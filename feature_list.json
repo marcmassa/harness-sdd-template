@@ -1,0 +1,49 @@
+{
+  "project": "Mi Proyecto",
+  "description": "Descripción del proyecto",
+  "rules": {
+    "maxConcurrent": 1,
+    "requireSpec": true,
+    "requireTests": true,
+    "requireCheck": true,
+    "validStatus": ["pending", "spec_ready", "in_progress", "done", "blocked"]
+  },
+  "features": [
+    {
+      "id": "P1-001",
+      "name": "eks-cluster-bootstrap",
+      "title": "Bootstrapping de cluster EKS con node groups gestionados",
+      "description": "Crear módulo Terraform para desplegar un cluster EKS con node groups gestionados, VPC, subnets públicas/privadas, IRSA y security groups",
+      "type": "feat",
+      "status": "pending",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "platform-engineer",
+      "sprint": "S1"
+    },
+    {
+      "id": "P1-002",
+      "name": "terraform-state-migration",
+      "title": "Migración del estado de Terraform a S3 con DynamoDB locking",
+      "description": "Migrar el backend de estado de local a S3 + DynamoDB, incluyendo migración del state existente y configuración de CI/CD",
+      "type": "chore",
+      "status": "pending",
+      "sdd": false,
+      "priority": "P0",
+      "agent": "platform-engineer",
+      "sprint": "S1"
+    },
+    {
+      "id": "P1-003",
+      "name": "vpc-peering-multi-account",
+      "title": "VPC Peering multi-cuenta para conectividad entre entornos",
+      "description": "Configurar VPC Peering entre cuentas de AWS (dev/staging/prod) con routing tables, security groups y validación de conectividad",
+      "type": "feat",
+      "status": "pending",
+      "sdd": true,
+      "priority": "P1",
+      "agent": "cloud-architect",
+      "sprint": "S1"
+    }
+  ]
+}
