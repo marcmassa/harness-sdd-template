@@ -21,6 +21,7 @@
 | `feature_list.json` | Feature list with status (pending/spec_ready/in_progress/done/blocked) | Always, at the start |
 | `progress/current.md` | Current session state | Always, at the start |
 | `progress/history.md` | Append-only log of previous sessions | If historical context is needed |
+| `.agents/skills/` | Specialized agent skills and domain knowledge | When specialized workflows are needed |
 | `specs/<feature>/` | requirements.md + design.md + tasks.md (SDD format) | Before implementing any feature with `"sdd": true` |
 | `docs/sdd.md` | Complete SDD process (EARS, traceability, templates) | Before drafting or reading a spec |
 | `check.sh` | Verification script (build, tests, validations) | Before declaring a task as done |

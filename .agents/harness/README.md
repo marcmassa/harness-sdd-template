@@ -28,7 +28,7 @@ Sistema de sub-agentes especializados para trabajar sobre las features del proye
 
 ## Sub-agentes
 
-Cada subagente se define en `.agents/subagents/<nombre>/SUBAGENT.md` con frontmatter YAML estándar.
+Cada subagente se define en `.agents/subagents/<nombre>/SUBAGENT.md` con frontmatter YAML estándar. Los subagentes pueden extender sus capacidades mediante **skills** almacenadas en `.agents/skills/`.
 
 | Agente | SUBAGENT.md | Responsabilidad |
 |--------|-------------|-----------------|

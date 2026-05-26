@@ -7,7 +7,7 @@ Establecer la guía para que cualquier agente (IA o humano) que trabaje en este 
 ## Reglas Obligatorias
 
 1. **Clasifica la tarea primero.** Usa `ROUTING.md` para determinar qué agente(s) usar.
-2. **Lee el contexto.** Siempre lee `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de empezar.
+2. **Lee el contexto.** Siempre lee `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de empezar. Consulta `.agents/skills/` por si existen habilidades relevantes para la tarea.
 3. **Una feature a la vez.** `check.sh` rechazará más de un `in_progress`.
 4. **No saltes el spec.** Si `sdd: true`, pasa por spec_author → humano → implementación.
 5. **check.sh es el gateway.** No declares `done` sin que pase limpio.
