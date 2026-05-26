@@ -1,19 +1,19 @@
-# Estado Actual — {YYYY-MM-DD}
+# Current Session State — {YYYY-MM-DD}
 
-## Tarea Activa
-{Breve descripción de la tarea en curso}
+## Active Task
+{Brief description of the task in progress}
 
-## Progreso
-- [ ] {Paso 1 completado}
-- [ ] {Paso 2 completado}
-- [ ] {Paso 3 en progreso}
+## Progress
+- [ ] {Step 1 completed}
+- [ ] {Step 2 completed}
+- [ ] {Step 3 in progress}
 
-## Pendiente
-- {Item del backlog que queda pendiente}
-- {Dependencias no resueltas}
+## Pending
+- {Backlog item remaining}
+- {Unresolved dependencies}
 
-## Bloqueos
-- {Si hay algún bloqueo, describirlo aquí}
+## Blockers
+- {Describe any blockers here}
 
-## Siguiente Paso
-{Qué hacer a continuación cuando se reanude la sesión}
+## Next Step
+{What to do next when the session resumes}

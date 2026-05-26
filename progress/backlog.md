@@ -1,18 +1,18 @@
 # Backlog
 
-Lista priorizada de features pendientes del proyecto.
+Prioritized list of pending features for the project.
 
-## P0 — Imprescindible (sprint actual)
-- [ ] {Feature P0 más urgente}
-- [ ] {Feature P0}
+## P0 — Critical (current sprint)
+- [ ] {Most urgent P0 feature}
+- [ ] {P0 feature}
 
-## P1 — Importante (próximo sprint)
-- [ ] {Feature P1}
-- [ ] {Feature P1}
+## P1 — Important (next sprint)
+- [ ] {P1 feature}
+- [ ] {P1 feature}
 
-## P2 — Mejora (cuando haya tiempo)
-- [ ] {Feature P2}
-- [ ] {Feature P2}
+## P2 — Nice to have (whenever possible)
+- [ ] {P2 feature}
+- [ ] {P2 feature}
 
-## Técnica / Deuda
-- [ ] {Deuda técnica o refactor pendiente}
+## Technical / Debt
+- [ ] {Technical debt or pending refactor}

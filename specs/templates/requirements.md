@@ -1,45 +1,45 @@
-# Requisitos — {Nombre de la funcionalidad}
+# Requirements — {Feature Name}
 
-> Feature {id} del `feature_list.json`. {Descripción breve de la funcionalidad y su contexto}
+> Feature {id} from `feature_list.json`. {Brief description of the functionality and its context}
 >
-> Cada requirement está redactado en EARS estricto y es verificable por al menos un test concreto.
+> Each requirement is written in strict EARS and is verifiable by at least one specific test.
 
-## Formato EARS
+## EARS Patterns
 
-| Patrón | Sintaxis | Cuándo usarlo |
+| Pattern | Syntax | When to use |
 |--------|----------|---------------|
-| **Ubicuo** | `DEBE ...` | Siempre es verdad, condición permanente |
-| **Evento** | `CUANDO <evento> DEBE ...` | Solo cuando ocurre un evento específico |
-| **Estado** | `MIENTRAS <estado> DEBE ...` | Mientras se cumple una condición |
-| **Opcional** | `DONDE <opción> DEBE ...` | Comportamiento que puede variar según configuración |
-| **No deseado** | `SI <condición> ENTONCES DEBE ...` | Respuesta a fallos o casos edge |
+| **Ubiquitous** | `SHALL ...` | Always true, permanent condition |
+| **Event** | `WHEN <event> SHALL ...` | Triggered by a specific event |
+| **State** | `WHILE <state> SHALL ...` | While a condition remains true |
+| **Optional** | `WHERE <option> SHALL ...` | Behavior varies based on configuration |
+| **Unwanted** | `IF <condition> THEN SHALL ...` | Response to failures or edge cases |
 
-## Requisitos
+## Requirements
 
-### R1 — {título corto}
-- **Patrón:** {Ubicuo / Evento / Estado / Opcional / No deseado}
-- {Redacción EARS del requisito}
+### R1 — {short title}
+- **Pattern:** {Ubiquitous / Event / State / Optional / Unwanted}
+- {EARS requirement wording}
 
-### R2 — {título corto}
-- **Patrón:** {patrón}
-- {Redacción EARS}
+### R2 — {short title}
+- **Pattern:** {pattern}
+- {EARS wording}
 
-### R3 — {título corto}
-- **Patrón:** {patrón}
-- {Redacción EARS}
+### R3 — {short title}
+- **Pattern:** {pattern}
+- {EARS wording}
 
-### R4 — {título corto}
-- **Patrón:** {patrón}
-- {Redacción EARS}
+### R4 — {short title}
+- **Pattern:** {pattern}
+- {EARS wording}
 
-### R5 — {título corto}
-- **Patrón:** {patrón}
-- {Redacción EARS}
+### R5 — {short title}
+- **Pattern:** {pattern}
+- {EARS wording}
 
-## Trazabilidad con acceptance criteria
+## Traceability with Acceptance Criteria
 
-| Acceptance criterion | Cubierto por |
+| Acceptance Criterion | Covered by |
 |----------------------|--------------|
-| {Criterio 1} | R1, R3 |
-| {Criterio 2} | R2 |
-| {Criterio 3} | R4, R5 |
+| {Criterion 1} | R1, R3 |
+| {Criterion 2} | R2 |
+| {Criterion 3} | R4, R5 |

@@ -28,12 +28,13 @@ Sistema de sub-agentes especializados para trabajar sobre las features del proye
 
 ## Sub-agentes
 
-| Agente | Responsabilidad |
-|--------|-----------------|
-| `spec_author` | Escribe specs (requirements, design, tasks) para features con sdd:true |
-| `implementer` | Ejecuta las tasks de implementación siguiendo el spec aprobado |
-| `tester-agent` | Escribe tests y documenta trazabilidad R<n> ↔ test |
-| `reviewer` | Verifica trazabilidad, completitud de tasks y check.sh |
+Cada subagente se define en `.agents/subagents/<nombre>/SUBAGENT.md` con frontmatter YAML estándar.
+
+| Agente | SUBAGENT.md | Responsabilidad |
+|--------|-------------|-----------------|
+| `agent-template` | `.agents/subagents/agent-template/SUBAGENT.md` | **Plantilla de ejemplo** — copia para crear nuevos subagentes |
+
+*Para añadir un subagente real, duplica `.agents/subagents/agent-template/`, renombra la carpeta y personaliza el SUBAGENT.md.*
 
 ## Routing
 

@@ -1,22 +1,22 @@
-# Diseño — {Nombre de la funcionalidad}
+# Design — {Feature Name}
 
-> Decisiones técnicas para implementar la feature {id}. Apoyado en las fuentes de verdad del proyecto (AGENTS.md, docs/). Solo se documentan los puntos donde la feature roza la frontera de esas reglas.
+> Technical decisions to implement feature {id}. Based on the project's sources of truth (AGENTS.md, docs/). Only points where the feature touches the boundaries of those rules are documented.
 
-## Resumen
+## Summary
 
-{1-2 párrafos explicando qué hace esta funcionalidad y por qué es necesaria}
+{1-2 paragraphs explaining what this functionality does and why it is necessary}
 
-## Archivos afectados
+## Affected Files
 
-| Archivo | Acción | Razón |
+| File | Action | Reason |
 |---------|--------|-------|
-| `ruta/al/archivo.tf` | crear | {razón} |
-| `ruta/al/archivo_test.go` | crear | {razón} |
-| `ruta/al/archivo.py` | modificar | {razón} |
+| `path/to/file.tf` | create | {reason} |
+| `path/to/file_test.go` | create | {reason} |
+| `path/to/file.py` | modify | {reason} |
 
-## Firmas y estructuras
+## Signatures and Structures
 
-### Terraform
+### Infrastructure / Configuration
 ```hcl
 module "example" {
   source = "./modules/example"
@@ -27,36 +27,36 @@ module "example" {
 }
 ```
 
-### Python / Go / TypeScript
-*[Especificar firmas de funciones, clases o interfaces según el lenguaje del proyecto]*
+### Programming Languages (Python / Go / TS / etc.)
+*[Specify function signatures, classes, or interfaces according to the project language]*
 
 ```python
-# module.function — descripción
-def funcion(param: str) -> dict: ...
+# module.function — description
+def function(param: str) -> dict: ...
 ```
 
-## Algoritmo / Flujo
+## Algorithm / Flow
 
 ```
-1. {paso 1 — validación de inputs}
-2. {paso 2 — creación de recurso principal}
-3. {paso 3 — configuración de dependencias}
-4. {paso 4 — verificación y outputs}
+1. {step 1 — input validation}
+2. {step 2 — main resource creation}
+3. {step 3 — dependency configuration}
+4. {step 4 — verification and outputs}
 ```
 
-## Manejo de errores
+## Error Handling
 
-| Condición | Respuesta |
+| Condition | Response |
 |-----------|-----------|
-| {error case 1} | {comportamiento esperado} |
-| {error case 2} | {comportamiento esperado} |
+| {error case 1} | {expected behavior} |
+| {error case 2} | {expected behavior} |
 
-## Alternativa descartada
+## Discarded Alternative
 
-{Explicar qué otra aproximación se consideró y por qué se descartó. Mínimo una alternativa.}
+{Explain what other approach was considered and why it was discarded. At least one alternative is required.}
 
-## Riesgos y edge cases
+## Risks and Edge Cases
 
-- {riesgo 1 — impacto y mitigación}
-- {riesgo 2 — impacto y mitigación}
-- {edge case 1 — comportamiento esperado}
+- {risk 1 — impact and mitigation}
+- {risk 2 — impact and mitigation}
+- {edge case 1 — expected behavior}

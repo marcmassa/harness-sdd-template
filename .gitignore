@@ -1,0 +1,51 @@
+# --- Dependencias ---
+node_modules/
+.vendor/
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# --- Entornos virtuales ---
+.virtualenvs/
+.venv/
+venv/
+
+# --- IDE / Editor ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Build ---
+dist/
+build/
+*.pyc
+__pycache__/
+
+# --- Secretos (nunca commitear) ---
+*.pem
+*.key
+*.cert
+.env
+.env.local
+*.env
+credentials.json
+service-account.json
+*.secret
+GEMINI.md
+
+# --- Terraform ---
+*.terraform.lock.hcl
+crash.log
+
+# --- Helm ---
+charts/**/charts/*.tgz
+
+# --- Progreso local ---
+progress/archive/*.bak
