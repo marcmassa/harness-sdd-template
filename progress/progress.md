@@ -1,15 +1,15 @@
 # Progress Log
 
-Bitácora cronológica append-only de avances del proyecto.
+Append-only chronological log of project progress.
 
-## Formato de entrada
+## Entry Format
 
 ```
-{YYYY-MM-DD} | {tipo} | {título breve} | {archivos tocados} | {siguiente paso}
+{YYYY-MM-DD} | {type} | {brief title} | {affected files} | {next step}
 ```
 
-Tipos: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migration`
+Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migration`
 
 ---
 
-*[Las entradas se añaden al principio del archivo, en orden cronológico inverso]*
+*[Entries are added at the top of the file, in reverse chronological order]*

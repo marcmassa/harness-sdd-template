@@ -1,172 +1,151 @@
-# Spec Driven Development (SDD) — Documentación completa
+# Spec Driven Development (SDD) — Complete Documentation
 
-> Este documento describe en detalle el proceso SDD implementado en el proyecto.
-> Es la referencia completa para spec_authors, implementers y reviewers.
+> This document describes in detail the SDD process implemented in the project.
+> It is the complete reference for spec_authors, implementers, and reviewers.
 
 ---
 
-## 1. Filosofía
+## 1. Philosophy
 
-SDD (Spec Driven Development) es un proceso en el que **los requisitos, el diseño y las tareas se escriben y aprueban antes de escribir una sola línea de código**. Esto contrasta con enfoques como:
+SDD (Spec Driven Development) is a process where **requirements, design, and tasks are written and approved before writing a single line of code**. This contrasts with approaches like:
 
-- **Code-first:** el agente escribe código directamente y luego se revisa
-- **Chat-driven:** los requisitos existen solo en la conversación, no en disco
+- **Code-first:** the agent writes code directly and then it is reviewed.
+- **Chat-driven:** requirements exist only in the conversation, not on disk.
 
-SDD prioriza la **trazabilidad** y la **aprobación humana temprana** sobre la velocidad de escritura de código. El resultado es código de mayor calidad, con menos iteraciones y con un registro permanente de por qué se hizo cada cosa.
+SDD prioritizes **traceability** and **early human approval** over code writing speed. The result is higher quality code, fewer iterations, and a permanent record of why everything was done.
 
-## 2. El ciclo SDD en detalle
+## 2. The SDD Cycle in Detail
 
 ### 2.1 pending → spec_ready
 
-**Entrada:** Una feature en `feature_list.json` con `status: "pending"` y `"sdd": true`.
+**Input:** A feature in `feature_list.json` with `status: "pending"` and `"sdd": true`.
 
-**Quién:** El agente `spec_author` (típicamente un agente de calidad/code-quality).
+**Who:** The `spec_author` agent (typically a quality-agent).
 
-**Qué produce:**
-- `specs/<feature-name>/requirements.md` — requisitos en EARS
-- `specs/<feature-name>/design.md` — decisiones técnicas
-- `specs/<feature-name>/tasks.md` — checklist ejecutable
+**What it produces:**
+- `specs/<feature-name>/requirements.md` — requirements in EARS.
+- `specs/<feature-name>/design.md` — technical decisions.
+- `specs/<feature-name>/tasks.md` — executable checklist.
 
-**Reglas:**
-- El spec_author NO escribe código. Solo escribe specs.
-- El spec_author lee `specs/templates/` y `docs/sdd.md` antes de empezar.
-- El nombre de la carpeta en `specs/` debe coincidir con `name` en `feature_list.json`.
-- Cada archivo sigue las plantillas en `specs/templates/`.
-- Al terminar, actualiza `feature_list.json`: `status: "spec_ready"`.
+**Rules:**
+- The spec_author does NOT write code. Only specs.
+- The spec_author reads the root `DESIGN.md` to ensure the feature aligns with the global architecture.
+- The spec_author reads `specs/templates/` and `docs/sdd.md` before starting.
+- The folder name in `specs/` must match the `name` in `feature_list.json`.
+- Each file follows the templates in `specs/templates/`.
+- Upon completion, update `feature_list.json`: `status: "spec_ready"`.
 
-### 2.2 spec_ready → ⏸ Humano
+### 2.2 spec_ready → ⏸ Human
 
-**Entrada:** Feature con `status: "spec_ready"` y archivos en `specs/<feature-name>/`.
+**Input:** Feature with `status: "spec_ready"` and files in `specs/<feature-name>/`.
 
-**Quién:** Un humano (tech lead, SRE, cloud architect).
+**Who:** A human (tech lead, SRE, architect).
 
-**Qué revisa:**
-- `requirements.md`: ¿Los requisitos cubren todos los casos? ¿Son verificables? ¿Usan EARS correctamente?
-- `design.md`: ¿La arquitectura es correcta? ¿Las alternativas descartadas tienen sentido? ¿Los riesgos están cubiertos?
-- `tasks.md`: ¿Las tareas están en orden lógico? ¿Cada R<n> tiene test?
+**What to review:**
+- `requirements.md`: Do the requirements cover all cases? Are they verifiable? Do they use EARS correctly?
+- `design.md`: Is the architecture correct? Do the discarded alternatives make sense? Are risks covered?
+- `tasks.md`: Are tasks in logical order? Does each R<n> have a test?
 
-**Resultado:**
-- **Aprobar** → cambiar `status: "in_progress"` y lanzar implementación.
-- **Solicitar cambios** → el spec_author corrige y vuelve a presentar.
+**Result:**
+- **Approve** → change `status: "in_progress"` and launch implementation.
+- **Request changes** → the spec_author fixes and re-submits.
 
 ### 2.3 in_progress → done
 
-**Entrada:** Feature con `status: "in_progress"`.
+**Input:** Feature with `status: "in_progress"`.
 
-**Quién:** El `implementer` y el `tester-agent`.
+**Who:** The `implementer` and the `tester-agent`.
 
-**Flujo:**
-1. El implementer ejecuta `tasks.md` de arriba a abajo, marcando `[x]`.
-2. Por cada tarea de implementación: escribe código, configuración o infraestructura.
-3. Por cada tarea de test: escribe tests que verifican los R<n> referenciados.
-4. Documenta la trazabilidad `R<n> ↔ test` en `progress/impl_<feature>.md`.
-5. Ejecuta `./check.sh` — debe pasar limpio.
-6. El **reviewer** (humano o quality-agent) verifica:
-   - Todas las tasks están marcadas `[x]`.
-   - Cada R<n> tiene al menos un test.
-   - `check.sh` pasa.
-   - No hay efectos secundarios no documentados.
-7. Si aprueba → `status: "done"`, registrar en `progress/progress.md`.
+**Workflow:**
+1. The implementer executes `tasks.md` from top to bottom, marking `[x]`.
+2. For each implementation task: write code, configuration, or infrastructure.
+3. For each test task: write tests that verify the referenced R<n>.
+4. Document traceability `R<n> ↔ test` in `progress/impl_<feature>.md`.
+5. Run `./check.sh` — it must pass clean.
+6. The **reviewer** (human or quality-agent) verifies:
+   - All tasks are marked `[x]`.
+   - Each R<n> has at least one test.
+   - `check.sh` passes.
+   - No undocumented side effects.
+7. If approved → `status: "done"`, record in `progress/progress.md`.
 
 ## 3. EARS — Easy Approach to Requirements Syntax
 
-### 3.1 Los 5 patrones
+### 3.1 The 5 Patterns
 
-| Patrón | Cuándo | Sintaxis | Ejemplo (Cloud) |
+| Pattern | When | Syntax | Example |
 |--------|--------|----------|-----------------|
-| **Ubicuo** | La condición es siempre verdad | `DEBE <acción>` | `DEBE existir un módulo Terraform aws-eks-cluster` |
-| **Evento** | La acción se dispara por un evento | `CUANDO <evento> DEBE <acción>` | `CUANDO se ejecuta terraform apply DEBE crearse el cluster` |
-| **Estado** | La acción depende de un estado continuo | `MIENTRAS <estado> DEBE <acción>` | `MIENTRAS enable_irsa = true DEBE asociarse un OIDC provider` |
-| **Opcional** | El comportamiento varía por configuración | `DONDE <opción> DEBE <acción>` | `DONDE environment = production DEBE usarse 3 AZs` |
-| **No deseado** | Respuesta a fallos o condiciones inesperadas | `SI <condición> ENTONCES DEBE <acción>` | `SI terraform plan detecta destrucción DEBE abortar` |
+| **Ubiquitous** | The condition is always true | `SHALL <action>` | `The system SHALL use AES-256 encryption` |
+| **Event** | Triggered by an event | `WHEN <event> SHALL <action>` | `WHEN the user clicks submit SHALL save data` |
+| **State** | Depends on a continuous state | `WHILE <state> SHALL <action>` | `WHILE in maintenance mode SHALL return 503` |
+| **Optional** | Varies by configuration | `WHERE <option> SHALL <action>` | `WHERE region is EU SHALL comply with GDPR` |
+| **Unwanted** | Response to failures | `IF <condition> THEN SHALL <action>` | `IF connection fails THEN SHALL retry 3 times` |
 
-### 3.2 Reglas duras EARS
+### 3.2 EARS Hard Rules
 
-1. **Cada requirement tiene un id único y estable:** `R1`, `R2`, ...
-2. **Cada requirement es verificable por al menos un test.**
-3. **Un requirement = un DEBE.** No mezcles varios DEBE en la misma frase.
-4. **Solo DEBE / NO DEBE.** No uses "podría", "puede", "soporta", "debería".
-5. **El orden importa:** R1 antes de R2 si hay dependencia lógica.
+1. **Each requirement has a unique, stable ID:** `R1`, `R2`, ...
+2. **Each requirement is verifiable by at least one test.**
+3. **One requirement = one SHALL.** Do not mix multiple SHALLs in the same sentence.
+4. **Only SHALL / SHALL NOT.** Do not use "could", "can", "supports", "should".
+5. **Order matters:** R1 before R2 if there is a logical dependency.
 
-### 3.3 Ejemplos EARS para Cloud/DevOps
+## 4. Traceability
 
-```markdown
-## R1 — (Ubicuo)
-DEBE existir un módulo Terraform `aws-vpc` con los parámetros:
-`vpc_cidr`, `environment`, `azs`, `enable_nat_gateway`, `tags`.
+### 4.1 R<n> → Test Map
 
-## R2 — (Evento)
-CUANDO se ejecuta `terraform apply` con `environment=production`,
-DEBE crearse un VPC con subnets públicas en 3 AZs y un NAT Gateway por AZ.
-
-## R3 — (Estado)
-MIENTRAS `enable_nat_gateway = true`, DEBE crearse un NAT Gateway
-en cada subnet pública con una Elastic IP asociada.
-
-## R4 — (Opcional)
-DONDE `single_nat_gateway = true`, DEBE crearse un único NAT Gateway
-en lugar de uno por AZ, independientemente del valor de `enable_nat_gateway`.
-
-## R5 — (No deseado)
-SI el `terraform plan` detecta que se va a eliminar un recurso existente
-con `prevent_destroy = true`, ENTONCES DEBE abortar la ejecución y mostrar
-un mensaje de error claro.
-```
-
-## 4. Trazabilidad
-
-### 4.1 Mapa R<n> → test
-
-El implementador documenta la trazabilidad en `progress/impl_<feature>.md`:
+The implementer documents traceability in `progress/impl_<feature>.md`:
 
 ```markdown
-## Trazabilidad R<n> ↔ Test
+## Traceability R<n> ↔ Test
 
-| Requisito | Test | Tipo | Archivo |
+| Requirement | Test | Type | File |
 |-----------|------|------|---------|
-| R1 | test_vpc_created_with_correct_cidr | unit | tests/test_vpc.py |
-| R2 | test_production_creates_3_azs | integration | tests/test_vpc.py |
-| R3 | test_nat_gateway_created_when_enabled | unit | tests/test_vpc.py |
-| R4 | test_single_nat_gateway_when_flag_set | unit | tests/test_vpc.py |
-| R5 | test_abort_on_destructive_plan | integration | tests/test_vpc.py |
+| R1 | test_encryption_is_aes256 | unit | tests/test_security.py |
+| R2 | test_save_on_submit | integration | tests/test_api.py |
+| R3 | test_maintenance_mode_returns_503 | unit | tests/test_app.py |
+| R4 | test_gdpr_compliance_in_eu | unit | tests/test_compliance.py |
+| R5 | test_retry_on_failure | integration | tests/test_network.py |
 ```
 
-### 4.2 Verificación del revisor
+### 4.2 Reviewer Verification
 
-El revisor comprueba:
+The reviewer checks:
 
-1. **Completitud:** Cada R<n> tiene al menos un test en la tabla.
-2. **Cobertura:** Cada test listado existe realmente y pasa.
-3. **Idoneidad:** El test verifica exactamente lo que dice el requirement (no un proxy).
-4. **check.sh:** El script pasa limpio.
+1. **Completeness:** Each R<n> has at least one test in the table.
+2. **Coverage:** Each listed test actually exists and passes.
+3. **Suitability:** The test verifies exactly what the requirement says.
+4. **check.sh:** The script passes clean.
 
-## 5. Anti-patrones
+## 5. Anti-patterns
 
-### ❌ Spec sin alternativas descartadas
-El `design.md` debe incluir **al menos una alternativa descartada**. Si no la tiene, el spec_author no ha pensado suficientes opciones.
+### ❌ Ignoring Global Design
+If a `specs/<feature>/design.md` proposes a solution that contradicts the principles in the root `DESIGN.md` without a justified ADR, it is an anti-pattern.
 
-### ❌ Requirements no verificables
-`R1: El sistema DEBE ser rápido` no es verificable. ¿Qué significa "rápido"? ¿< 1s? ¿< 100ms? ¿Bajo qué carga?
+### ❌ Spec without discarded alternatives
+`design.md` must include **at least one discarded alternative**. If it doesn't, the spec_author hasn't thought through enough options.
 
-### ❌ Tasks que no referencian R<n>
-Toda task debe referenciar al menos un R<n>. Si una task no cubre ningún requisito, ¿por qué existe?
+### ❌ Non-verifiable requirements
+`R1: The system SHALL be fast` is not verifiable. What does "fast" mean? < 1s? < 100ms? Under what load?
 
-### ❌ Mezclar features en el mismo spec
-Un spec cubre UNA feature. Si dos features están relacionadas pero pueden implementarse por separado, crea specs separados y gestiona dependencias en `progress/backlog.md`.
+### ❌ Tasks without R<n> references
+Every task should reference at least one R<n>. If a task covers no requirement, why does it exist?
 
-### ❌ Implementar sin aprobación
-Si el spec está en `spec_ready` pero el humano no ha aprobado, NO se escribe código. El spec_author espera.
+### ❌ Mixing features in the same spec
+One spec covers ONE feature. If two features are related but can be implemented separately, create separate specs and manage dependencies in `progress/backlog.md`.
+
+### ❌ Implementing without approval
+If the spec is in `spec_ready` but the human hasn't approved, NO code is written. The spec_author waits.
 
 ## 6. FAQ
 
-### ¿Puedo tener specs para features que no son sdd:true?
-Técnicamente sí, pero el proceso no las valida ni exige su presencia. Para features complejas aunque no sean sdd, se recomienda escribirlas igualmente.
+### Can I have specs for features that are not sdd:true?
+Technically yes, but the process doesn't validate or require them. For complex features, it's recommended to write them anyway.
 
-### ¿Qué hago si una feature cambia durante la implementación?
-Si el cambio es pequeño, actualiza el `tasks.md` y documenta en `progress/impl_<feature>.md`. Si el cambio es grande (nuevos requisitos R6+ o cambio de arquitectura), para, actualiza el spec y pasa por aprobación humana otra vez.
+### What if a feature changes during implementation?
+If the change is small, update `tasks.md` and document in `progress/impl_<feature>.md`. If the change is large (new R6+ requirements or architecture change), stop, update the spec, and get human approval again.
 
-### ¿Y si el revisor es un agente IA?
-El revisor IA verifica trazabilidad y completitud de tasks. La aprobación final (humana) sigue siendo necesaria para el spec. El revisor IA es complementario, no sustituto.
+### What if the reviewer is an AI agent?
+The AI reviewer verifies traceability and task completeness. Final (human) approval is still required for the spec. The AI reviewer is complementary, not a substitute.
 
-### ¿Cuándo uso sdd: false?
-Para tareas triviales: typos, cambios de nombre, actualizaciones de dependencias, refactors puramente mecánicos. Si hay duda, usa `sdd: true`.
+### When do I use sdd: false?
+For trivial tasks: typos, name changes, dependency updates, purely mechanical refactors. If in doubt, use `sdd: true`.

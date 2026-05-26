@@ -69,6 +69,20 @@ START: New Task Received
   └────────────────┘
 ```
 
+## Subagent Definitions
+
+Cada subagente se define en `.agents/subagents/<nombre>/SUBAGENT.md` con frontmatter YAML estándar:
+```yaml
+---
+name: <nombre>
+type: subagent
+user-invocable: true
+description: "<descripción breve>"
+model-agnostic: true
+---
+```
+Para crear un nuevo subagente, copia `.agents/subagents/agent-template/`, renombra la carpeta y edita el SUBAGENT.md.
+
 ## Routing Matrix
 
 | Task Type | Keywords | Primary Agent | Secondary Agents |
@@ -80,3 +94,5 @@ START: New Task Received
 | **Security / Compliance** | security, policy, compliance, soc2, hipaa, network policy | `security-reviewer` | `quality-agent` |
 | **Documentation** | docs, readme, progress, handoff, runbook | `escriba` | `quality-agent` |
 | **General** | Any other task | `quality-agent` | (depends on specifics) |
+
+*[Personaliza esta matriz con los nombres reales de tus subagentes una vez los crees en `.agents/subagents/`.]*
