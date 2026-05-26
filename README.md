@@ -177,5 +177,4 @@ The templates in `specs/templates/` use generic examples. You can replace them w
 
 ---
 
-> **License:** Apache 2.0
 > **Based on:** Real-world implementations in multiple production projects.
