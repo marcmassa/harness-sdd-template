@@ -47,5 +47,9 @@ crash.log
 # --- Helm ---
 charts/**/charts/*.tgz
 
+# --- Agentes ---
+.agents/skills/README.md
+# .agents/skills/* (opcional: descomentar si se quieren ignorar las skills descargadas)
+
 # --- Progreso local ---
 progress/archive/*.bak

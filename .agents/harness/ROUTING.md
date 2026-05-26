@@ -83,6 +83,10 @@ model-agnostic: true
 ```
 Para crear un nuevo subagente, copia `.agents/subagents/agent-template/`, renombra la carpeta y edita el SUBAGENT.md.
 
+## Skills
+
+Las **skills** (en `.agents/skills/`) son complementos que los agentes pueden cargar para adquirir conocimientos específicos o flujos de trabajo especializados sin necesidad de crear un nuevo subagente completo.
+
 ## Routing Matrix
 
 | Task Type | Keywords | Primary Agent | Secondary Agents |
