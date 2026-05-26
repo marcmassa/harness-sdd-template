@@ -1,26 +1,26 @@
-# Handoff — Estado Transferible
+# Handoff — Transferable State
 
-Estado actual del proyecto para continuidad entre sesiones/agentes.
+Current project state for continuity between sessions/agents.
 
-## Última Acción
-{Qué se hizo en la última sesión}
+## Last Action
+{What was done in the last session}
 
-## Estado Actual
-- Feature activa: {id} — {nombre} [{status}]
-- Rama git: {branch}
-- Commits pendientes: {sí/no}
+## Current State
+- Active feature: {id} — {name} [{status}]
+- Git branch: {branch}
+- Pending commits: {yes/no}
 
-## Archivos Modificados
-- {ruta/al/archivo}
-- {ruta/al/otro/archivo}
+## Modified Files
+- {path/to/file}
+- {path/to/other/file}
 
-## Pendiente para Próxima Sesión
-1. {Primera acción a retomar}
-2. {Segunda acción}
+## Pending for Next Session
+1. {First action to resume}
+2. {Second action}
 
-## Riesgos / Notas
-- {Algo que el próximo agente debe saber}
-- {Contexto que no está en los archivos}
+## Risks / Notes
+- {Something the next agent should know}
+- {Context not found in files}
 
-## Credenciales / Accesos
-*[No almacenar credenciales aquí — usar variables de entorno o vault]*
+## Credentials / Access
+*[Do not store credentials here — use environment variables or a vault]*

@@ -49,13 +49,13 @@ cd "$ROOT_DIR"
 
 if command -v terraform &>/dev/null; then
 	section "Terraform — Format & Validate"
-	terraform fmt -check -recursive 2>/dev/null && pass "terraform fmt" || warn "terraform fmt encontró diferencias (corrige con 'terraform fmt')"
-	terraform validate 2>/dev/null && pass "terraform validate" || warn "terraform validate tiene advertencias"
+	terraform fmt -check -recursive 2>/dev/null && pass "terraform fmt" || warn "terraform fmt found differences (fix with 'terraform fmt')"
+	terraform validate 2>/dev/null && pass "terraform validate" || warn "terraform validate has warnings"
 fi
 
 if command -v tflint &>/dev/null; then
 	section "Terraform — TFLint"
-	tflint --recursive 2>&1 | tail -5 && pass "tflint" || warn "tflint encontró issues"
+	tflint --recursive 2>&1 | tail -5 && pass "tflint" || warn "tflint found issues"
 fi
 
 if [ -d "charts" ] && command -v helm &>/dev/null; then
@@ -65,25 +65,25 @@ if [ -d "charts" ] && command -v helm &>/dev/null; then
 	done
 fi
 
-# ── Python checks (si aplica) ─────────────────────
+# ── Python checks (if applicable) ─────────────────────
 if ! $TS_ONLY && ! $GO_ONLY && (ls *.py 2>/dev/null || ls **/*.py 2>/dev/null); then
 	section "Python — Syntax check"
-	python3 -m py_compile -x .venv -x __pycache__ . 2>/dev/null && pass "py_compile" || warn "py_compile encontró errores"
+	python3 -m py_compile -x .venv -x __pycache__ . 2>/dev/null && pass "py_compile" || warn "py_compile found errors"
 
 	section "Python — Tests"
 	if command -v pytest &>/dev/null && [ -d "tests" ]; then
 		python3 -m pytest tests/ -v --tb=short -x 2>&1 | tail -10
 		if [ $? -eq 0 ]; then
-			pass "pytest: todos pasan"
+			pass "pytest: all passed"
 		else
-			fail "pytest: hay tests rotos"
+			fail "pytest: broken tests"
 		fi
 	elif [ -d "tests" ]; then
-		warn "tests/ existe pero pytest no está disponible"
+		warn "tests/ exists but pytest is not available"
 	fi
 fi
 
-# ── Go checks (si aplica) ─────────────────────────
+# ── Go checks (if applicable) ─────────────────────────
 if ! $PY_ONLY && ! $TS_ONLY && (ls *.go 2>/dev/null || ls **/*.go 2>/dev/null); then
 	section "Go — Build & Vet"
 	if command -v go &>/dev/null; then
@@ -93,14 +93,14 @@ if ! $PY_ONLY && ! $TS_ONLY && (ls *.go 2>/dev/null || ls **/*.go 2>/dev/null); 
 	fi
 fi
 
-# ── TypeScript checks (si aplica) ─────────────────
+# ── TypeScript checks (if applicable) ─────────────────
 if ! $PY_ONLY && ! $GO_ONLY && [ -f "package.json" ]; then
 	section "TypeScript — Build"
 	npm run build 2>&1 | tail -3 && pass "npm run build" || fail "npm run build"
 
 	if [ -f "vitest.config.js" ] || [ -f "vitest.config.ts" ]; then
 		section "TypeScript — Tests"
-		npm test -- --run 2>&1 | tail -10 && pass "npm test" || warn "npm test: algunos tests fallaron"
+		npm test -- --run 2>&1 | tail -10 && pass "npm test" || warn "npm test: some tests failed"
 	fi
 fi
 
@@ -108,9 +108,9 @@ fi
 section "Feature List Validation"
 if [ -f "feature_list.json" ]; then
 	if python3 -c "import json; json.load(open('feature_list.json'))" 2>/dev/null; then
-		pass "feature_list.json es JSON válido"
+		pass "feature_list.json is valid JSON"
 	else
-		fail "feature_list.json no es JSON válido"
+		fail "feature_list.json is NOT valid JSON"
 	fi
 
 	python3 /dev/stdin <<'PYEOF' 2>/dev/null || true
@@ -123,12 +123,12 @@ errors = []
 
 for feat in data['features']:
     if feat['status'] not in valid_status:
-        errors.append(f"{feat['id']}: estado inválido '{feat['status']}'")
+        errors.append(f"{feat['id']}: invalid status '{feat['status']}'")
 
 in_progress = [f for f in data['features'] if f['status'] == 'in_progress']
 if len(in_progress) > 1:
     names = ', '.join(f['id'] for f in in_progress)
-    errors.append(f"Múltiples features 'in_progress': {names}")
+    errors.append(f"Multiple features 'in_progress': {names}")
 
 requires_spec = {"spec_ready", "in_progress", "done"}
 for feat in data['features']:
@@ -136,56 +136,77 @@ for feat in data['features']:
         spec_dir = os.path.join('specs', feat['name'])
         for fname in ('requirements.md', 'design.md', 'tasks.md'):
             if not os.path.isfile(os.path.join(spec_dir, fname)):
-                errors.append(f"{feat['id']}: sdd=true, status={feat['status']}, falta {spec_dir}/{fname}")
+                errors.append(f"{feat['id']}: sdd=true, status={feat['status']}, missing {spec_dir}/{fname}")
 
 if errors:
     for e in errors:
         print(f"[WARN]  {e}")
     sys.exit(1)
 else:
-    print(f"[OK]    feature_list.json válido ({len(data['features'])} features)")
+    print(f"[OK]    feature_list.json valid ({len(data['features'])} features)")
     in_prog = [f for f in data['features'] if f['status'] == 'in_progress']
     if in_prog:
-        print(f"        1 feature en progreso: {in_prog[0]['id']} — {in_prog[0]['name']}")
+        print(f"        1 feature in progress: {in_prog[0]['id']} — {in_prog[0]['name']}")
     else:
-        print("        Ningún feature en progreso")
+        print("        No features in progress")
 PYEOF
 
 	if [ $? -eq 0 ]; then
-		pass "Validación feature_list completada"
+		pass "Feature list validation completed"
 	else
-		fail "Errores en feature_list.json"
+		fail "Errors in feature_list.json"
 	fi
 else
-	warn "feature_list.json no encontrado — se salta"
+	warn "feature_list.json not found — skipping"
 fi
 
 # ── Progress files check ──────────────────────────
 section "Progress Files"
 for f in progress/current.md progress/progress.md progress/backlog.md progress/decisions.md progress/handoff.md; do
 	if [ -f "$f" ]; then
-		pass "Existe $f"
+		pass "Exists $f"
 	else
-		warn "Falta $f"
+		warn "Missing $f"
 	fi
 done
 
+# ── Sub-Agent check ───────────────────────────────
+section "Sub-Agents"
+for dir in .agents/subagents/*/; do
+	name=$(basename "$dir")
+	if [ -f "${dir}SUBAGENT.md" ]; then
+		pass "Subagent $name (SUBAGENT.md)"
+	else
+		warn "Subagent $name: missing SUBAGENT.md"
+	fi
+done
+
+if ! ls .agents/subagents/*/SUBAGENT.md &>/dev/null 2>&1; then
+	warn "No subagents defined in .agents/subagents/"
+fi
+
 # ── SDD Infrastructure check ──────────────────────
 section "SDD Infrastructure"
+if [ -f "DESIGN.md" ]; then
+	pass "Exists DESIGN.md (Global Architecture)"
+else
+	warn "Missing DESIGN.md in root directory"
+fi
+
 for f in specs/README.md specs/templates/requirements.md specs/templates/design.md specs/templates/tasks.md; do
 	if [ -f "$f" ]; then
-		pass "Existe $f"
+		pass "Exists $f"
 	else
-		warn "Falta $f"
+		warn "Missing $f"
 	fi
 done
 
 # ── Summary ─────────────────────────────────────────
-section "Resultado"
+section "Result"
 if [ "$EXIT_CODE" -eq 0 ]; then
-	echo "  ✅ Todos los checks pasaron — entorno listo"
+	echo "  ✅ All checks passed — environment ready"
 else
-	echo "  ❌ Algunos checks fallaron — resuelve antes de continuar"
+	echo "  ❌ Some checks failed — resolve before continuing"
 fi
 echo ""
 exit "$EXIT_CODE"
