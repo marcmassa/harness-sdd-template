@@ -31,6 +31,9 @@ Comandos:
       - Specs pendientes (spec_ready)
       - Últimas entradas de progress/progress.md
 
+  subagents
+      Lista los subagentes definidos en .agents/subagents/*/SUBAGENT.md
+
   help
       Muestra esta ayuda.
 EOF
@@ -138,10 +141,35 @@ PYEOF
 	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
+subagents() {
+	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	echo "  Sub-Agents — Harness SDD"
+	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	echo ""
+	local count=0
+	for dir in "$ROOT_DIR/.agents/subagents/"*/; do
+		if [ -f "${dir}SUBAGENT.md" ]; then
+			name=$(basename "$dir")
+			desc=$(head -5 "${dir}SUBAGENT.md" | grep 'description:' | sed 's/description: "//;s/"$//')
+			echo "  ✅ $name"
+			echo "     $desc"
+			echo "     ${dir}SUBAGENT.md"
+			echo ""
+			count=$((count + 1))
+		fi
+	done
+	if [ "$count" -eq 0 ]; then
+		echo "  ⚠️  No se encontraron subagentes en .agents/subagents/"
+	fi
+	echo "  Total: $count subagentes"
+	echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
 case "${1:-help}" in
 	route) shift; route "$@" ;;
 	check) cd "$ROOT_DIR" && exec ./check.sh ;;
 	status) status ;;
+	subagents) subagents ;;
 	help|--help|-h) help ;;
 	*) echo "Comando desconocido: $1"; help; exit 1 ;;
 esac

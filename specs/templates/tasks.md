@@ -1,23 +1,23 @@
-# Tareas — {Nombre de la funcionalidad}
+# Tasks — {Feature Name}
 
-> Pasos discretos en orden. El implementador marca `[x]` al completar cada uno. Cada task referencia los R<n> que cubre.
+> Discrete steps in order. The implementer marks `[x]` upon completing each one. Each task references the R<n> it covers.
 
-## Implementación
+## Implementation
 
-- [ ] **T1** — {descripción breve de la primera tarea de implementación} _(R1, R2)_
-- [ ] **T2** — {descripción breve de la segunda tarea} _(R2)_
-- [ ] **T3** — {descripción breve de la tercera tarea} _(R3, R4)_
-- [ ] **T4** — {descripción breve} _(R4, R5)_
+- [ ] **T1** — {brief description of the first implementation task} _(R1, R2)_
+- [ ] **T2** — {brief description of the second task} _(R2)_
+- [ ] **T3** — {brief description of the third task} _(R3, R4)_
+- [ ] **T4** — {brief description} _(R4, R5)_
 
 ## Tests
 
-- [ ] **T5** — {descripción del test unitario o de infraestructura} _(R1, R2)_
-- [ ] **T6** — {descripción del test de integración} _(R3, R4)_
-- [ ] **T7** — {descripción del test de error/edge case} _(R5)_
+- [ ] **T5** — {description of the unit or infrastructure test} _(R1, R2)_
+- [ ] **T6** — {description of the integration test} _(R3, R4)_
+- [ ] **T7** — {description of the error/edge case test} _(R5)_
 
-## Cierre
+## Closure
 
-- [ ] **T8** — Documentar trazabilidad `R<n> ↔ test` en `progress/impl_<feature>.md`
-- [ ] **T9** — Ejecutar `./check.sh` y verificar que todos los tests pasan
-- [ ] **T10** — Actualizar `feature_list.json`: cambiar `status` a `"done"`
-- [ ] **T11** — Registrar resumen en `progress/progress.md`
+- [ ] **T8** — Document traceability `R<n> ↔ test` in `progress/impl_<feature>.md`
+- [ ] **T9** — Run `./check.sh` and verify all tests pass
+- [ ] **T10** — Update `feature_list.json`: set `status` to `"done"`
+- [ ] **T11** — Log summary in `progress/progress.md`

@@ -5,79 +5,79 @@
 
 ---
 
-## 1. Antes de empezar (obligatorio)
+## 1. Before starting (mandatory)
 
-1. Ejecuta `./check.sh` y verifica que termina sin errores. Si falla, **para** y resuelve el entorno antes de tocar código.
-2. Lee `feature_list.json`. Toda feature nueva con `"sdd": true` pasa por **Spec Driven Development**.
-3. Lee `progress/current.md` para entender en qué estado quedó la última sesión.
-4. Si la tarea involucra una feature SDD, lee `specs/README.md` y `docs/sdd.md`.
+1. Run `./check.sh` and verify it finishes without errors. If it fails, **stop** and resolve the environment before touching code.
+2. Read `DESIGN.md` to understand the high-level architecture and global principles.
+3. Read `feature_list.json`. Every new feature with `"sdd": true` goes through **Spec Driven Development**.
+4. Read `progress/current.md` to understand the state of the last session.
+5. If the task involves an SDD feature, read `specs/README.md` and `docs/sdd.md`.
 
-## 2. Mapa del repositorio
+## 2. Repository Map
 
-| Archivo / carpeta | Qué contiene | Cuándo leerlo |
+| File / Folder | Content | When to read it |
 |---|---|---|
-| `feature_list.json` | Lista de features con estado (pending/spec_ready/in_progress/done/blocked) | Siempre, al empezar |
-| `progress/current.md` | Estado de la sesión actual | Siempre, al empezar |
-| `progress/history.md` | Bitácora append-only de sesiones anteriores | Si necesitas contexto histórico |
-| `specs/<feature>/` | requirements.md + design.md + tasks.md (formato SDD) | Antes de implementar cualquier feature con `"sdd": true` |
-| `docs/sdd.md` | Proceso SDD completo (EARS, trazabilidad, plantillas) | Antes de redactar o leer un spec |
-| `check.sh` | Script de verificación (build, tests, validaciones) | Antes de declarar una tarea como done |
+| `DESIGN.md` | High-level architecture and global principles | Always, for architectural context |
+| `feature_list.json` | Feature list with status (pending/spec_ready/in_progress/done/blocked) | Always, at the start |
+| `progress/current.md` | Current session state | Always, at the start |
+| `progress/history.md` | Append-only log of previous sessions | If historical context is needed |
+| `specs/<feature>/` | requirements.md + design.md + tasks.md (SDD format) | Before implementing any feature with `"sdd": true` |
+| `docs/sdd.md` | Complete SDD process (EARS, traceability, templates) | Before drafting or reading a spec |
+| `check.sh` | Verification script (build, tests, validations) | Before declaring a task as done |
 
-## 3. Reglas duras (no negociables)
+## 3. Hard Rules (non-negotiable)
 
-- **Una sola feature a la vez.** No mezcles cambios de varias tareas en la misma sesión.
-- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./check.sh` y asegúrate de que pasa.
-- **No saltes la fase de spec.** Toda feature con `"sdd": true` debe pasar por spec_author y obtener aprobación humana antes de tocar código.
-- **No saltes la puerta de aprobación humana.** El flujo se detiene en `spec_ready` y espera.
-- **Documenta lo que haces** en `progress/current.md` mientras trabajas, no al final.
-- **Deja el repositorio limpio** antes de cerrar la sesión (ver §5).
+- **One feature at a time.** Do not mix changes from multiple tasks in the same session.
+- **Do not declare a task `done` without green tests.** Run `./check.sh` and ensure it passes.
+- **Do not skip the spec phase.** Every feature with `"sdd": true` must pass through spec_author and get human approval before touching code.
+- **Do not skip the human approval gate.** The flow stops at `spec_ready` and waits.
+- **Document what you do** in `progress/current.md` while you work, not at the end.
+- **Leave the repository clean** before closing the session (see §5).
 
-## 4. Flujo de trabajo (SDD)
+## 4. Workflow (SDD)
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMAN → in_progress → [implementer → reviewer] → done
 ```
 
-1. El agente detecta la primera feature `pending` con `"sdd": true` en `feature_list.json`.
-2. El agente (como spec_author) crea `specs/<name>/{requirements,design,tasks}.md` y marca status como `spec_ready`.
-3. **Pausa.** El humano lee el spec en `specs/<name>/` y aprueba (o pide cambios).
-4. Una vez aprobado, cambiar status a `in_progress` y proceder con la implementación.
-5. Ejecutar `tasks.md` una a una, marcando `[x]`.
-6. Verificar trazabilidad `R<n>` ↔ test y tasks completas.
-7. Ejecutar `./check.sh` — debe pasar.
-8. Marcar `done` y registrar resumen en `progress/progress.md`.
+1. The agent detects the first `pending` feature with `"sdd": true` in `feature_list.json`.
+2. The agent (as spec_author) reads `DESIGN.md` for architectural context.
+3. The agent creates `specs/<name>/{requirements,design,tasks}.md` and marks status as `spec_ready`.
+4. **Pause.** The human reads the spec in `specs/<name>/` and approves (or requests changes).
+5. Once approved, change status to `in_progress` and proceed with implementation.
+6. Execute `tasks.md` one by one, marking `[x]`.
+7. Verify traceability `R<n>` ↔ test and completed tasks.
+8. Run `./check.sh` — it must pass.
+9. Mark as `done` and record the summary in `progress/progress.md`.
 
-## 5. Cierre de sesión
+## 5. Session Closing
 
-Antes de terminar:
+Before finishing:
 
-1. Ejecuta `./check.sh` — todo verde.
-2. Si la tarea está acabada: marca `status: "done"` en `feature_list.json`.
-3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
-4. Vacía `progress/current.md` dejando solo la plantilla.
-5. No dejes archivos temporales, ni print() de debug, ni TODOs sin contexto.
+1. Run `./check.sh` — all green.
+2. If the task is finished: set `status: "done"` in `feature_list.json`.
+3. Move the summary from `progress/current.md` to the end of `progress/history.md`.
+4. Empty `progress/current.md`, leaving only the template.
+5. Do not leave temporary files, debug print() statements, or TODOs without context.
 
-## 6. Stack del repositorio
+## 6. Repository Stack
 
-*[Personalizar: indica aquí tu stack tecnológico principal]*
+> **NOTE:** Customize this section according to your real project's technology stack.
 
-| Capa | Tecnología |
+| Layer | Technology |
 |------|-----------|
-| Infraestructura | *[ej: Terraform, Terragrunt, Pulumi]* |
-| Kubernetes | *[ej: Helm, Kustomize, Crossplane]* |
-| CI/CD | *[ej: GitHub Actions, GitLab CI, ArgoCD]* |
-| Lenguajes | *[ej: Python, Go, TypeScript, HCL]* |
-| Validación | *[ej: pytest, golangci-lint, tflint, checkov]* |
+| Infrastructure | *[e.g., Terraform, Terragrunt, Pulumi, CloudFormation]* |
+| Orchestration / K8s | *[e.g., Helm, Kustomize, Crossplane, Docker Compose]* |
+| CI/CD | *[e.g., GitHub Actions, GitLab CI, ArgoCD, Jenkins]* |
+| Languages | *[e.g., Python, Go, TypeScript, Java, Rust]* |
+| Validation | *[e.g., pytest, vitest, golangci-lint, tflint, checkov, trivy]* |
 
-## 7. Subagentes recomendados
+## 7. Project Subagents
 
-| Agente | Responsabilidad principal |
-|--------|--------------------------|
-| `cloud-architect` | Diseño de infraestructura multi-cloud, decisión de servicios, costes |
-| `platform-engineer` | Implementación Terraform/Pulumi, pipelines, Helm |
-| `security-reviewer` | Políticas de seguridad, compliance, network policies |
-| `tester-agent` | Tests de infraestructura (Terratest, Kitchen-Terraform) |
-| `quality-agent` | Code review, buenas prácticas, validación de convenciones |
-| `escriba` | Documentación técnica, runbooks, handoffs |
+Each subagent is defined in `.agents/subagents/<name>/SUBAGENT.md` with YAML frontmatter, mission, tasks, tools, and workflow.
 
-*[Personalizar: ajusta los subagentes según tu equipo y stack]*
+| Agent | File | Responsibility |
+|--------|---------|-----------------|
+| `agent-template` | `.agents/subagents/agent-template/SUBAGENT.md` | **Example Template** — copy this directory to create new subagents |
+
+*[Customize: duplicate `.agents/subagents/agent-template/`, rename the folder, and edit SUBAGENT.md for each role in your team. Common examples: cloud-architect, platform-engineer, security-reviewer, tester-agent, quality-agent, scribe.]*
