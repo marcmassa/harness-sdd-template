@@ -7,8 +7,10 @@ Establecer la guía para que cualquier agente (IA o humano) que trabaje en este 
 ## Reglas Obligatorias
 
 1. **Clasifica la tarea primero.** Usa `ROUTING.md` para determinar qué agente(s) usar.
-2. **Lee el contexto.** Siempre lee `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de empezar. Consulta `.agents/skills/` por si existen habilidades relevantes para la tarea.
-3. **Una feature a la vez.** `check.sh` rechazará más de un `in_progress`.
+2. **Harness First.** El Harness SDD es el marco de operación único. No se permiten flujos de trabajo paralelos que no respeten la trazabilidad de `feature_list.json` y `progress/`.
+3. **Skills Registry.** Este template es agnóstico. El conocimiento técnico reside en [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git). Es obligatorio sincronizar skills antes de comenzar tareas técnicas.
+4. **Lee el contexto.** Siempre lee `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de empezar. Consulta `.agents/skills/` por si existen habilidades relevantes para la tarea.
+5. **Una feature a la vez.** `check.sh` rechazará más de un `in_progress`.
 4. **No saltes el spec.** Si `sdd: true`, pasa por spec_author → humano → implementación.
 5. **check.sh es el gateway.** No declares `done` sin que pase limpio.
 6. **Documenta en disco.** Todo avance en `progress/current.md`. Al cerrar, resumen en `progress/progress.md`.

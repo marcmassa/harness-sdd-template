@@ -1,6 +1,14 @@
 # Skills
 
-Este directorio está destinado a almacenar las **skills** (habilidades) de los agentes, ya sean descargadas de fuentes externas o generadas localmente.
+Este directorio contiene las **skills** (habilidades) de los agentes. Para mantener la plantilla agnóstica, las skills se gestionan de forma centralizada en el [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git).
+
+## Cómo obtener/actualizar skills
+
+Ejecuta el script de sincronización para descargar las últimas versiones de las skills estándar:
+
+```bash
+./.agents/skills/sync-skills.sh
+```
 
 ## Propósito
 
@@ -11,4 +19,4 @@ Las skills permiten extender las capacidades de los agentes de Gemini CLI median
 
 ## Estructura
 
-Cada skill debe residir en su propio subdirectorio dentro de esta carpeta, conteniendo idealmente un archivo `SKILL.md` con sus instrucciones y recursos.
+Cada skill reside en su propio subdirectorio, conteniendo un archivo `SKILL.md` con sus instrucciones y recursos.

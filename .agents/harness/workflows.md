@@ -24,9 +24,10 @@ Flujos de trabajo predefinidos para las tareas más comunes en un proyecto Cloud
 3. Actualizar `feature_list.json`: `status: "in_progress"`
 
 ### Fase 2: Implementación (implementer / platform-engineer)
-1. Ejecutar tasks.md secuencialmente, marcando `[x]` cada T<n>
-2. Seguir el diseño definido en `design.md`
-3. Commits tras cada task completada (opcional pero recomendado)
+1. **Importante:** Cargar y aplicar la skill `terraform-structure` (`.agents/skills/terraform-structure/SKILL.md`) para determinar la estructura de carpetas y el uso de templates.
+2. Ejecutar tasks.md secuencialmente, marcando `[x]` cada T<n>
+3. Seguir el diseño definido en `design.md` e integrar los metadatos de los ficheros XML de arquitectura en los ficheros `terraform.tfvars`.
+4. Commits tras cada task completada (opcional pero recomendado)
 
 ### Fase 3: Tests (tester-agent)
 1. Implementar tests según tasks.md

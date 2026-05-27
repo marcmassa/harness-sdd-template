@@ -84,6 +84,7 @@ Agent (implementer):
 3. **Multi-Team Consistency:** Developers, SREs, and AI agents follow the same flow (spec → approval → code → tests → close).
 4. **Reduced Code Review Friction:** Reviewers trust the process (approved spec + `check.sh` + traceability).
 5. **AI Agent Onboarding:** A new agent can read `AGENTS.md` and `feature_list.json` to understand the project state immediately.
+6. **Modular & Agnostic Architecture:** The template methodology is technology-independent. Specific technical knowledge is pulled from a centralized [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git).
 
 ---
 

@@ -21,10 +21,21 @@
 | `feature_list.json` | Feature list with status (pending/spec_ready/in_progress/done/blocked) | Always, at the start |
 | `progress/current.md` | Current session state | Always, at the start |
 | `progress/history.md` | Append-only log of previous sessions | If historical context is needed |
-| `.agents/skills/` | Specialized agent skills and domain knowledge | When specialized workflows are needed |
+| `.agents/skills/` | Specialized agent skills and domain knowledge (Run `./.agents/skills/sync-skills.sh` to update) | When specialized workflows are needed |
 | `specs/<feature>/` | requirements.md + design.md + tasks.md (SDD format) | Before implementing any feature with `"sdd": true` |
 | `docs/sdd.md` | Complete SDD process (EARS, traceability, templates) | Before drafting or reading a spec |
 | `check.sh` | Verification script (build, tests, validations) | Before declaring a task as done |
+
+## 8. Agent Skills Registry
+
+El conocimiento experto y los flujos de trabajo especializados se gestionan de forma centralizada para mantener este template agnóstico.
+
+- **Repositorio:** [agent-skills-registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git)
+- **Skills Disponibles:**
+    - `terraform-structure`: Estándares de carpetas y gestión de metadatos XML para Terraform.
+    - `skill-governance`: Flujo de trabajo obligatorio (GitFlow + SDD + MR) para contribuir al registry.
+- **Uso:** Los agentes deben ejecutar `./.agents/skills/sync-skills.sh` al inicio de la sesión si detectan que faltan habilidades necesarias para la tarea actual.
+- **Contribución:** Toda contribución al registry debe seguir la skill `skill-governance`, utilizando ramas `feature/` y Merge Requests en GitLab.
 
 ## 3. Hard Rules (non-negotiable)
 
