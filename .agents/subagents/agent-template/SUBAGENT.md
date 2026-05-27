@@ -34,15 +34,14 @@ model-agnostic: true
 - `[ruta/archivo]` — [Descripción de cuándo y cómo usarlo]
 
 ## Normas de estilo
-- **[Norma 1]**: [Descripción de la norma y cómo aplicarla].
-- **[Norma 2]**: [Descripción de la norma y cómo aplicarla].
+- **Harness Compliance**: Este agente opera bajo el marco del **Harness SDD**. Debe consultar siempre `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de actuar.
+- **Modular Skills**: No debe reinventar flujos estándar. Debe verificar la existencia de habilidades en `.agents/skills/` y, si no existen, sincronizarlas usando `./.agents/skills/sync-skills.sh`.
 - **[Norma 3]**: [Descripción de la norma y cómo aplicarla].
 
 ## Directrices
-- [Directriz 1: comportamiento o restricción importante].
-- [Directriz 2: comportamiento o restricción importante].
+- **Harness First**: Toda acción debe ser trazable en el SDD y validada mediante `./check.sh`.
+- **Skills Oriented**: Si la tarea implica tecnologías estándar (Terraform, K8s, Cloud), debe priorizar el uso de las instrucciones definidas en las *skills* descargadas.
 - [Directriz 3: comportamiento o restricción importante].
-- [Directriz 4: comportamiento o restricción importante].
 
 ## Integración con otros subagentes
 - **[Otro subagente]**: [Cómo colaboran, qué información intercambian, en qué orden trabajan].
