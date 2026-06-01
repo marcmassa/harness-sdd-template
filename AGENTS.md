@@ -308,20 +308,7 @@ The **canonical roles** for the Harness SDD workflow live in `.agents/subagents/
 
 Additional subagents referenced in `.agents/harness/ROUTING.md` (e.g., `cloud-architect`, `platform-engineer`, `tester-agent`, `security-reviewer`, `escriba`, `quality-agent`) are **illustrative**. Scaffold them by copying `agent-template/` before invoking them.
 
-## §8 — Agent Skills Registry
-
-Expert knowledge and specialized workflows are managed centrally so this template stays agnostic.
-
-- **Repository:** [agent-skills-registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git)
-- **Available Skills:**
-    - `harness-sdd`: Full SDD workflow (canonical to this template).
-    - `ears-requirements`: How to write requirements in EARS notation.
-    - `terraform-structure`: Folder standards and metadata management for Terraform.
-    - `skill-governance`: Mandatory workflow (GitFlow + SDD + MR) for contributing back to the registry.
-- **Usage:** Run `./.agents/skills/sync-skills.sh` at the start of a session if you detect that skills required for the current task are missing.
-- **Contribution:** Any contribution to the registry must follow the `skill-governance` skill (feature branches + Merge Requests in GitLab).
-
-## §9 — CLI-agnostic integration (Harness Bootstrap)
+## §8 — CLI-agnostic integration (Harness Bootstrap)
 
 This template is **CLI-agnostic**. It does **not** ship hand-crafted config files for any particular CLI. Instead:
 
