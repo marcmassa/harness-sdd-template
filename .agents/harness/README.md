@@ -1,43 +1,42 @@
-# Harness SDD — Sistema de sub-agentes
+# Harness SDD — Sub-Agent System
 
-Sistema de sub-agentes especializados para trabajar sobre las features del proyecto siguiendo el proceso SDD.
+Specialized sub-agents that work on project features following the SDD process.
 
-## Arquitectura de Agentes
+## Agent Architecture
 
 ```
                       ┌──────────────────────┐
                       │      HARNESS         │
-                      │   (orquestador)      │
+                      │   (orchestrator)     │
                       └────────┬─────────────┘
                                │
-              ┌────────────────┼────────────────┐
-              │                │                │
-              ▼                ▼                ▼
+               ┌────────────────┼────────────────┐
+               │                │                │
+               ▼                ▼                ▼
      ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
-     │  SPEC_AUTHOR   │ │  IMPLEMENTER   │ │  TESTER-AGENT  │
-     │  (quality)     │ │  (orquestador) │ │  (tester)      │
+     │  SPEC_AUTHOR   │ │  IMPLEMENTER   │ │  REVIEWER      │
+     │  (quality)     │ │  (orchestrator)│ │  (quality)     │
      └────────────────┘ └────────────────┘ └────────────────┘
-              │                │                │
-              └────────────────┼────────────────┘
-                               │
-                      ┌────────▼────────┐
-                      │  REVIEWER       │
-                      │  (quality)      │
-                      └─────────────────┘
 ```
 
-## Sub-agentes
+## Sub-agents
 
-Cada subagente se define en `.agents/subagents/<nombre>/SUBAGENT.md` con frontmatter YAML estándar. Los subagentes pueden extender sus capacidades mediante **skills** almacenadas en `.agents/skills/`.
+Each sub-agent is defined in `.agents/subagents/<name>/SUBAGENT.md` with a dual
+frontmatter (CLI-agnostic fields + opencode-compatible fields). Sub-agents can
+extend their capabilities through **skills** stored in `.agents/skills/`.
 
-| Agente | SUBAGENT.md | Responsabilidad |
-|--------|-------------|-----------------|
-| `agent-template` | `.agents/subagents/agent-template/SUBAGENT.md` | **Plantilla de ejemplo** — copia para crear nuevos subagentes |
+| Agent | SUBAGENT.md | Responsibility |
+|--------|-------------|----------------|
+| `harness` | `.agents/subagents/harness/SUBAGENT.md` | Default orchestrator. Routes work across sub-agents. |
+| `spec-author` | `.agents/subagents/spec-author/SUBAGENT.md` | Produces specs in EARS notation. Never writes production code. |
+| `implementer` | `.agents/subagents/implementer/SUBAGENT.md` | Executes `tasks.md` sequentially on the active feature. |
+| `reviewer` | `.agents/subagents/reviewer/SUBAGENT.md` | Verifies R<n>↔test traceability and runs `./check.sh`. |
+| `agent-template` | `.agents/subagents/agent-template/SUBAGENT.md` | **Example template** — copy to create new sub-agents. |
 
-*Para añadir un subagente real, duplica `.agents/subagents/agent-template/`, renombra la carpeta y personaliza el SUBAGENT.md.*
+*To add a new sub-agent, copy `.agents/subagents/agent-template/`, rename the folder and edit the SUBAGENT.md.*
 
 ## Routing
 
-Ver `ROUTING.md` para el árbol de decisión completo.
-Ver `workflows.md` para flujos de trabajo predefinidos.
-Ver `CONVENTION.md` para la convención de uso obligatoria.
+See `ROUTING.md` for the full decision tree.
+See `workflows.md` for predefined workflows.
+See `CONVENTION.md` for the mandatory usage convention.

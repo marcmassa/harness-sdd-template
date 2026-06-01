@@ -1,29 +1,29 @@
-# Tareas — deploy-cluster
+# Tasks — deploy-cluster
 
-> Pasos discretos en orden. El implementador marca `[x]` al completar cada uno.
+> Discrete steps in order. The implementer marks `[x]` upon completing each one.
 
-## Implementación
+## Implementation
 
-- [ ] **T1** — Crear `modules/aws-eks-cluster/variables.tf` con todos los inputs definidos en R1. Cubre: R1.
-- [ ] **T2** — Crear `modules/aws-eks-cluster/vpc.tf` con VPC, subnets públicas/privadas, IGW, NAT Gateways y routing tables. Cubre: R2, R4.
-- [ ] **T3** — Crear `modules/aws-eks-cluster/security-groups.tf` con reglas intra-cluster, LB→nodes y admin SSH. Cubre: R5.
-- [ ] **T4** — Crear `modules/aws-eks-cluster/main.tf` con el recurso `aws_eks_cluster`, IAM role y dependencias de VPC+SGs. Cubre: R1, R2.
-- [ ] **T5** — Crear `modules/aws-eks-cluster/irsa.tf` con OIDC provider condicional a `enable_irsa`. Cubre: R3.
-- [ ] **T6** — Crear `modules/aws-eks-cluster/node-groups.tf` con soporte para managed y self-managed node groups. Cubre: R6.
-- [ ] **T7** — Crear `modules/aws-eks-cluster/outputs.tf` con cluster endpoint, OIDC ARN, kubeconfig. Cubre: R3.
-- [ ] **T8** — Crear `environments/dev/terraform.tfvars` y `environments/prod/terraform.tfvars` con ejemplos. Cubre: R2 (prod multi-AZ).
-- [ ] **T9** — Añadir validación pre-fly en `variables.tf` (nombre ≤ 100 chars, versión K8s soportada, región con ≥ 3 AZs). Cubre: R8.
+- [ ] **T1** — Create `modules/aws-eks-cluster/variables.tf` with all inputs defined in R1. Covers: R1.
+- [ ] **T2** — Create `modules/aws-eks-cluster/vpc.tf` with VPC, public/private subnets, IGW, NAT Gateways, and routing tables. Covers: R2, R4.
+- [ ] **T3** — Create `modules/aws-eks-cluster/security-groups.tf` with intra-cluster rules, LB→nodes, and admin SSH. Covers: R5.
+- [ ] **T4** — Create `modules/aws-eks-cluster/main.tf` with the `aws_eks_cluster` resource, IAM role, and VPC+SGs dependencies. Covers: R1, R2.
+- [ ] **T5** — Create `modules/aws-eks-cluster/irsa.tf` with OIDC provider conditional on `enable_irsa`. Covers: R3.
+- [ ] **T6** — Create `modules/aws-eks-cluster/node-groups.tf` with support for managed and self-managed node groups. Covers: R6.
+- [ ] **T7** — Create `modules/aws-eks-cluster/outputs.tf` with cluster endpoint, OIDC ARN, kubeconfig. Covers: R3.
+- [ ] **T8** — Create `environments/dev/terraform.tfvars` and `environments/prod/terraform.tfvars` with examples. Covers: R2 (prod multi-AZ).
+- [ ] **T9** — Add pre-flight validation in `variables.tf` (name ≤ 100 chars, supported K8s version, region with ≥ 3 AZs). Covers: R8.
 
 ## Tests
 
-- [ ] **T10** — Crear test unitario que verifica la creación del módulo con `terraform init` y `terraform validate`. Cubre: R1.
-- [ ] **T11** — Crear test de integración que despliega el módulo en un sandbox AWS y verifica que el cluster se crea con 3 AZs en prod. Cubre: R2, R4.
-- [ ] **T12** — Crear test que verifica que IRSA se crea solo cuando `enable_irsa=true`. Cubre: R3.
-- [ ] **T13** — Crear test que verifica que `terraform plan` falla con nombre de cluster > 100 caracteres. Cubre: R8.
+- [ ] **T10** — Create unit test that verifies module creation with `terraform init` and `terraform validate`. Covers: R1.
+- [ ] **T11** — Create integration test that deploys the module in an AWS sandbox and verifies that the cluster is created with 3 AZs in prod. Covers: R2, R4.
+- [ ] **T12** — Create test that verifies IRSA is created only when `enable_irsa=true`. Covers: R3.
+- [ ] **T13** — Create test that verifies `terraform plan` fails with cluster name > 100 characters. Covers: R8.
 
-## Cierre
+## Closure
 
-- [ ] **T14** — Documentar trazabilidad `R<n> ↔ test` en `progress/impl_deploy-cluster.md`. Cubre: trazabilidad.
-- [ ] **T15** — Ejecutar `./check.sh` y verificar que todo pasa. Cubre: verificación final.
-- [ ] **T16** — Actualizar `feature_list.json`: mover P1-001 a status "done". Cubre: cierre.
-- [ ] **T17** — Registrar resumen en `progress/progress.md`. Cubre: registro.
+- [ ] **T14** — Document traceability `R<n> ↔ test` in `progress/impl_deploy-cluster.md`. Covers: traceability.
+- [ ] **T15** — Run `./check.sh` and verify everything passes. Covers: final verification.
+- [ ] **T16** — Update `feature_list.json`: move P1-001 to status "done". Covers: closure.
+- [ ] **T17** — Log summary in `progress/progress.md`. Covers: log.

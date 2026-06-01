@@ -1,58 +1,58 @@
 # SDD — Spec Driven Development
 
-Este directorio contiene las **especificaciones formales** de cada funcionalidad del proyecto. Cada funcionalidad sigue el proceso SDD: **Requisitos → Diseño → Tareas → Código**, con un gate de aprobación humano antes de implementar.
+This directory contains the **formal specifications** of each project feature. Each feature follows the SDD process: **Requirements → Design → Tasks → Code**, with a human approval gate before implementation.
 
-## Flujo SDD
+## SDD Flow
 
 ```
-pending → [spec_author] → spec_ready → ⏸ HUMANO → in_progress → [implementer → reviewer] → done
+pending → [spec_author] → spec_ready → ⏸ HUMAN → in_progress → [implementer → reviewer] → done
 ```
 
-### Fases
+### Phases
 
-| Fase | Quién | Qué produce |
+| Phase | Who | What it produces |
 |------|-------|-------------|
-| **Requisitos** | `spec_author` (quality-agent) | `specs/<nombre>/requirements.md` — en notación EARS |
-| **Diseño** | `spec_author` | `specs/<nombre>/design.md` — decisiones técnicas, alternativas descartadas |
-| **Tareas** | `spec_author` | `specs/<nombre>/tasks.md` — checklist ejecutable con trazabilidad R<n> |
-| **Gate** | **Humano** | Lee los 3 archivos → aprueba o solicita cambios |
-| **Implementación** | `implementer` | Código, módulos Terraform, configuraciones |
-| **Tests** | `tester-agent` | Tests de infraestructura, unitarios, integración |
-| **Revisión** | `reviewer` (quality-agent) | Verifica trazabilidad: cada R<n> tiene un test |
+| **Requirements** | `spec_author` | `specs/<name>/requirements.md` — in EARS notation |
+| **Design** | `spec_author` | `specs/<name>/design.md` — technical decisions, discarded alternatives |
+| **Tasks** | `spec_author` | `specs/<name>/tasks.md` — executable checklist with R<n> traceability |
+| **Gate** | **Human** | Reads the 3 files → approves or requests changes |
+| **Implementation** | `implementer` | Code, Terraform modules, configurations |
+| **Tests** | `tester-agent` | Infrastructure, unit, and integration tests |
+| **Review** | `reviewer` | Verifies traceability: each R<n> has a test |
 
-## Estructura
+## Structure
 
 ```
 specs/
-├── README.md                    # Este archivo
-├── templates/                   # Plantillas reutilizables
+├── README.md                    # This file
+├── templates/                   # Reusable templates
 │   ├── requirements.md          # EARS notation template
 │   ├── design.md                # Technical decisions template
 │   └── tasks.md                 # Task checklist template
-└── <feature-name>/              # Un directorio por funcionalidad
-    ├── requirements.md          # R1, R2, ... (EARS estricto)
-    ├── design.md                # Decisiones técnicas
-    └── tasks.md                 # T1, T2, ... con referencias R<n>
+└── <feature-name>/              # One directory per feature
+    ├── requirements.md          # R1, R2, ... (strict EARS)
+    ├── design.md                # Technical decisions
+    └── tasks.md                 # T1, T2, ... with R<n> references
 ```
 
-El `<feature-name>` debe coincidir con el campo `name` en `feature_list.json`.
+The `<feature-name>` must match the `name` field in `feature_list.json`.
 
-## Reglas de trazabilidad
+## Traceability rules
 
-1. Cada **R**equisito (`R1`, `R2`, ...) debe ser verificable por al menos un test concreto.
-2. Cada **T**area (`T1`, `T2`, ...) debe referenciar los R<n> que cubre.
-3. El implementador documenta el mapa `R<n> → test` en el reporte de implementación (`progress/impl_<feature>.md`).
-4. El revisor verifica explícitamente esta correspondencia y rechaza si falta.
+1. Each **R**equirement (`R1`, `R2`, ...) must be verifiable by at least one concrete test.
+2. Each **T**ask (`T1`, `T2`, ...) must reference the R<n> it covers.
+3. The implementer documents the `R<n> → test` map in the implementation report (`progress/impl_<feature>.md`).
+4. The reviewer explicitly verifies this correspondence and rejects if missing.
 
-## Estados de una feature
+## Feature states
 
-| Estado | Significado |
+| State | Meaning |
 |--------|-------------|
-| `pending` | Sin spec — el spec_author es el primero en actuar. |
-| `spec_ready` | Spec escrito — esperando aprobación humana. NO se toca código. |
-| `in_progress` | Spec aprobado — implementador trabajando. |
-| `done` | Código + tests, revisor aprobó, `check.sh` verde. |
-| `blocked` | Atascado — razón en `progress/current.md`. |
+| `pending` | No spec — spec_author is the first to act. |
+| `spec_ready` | Spec written — waiting for human approval. NO code is touched. |
+| `in_progress` | Spec approved — implementer working. |
+| `done` | Code + tests, reviewer approved, `check.sh` green. |
+| `blocked` | Stuck — reason in `progress/current.md`. |
 
-Ver `docs/sdd.md` para la documentación completa del proceso SDD.
-Ver `AGENTS.md` para la matriz de delegación de agentes.
+See `docs/sdd.md` for complete documentation of the SDD process.
+See `AGENTS.md` for the agent delegation matrix.
