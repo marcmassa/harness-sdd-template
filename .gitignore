@@ -1,11 +1,11 @@
-# --- Dependencias ---
+# --- Dependencies ---
 node_modules/
 .vendor/
 .terraform/
 *.tfstate
 *.tfstate.backup
 
-# --- Entornos virtuales ---
+# --- Virtual environments ---
 .virtualenvs/
 .venv/
 venv/
@@ -28,7 +28,7 @@ build/
 *.pyc
 __pycache__/
 
-# --- Secretos (nunca commitear) ---
+# --- Secrets (never commit) ---
 *.pem
 *.key
 *.cert
@@ -38,7 +38,6 @@ __pycache__/
 credentials.json
 service-account.json
 *.secret
-GEMINI.md
 
 # --- Terraform ---
 *.terraform.lock.hcl
@@ -47,9 +46,17 @@ crash.log
 # --- Helm ---
 charts/**/charts/*.tgz
 
-# --- Agentes ---
-.agents/skills/README.md
-# .agents/skills/* (opcional: descomentar si se quieren ignorar las skills descargadas)
+# --- Agents: sync artifacts ---
+.agents/.tmp_skills/
 
-# --- Progreso local ---
+# --- Generated CLI adapters (regenerate with ./.agents/bootstrap.sh) ---
+/opencode.json
+/opencode.jsonc
+/GEMINI.md
+/.gemini/
+/CLAUDE.md
+/.claude/
+/agy.config*
+
+# --- Local progress ---
 progress/archive/*.bak

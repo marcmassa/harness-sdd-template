@@ -2,7 +2,7 @@
 
 Template for adopting **Harness Engineering + Spec Driven Development (SDD)** in any software project (Infrastructure, Platform, or Application).
 
-This template provides a structured, traceable, and verifiable workflow for AI agents and human developers to collaborate effectively.
+This template provides a structured, traceable, and verifiable workflow for AI agents and human developers to collaborate effectively. It is **CLI-agnostic**: a single canonical manifest drives the native config for opencode, gemini-cli, claude-code, or any other agentic CLI.
 
 ---
 
@@ -11,9 +11,11 @@ This template provides a structured, traceable, and verifiable workflow for AI a
 - [What is Harness Engineering?](#what-is-harness-engineering)
 - [Why SDD + Harness?](#why-sdd--harness)
 - [Benefits](#benefits)
-- [Complete Workflow](#complete-workflow)
+- [Template Installation Lifecycle](#template-installation-lifecycle)
+- [Complete SDD Workflow](#complete-sdd-workflow)
 - [Template Structure](#template-structure)
 - [Quick Adoption Guide (5 steps)](#quick-adoption-guide-5-steps)
+- [Slash Commands](#slash-commands-available)
 - [How to Customize for Your Stack](#how-to-customize-for-your-stack)
 - [FAQ and Troubleshooting](#faq-and-troubleshooting)
 
@@ -56,7 +58,7 @@ With SDD + Harness, the flow is:
 
 ```
 Human: "Add support for X"
-Agent (spec_author):
+Agent (spec-author):
   1. Reads feature_list.json → detects feature with sdd:true, status:pending
   2. Creates specs/feature-x/requirements.md (EARS: R1, R2, ...)
   3. Creates specs/feature-x/design.md (files, signatures, alternatives)
@@ -70,7 +72,7 @@ Agent (implementer):
   7. Adds tests with R<n> ↔ test traceability
   8. Runs ./check.sh → all green
   9. Sets status: done in feature_list.json
-  10. Logs in progress/progress.md
+ 10. Logs in progress/progress.md
 
 → Full traceability, 0 ambiguity, human only reviews once
 ```
@@ -85,84 +87,226 @@ Agent (implementer):
 4. **Reduced Code Review Friction:** Reviewers trust the process (approved spec + `check.sh` + traceability).
 5. **AI Agent Onboarding:** A new agent can read `AGENTS.md` and `feature_list.json` to understand the project state immediately.
 6. **Modular & Agnostic Architecture:** The template methodology is technology-independent. Specific technical knowledge is pulled from a centralized [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git).
+7. **CLI-Agnostic Bootstrap:** One canonical manifest (`.agents/agentic.json`) generates the native config for opencode, gemini-cli, claude-code, or any other agentic CLI. No vendor lock-in.
 
 ---
 
-## Complete Workflow
+## Template Installation Lifecycle
 
-### State Diagram
+When you copy this template into a project, the framework's sub-agents ship as **scaffolds** — patterns for you to use as a basis for your own project-specific sub-agents, never installed by default. The lifecycle has 3 stages:
+
+```
+                      ┌──────────────────────────────────────────────────┐
+                      │   Copy the template into your project            │
+                      │   (preserves _template_subagents_examples[])     │
+                      └────────────────────────┬─────────────────────────┘
+                                               │
+                                               ▼
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │  STAGE 1 — SCAFFOLD                                                  │
+   │  $ ./.agents/bootstrap.sh profile                                   │
+   │                                                                     │
+   │  Read the entries in _template_subagents_examples[] to see the      │
+   │  patterns the framework provides.                                   │
+   │  4 canonicals (harness, spec-author, implementer, reviewer) +       │
+   │  3 illustrative (cloud-architect, frontend-specialist, data-engineer)│
+   │  Each entry carries _lifecycle: "scaffold" + an _intent hint.      │
+   └────────────────────────────────────┬────────────────────────────────┘
+                                        │
+                                        ▼
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │  STAGE 2 — IMPLEMENT                                                 │
+   │  For each sub-agent your project needs, copy a scaffold into        │
+   │  subagents[] and customize it (name, description, permission,        │
+   │  role_file, applies_when).                                          │
+   │                                                                     │
+   │  Quick try:    ./.agents/bootstrap.sh add-agent <name> --yes        │
+   │  Customize:    copy + edit .agents/agentic.json by hand             │
+   │                 (e.g. implementer -> python-implementer)            │
+   │                                                                     │
+   │  The renderer auto-scaffolds the SUBAGENT.md from                   │
+   │  .agents/subagents/agent-template/ if it is missing.                │
+   └────────────────────────────────────┬────────────────────────────────┘
+                                        │
+                                        ▼
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │  STAGE 3 — REMOVE                                                    │
+   │  $ ./.agents/bootstrap.sh remove-examples --yes                     │
+   │                                                                     │
+   │  Drops _template_subagents_examples[] and _template_lifecycle from  │
+   │  .agents/agentic.json. Sub-agents already promoted to subagents[]   │
+   │  are NOT affected. Re-renders all CLI adapters.                     │
+   └────────────────────────────────────┬────────────────────────────────┘
+                                        │
+                                        ▼
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │  FINAL — project-only manifest                                      │
+   │                                                                     │
+   │  subagents[] = the project's sub-agents only.                       │
+   │  No _template_* residue, no placeholder entries, no leftover         │
+   │  scaffold metadata. Just the project, shaped by the project.        │
+   └─────────────────────────────────────────────────────────────────────┘
+```
+
+The intent is documented **inside the manifest itself** at `agentic.json#_template_lifecycle` — the lifecycle is part of the project's source of truth, not external documentation that can drift.
+
+---
+
+## Complete SDD Workflow
+
+Once the template is installed and your project's sub-agents are in place, the day-to-day workflow follows the SDD state machine:
 
 ```
                           ┌──────────────────────────────────────────┐
                           │           feature_list.json              │
                           │  (one feature at a time, sdd:true/false) │
                           └──────────────────────────────────────────┘
-                                       │
-                                       ▼
-                              ┌─────────────────┐
-                              │    pending       │
-                              │  (no spec yet)   │
-                              └────────┬─────────┘
-                                       │ quality-agent / spec_author
-                                       │ creates specs/<feature>/{requirements,design,tasks}.md
-                                       ▼
-                              ┌─────────────────┐
-                              │   spec_ready     │
-                              │  (⏸ waiting)     │◄──────────────────┐
-                              └────────┬─────────┘                   │
-                                       │                             │
-                              ┌────────▼────────┐                   │
-                              │  HUMAN          │── No → fix ───────┘
-                              │  APPROVAL       │
-                              └────────┬─────────┘
-                                       │ Yes
-                                       ▼
-                              ┌─────────────────┐
-                              │  in_progress     │
-                              │  (implementing)  │
-                              └────────┬─────────┘
-                                       │ implementer follows tasks.md
-                                       │ tester-agent adds tests
-                                       │ R<n> ↔ test documented
-                                       │ check.sh passes
-                                       ▼
-                              ┌─────────────────┐
-                              │     done         │
-                              │  (closed)        │
-                              └─────────────────┘
+                                        │
+                                        ▼
+                               ┌─────────────────┐
+                               │    pending       │
+                               │  (no spec yet)   │
+                               └────────┬─────────┘
+                                        │ spec-author
+                                        │ creates specs/<feature>/{requirements,design,tasks}.md
+                                        ▼
+                               ┌─────────────────┐
+                               │   spec_ready     │
+                               │  (⏸ waiting)     │◄──────────────────┐
+                               └────────┬─────────┘                   │
+                                        │                             │
+                               ┌────────▼────────┐                   │
+                               │  HUMAN          │── No → fix ───────┘
+                               │  APPROVAL       │
+                               └────────┬─────────┘
+                                        │ Yes
+                                        ▼
+                               ┌─────────────────┐
+                               │  in_progress     │
+                               │  (implementing)  │
+                               └────────┬─────────┘
+                                        │ implementer follows tasks.md
+                                        │ reviewer validates R<n>↔test traceability
+                                        │ check.sh passes
+                                        ▼
+                               ┌─────────────────┐
+                               │     done         │
+                               │  (closed)        │
+                               └─────────────────┘
 ```
+
+---
+
+## Template Structure
+
+```
+harness-sdd-template/
+├── AGENTS.md                  # Navigation map for agents (read this first)
+├── README.md                  # This file
+├── DESIGN.md                  # High-level architecture
+├── SECURITY.md                # Security policy
+├── check.sh                   # Verification gateway (lint, test, drift, ...)
+├── feature_list.json          # Source of truth for features (one at a time)
+│
+├── .agents/                   # Framework internals
+│   ├── agentic.json           #   Canonical manifest (source of truth)
+│   ├── BOOTSTRAP.md           #   LLM fallback for unknown CLIs
+│   ├── bootstrap.sh           #   Renderer dispatcher
+│   ├── adapters/              #   CLI adapter templates (opencode, gemini-cli, claude-code, ...)
+│   ├── subagents/             #   Sub-agent role files
+│   │   ├── agent-template/    #     Scaffold source for new sub-agents
+│   │   ├── harness/           #     Reference role files (Stage 1 scaffolds)
+│   │   ├── spec-author/
+│   │   ├── implementer/
+│   │   └── reviewer/
+│   ├── skills/                #   Specialized skills (sync'd from the registry)
+│   ├── commands/              #   Slash-command bodies (/spec, /implement, ...)
+│   └── harness/               #   Operational docs (CONVENTION, ROUTING, ...)
+│
+├── specs/                     # Spec Driven Development artifacts
+│   ├── README.md              #   How to write a spec
+│   └── templates/             #   EARS templates (requirements, design, tasks)
+│
+├── progress/                  # Operational memory on disk
+│   ├── current.md             #   Live session state
+│   ├── progress.md            #   Append-only history
+│   ├── backlog.md             #   Deferred items
+│   ├── decisions.md           #   Architecture Decision Records
+│   └── handoff.md             #   Hand-off notes between sessions
+│
+└── examples/                  # Reference implementations
+    └── deploy-cluster/        #   End-to-end SDD example
+```
+
+The canonical source of truth is `.agents/agentic.json`. Every CLI-specific config
+(`opencode.json`, `GEMINI.md`, `CLAUDE.md`, etc.) is generated from it by
+`./.agents/bootstrap.sh <cli>` and is **gitignored** — each developer regenerates
+their own after cloning.
 
 ---
 
 ## Quick Adoption Guide (5 steps)
 
-### Step 1: Copy the Template to Your Repo
+### Step 1 — Copy the template into your repo
 
 ```bash
-cp -r harness-sdd-template/* /path/to/your/repo/
+cp -r harness-sdd-template/. /path/to/your/repo/
 cd /path/to/your/repo
 ```
 
-### Step 2: Customize `AGENTS.md`
-
-Edit the main file to reflect your stack, teams, and agents.
-
-### Step 3: Create Your First Feature in `feature_list.json`
-
-Add a pending feature entry with `sdd: true` to start the SDD process.
-
-### Step 4: Run `check.sh` to Verify
+### Step 2 — Install the CLI adapter (clean install)
 
 ```bash
-chmod +x check.sh
-./check.sh
+./.agents/bootstrap.sh detect                # See which CLIs are supported and detect your stack
+./.agents/bootstrap.sh opencode              # Or: gemini-cli | claude-code | --all
+                                             # Default install is clean: subagents[] starts empty.
 ```
 
-### Step 5: Launch Your First SDD Cycle
+### Step 3 — Shape the manifest to your project (the 3-stage lifecycle)
 
-Ask your AI agent:
+**Agent-driven (recommended):** tell your AI agent *"run /init"*. The agent
+reads `.agents/commands/init.md`, walks the SCAFFOLD → IMPLEMENT → REMOVE
+stages, and reports the result. The human supervises; the agent does the work.
+
+**Manual (equivalent):**
+
+```bash
+./.agents/bootstrap.sh profile               # STAGE 1: read the 7 scaffolds
+./.agents/bootstrap.sh add-agent <name>      # STAGE 2: borrow a scaffold as-is (or copy + edit agentic.json)
+# ... build your project's sub-agents ...
+./.agents/bootstrap.sh remove-examples       # STAGE 3: drop the scaffolds when done
+```
+
+See [Template Installation Lifecycle](#template-installation-lifecycle) for the full diagram.
+
+### Step 4 — Verify the environment
+
+```bash
+./check.sh                                   # Must pass before any SDD work begins
+```
+
+### Step 5 — Launch the first SDD cycle
+
+Add a feature to `feature_list.json` with `"sdd": true`, then ask your AI agent:
 
 > "Apply Harness Engineering with SDD to implement the pending features in feature_list.json"
+
+The agent will read `AGENTS.md`, route to `spec-author`, and stop at `spec_ready` for your approval.
+
+### Slash commands available
+
+The agent exposes these workflows as native slash commands (CLI-specific
+names differ; the bodies are identical):
+
+| Slash command | Purpose                                                                 |
+|---------------|-------------------------------------------------------------------------|
+| `/init`       | Set up the project (one-time scaffold lifecycle). The agent does it.   |
+| `/status`     | Show project state (active feature, specs pending, last progress).      |
+| `/spec`       | Create the spec for the first `pending` feature with `"sdd": true`.     |
+| `/approve`    | Approve a `spec_ready` feature and flip it to `in_progress`.            |
+| `/implement`  | Execute `tasks.md` for the feature in `in_progress`.                    |
+| `/done`       | Run the reviewer, verify R↔test traceability, mark `done` if green.      |
+| `/check`      | Shortcut to `./check.sh`.                                               |
 
 ---
 
@@ -170,11 +314,56 @@ Ask your AI agent:
 
 ### Adapt `check.sh`
 
-The generic `check.sh` supports Python, TypeScript, and Go. Add blocks for your specific tools (e.g., `terraform fmt`, `hadolint`, `rustc`, etc.).
+The generic `check.sh` supports Python, TypeScript, Go, and Terraform out of the box. Add blocks for your specific tools (e.g., `hadolint`, `rustc`, `tflint`).
 
-### Adapt EARS Templates
+### Adapt the canonical manifest
 
-The templates in `specs/templates/` use generic examples. You can replace them with examples relevant to your specific domain (Infra, Web, Data, etc.).
+Edit `.agents/agentic.json` directly:
+
+- Add or remove entries in `subagents[]` (the active set).
+- Add `_lifecycle: "scaffold"` entries to `_template_subagents_examples[]` to publish project-specific sub-agent patterns for your team.
+- Add or extend `project_detect[]` rules to set stack-aware permission overrides and skills.
+
+After every change, re-render the CLI adapters:
+
+```bash
+./.agents/bootstrap.sh <cli>                 # Render for one CLI
+./.agents/bootstrap.sh --all                 # Render for every adapter
+./.agents/bootstrap.sh --check               # Drift check (CI-friendly)
+```
+
+### Adapt EARS templates
+
+The templates in `specs/templates/` use generic examples. Replace them with examples relevant to your specific domain (Infra, Web, Data, etc.).
+
+### Add a new CLI
+
+Copy `.agents/adapters/_generic/` to `.agents/adapters/<your-cli>/` and write the adapter. The bootstrap mechanism is data-driven; see [`.agents/BOOTSTRAP.md`](.agents/BOOTSTRAP.md) for the LLM fallback when no prebuilt renderer exists.
+
+---
+
+## FAQ and Troubleshooting
+
+**Q: My CLI is not in the list of supported adapters.**
+A: Read [`.agents/BOOTSTRAP.md`](.agents/BOOTSTRAP.md) — it explains how to translate the canonical manifest to your CLI's native format by hand, or how to add a prebuilt adapter.
+
+**Q: `bootstrap.sh --check` reports DRIFT.**
+A: The canonical manifest and the on-disk adapter have diverged. Re-run `./.agents/bootstrap.sh <cli>` to regenerate.
+
+**Q: `check.sh` says a canonical sub-agent is "orphaned".**
+A: The canonical directory exists on disk but is not in `.agents/agentic.json` (neither in `subagents[]` nor in `_template_subagents_examples[]`). Either restore the entry, run `./.agents/bootstrap.sh prune` to clean up, or move the canonical into `_template_subagents_examples[]` if you want to keep it as a scaffold.
+
+**Q: I want to add a sub-agent that's not a scaffold — a permanent part of my project.**
+A: Add it directly to `subagents[]` in `.agents/agentic.json`. You don't need to use `add-agent`; that's only for borrowing scaffolds.
+
+**Q: I want to share my project's sub-agents with other teams.**
+A: Move them from `subagents[]` to `_template_subagents_examples[]` (with a `_lifecycle: "scaffold"` and an `_intent` hint) and ship the manifest. Other projects can then use `add-agent` to borrow them.
+
+**Q: `add-agent` prompts even when I pass `--yes`. What's happening?**
+A: If the scaffold entry is not in `_template_subagents_examples[]` (e.g. you typed a name that doesn't exist), the renderer reports the error and exits 1 — `--yes` only skips the human confirmation, not validation errors.
+
+**Q: I want the agent to do the project setup, not me. How?**
+A: Tell the agent *"run /init"* (or invoke the `/init` slash command directly). The agent reads `.agents/commands/init.md` and walks the 3-stage lifecycle (SCAFFOLD → IMPLEMENT → REMOVE) on its own, then runs `./check.sh` and reports. The human supervises; the agent does the work. This is the recommended way to adopt the template — it works the same way across opencode, gemini-cli, claude-code, copilot, and any other agentic CLI that supports slash commands.
 
 ---
 

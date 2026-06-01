@@ -2,58 +2,59 @@
 name: agent-template
 type: subagent
 user-invocable: true
-description: "Subagente de ejemplo que sirve como plantilla para implementar más subagentes. Incluye la estructura y formato idóneos: frontmatter YAML, misión, tareas, herramientas, normas, directrices, integración y workflow."
+description: "Example sub-agent that serves as a template for implementing more sub-agents. Includes the right structure and format: dual frontmatter, mission, tasks, tools, rules, guidelines, integration, and workflow."
+mode: subagent
 model-agnostic: true
 ---
 
-## Misión
-[Describe aquí el propósito fundamental de este subagente: qué problema resuelve, qué área del proyecto cubre, y por qué es necesario.]
+## Mission
+[Describe here the fundamental purpose of this sub-agent: what problem it solves, what area of the project it covers, and why it is needed.]
 
-## Tareas principales
+## Main tasks
 
-1. **[Área 1 — Nombre descriptivo]**:
-   - [Acción concreta y medible 1].
-   - [Acción concreta y medible 2].
-   - [Acción concreta y medible 3].
+1. **[Area 1 — Descriptive name]**:
+   - [Concrete and measurable action 1].
+   - [Concrete and measurable action 2].
+   - [Concrete and measurable action 3].
 
-2. **[Área 2 — Nombre descriptivo]**:
-   - [Acción concreta y medible 1].
-   - [Acción concreta y medible 2].
+2. **[Area 2 — Descriptive name]**:
+   - [Concrete and measurable action 1].
+   - [Concrete and measurable action 2].
 
-3. **[Área 3 — Nombre descriptivo]**:
-   - [Acción concreta y medible 1].
-   - [Acción concreta y medible 2].
-   - [Acción concreta y medible 3].
+3. **[Area 3 — Descriptive name]**:
+   - [Concrete and measurable action 1].
+   - [Concrete and measurable action 2].
+   - [Concrete and measurable action 3].
 
-4. **[Área 4 — Nombre descriptivo]**:
-   - [Acción concreta y medible 1].
+4. **[Area 4 — Descriptive name]**:
+   - [Concrete and measurable action 1].
 
-## Herramientas disponibles
-- `[ruta/archivo]` — [Descripción de cuándo y cómo usarlo]
-- `[ruta/archivo]` — [Descripción de cuándo y cómo usarlo]
-- `[ruta/archivo]` — [Descripción de cuándo y cómo usarlo]
+## Available tools
+- `[path/file]` — [Description of when and how to use it]
+- `[path/file]` — [Description of when and how to use it]
+- `[path/file]` — [Description of when and how to use it]
 
-## Normas de estilo
-- **Harness Compliance**: Este agente opera bajo el marco del **Harness SDD**. Debe consultar siempre `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de actuar.
-- **Modular Skills**: No debe reinventar flujos estándar. Debe verificar la existencia de habilidades en `.agents/skills/` y, si no existen, sincronizarlas usando `./.agents/skills/sync-skills.sh`.
-- **[Norma 3]**: [Descripción de la norma y cómo aplicarla].
+## Style rules
+- **Harness Compliance**: This agent operates under the **Harness SDD** framework. It must always consult `AGENTS.md`, `feature_list.json` and `progress/current.md` before acting.
+- **Modular Skills**: It must not reinvent standard workflows. It must verify the existence of skills in `.agents/skills/` and, if they don't exist, sync them using `./.agents/skills/sync-skills.sh`.
+- **[Rule 3]**: [Description of the rule and how to apply it].
 
-## Directrices
-- **Harness First**: Toda acción debe ser trazable en el SDD y validada mediante `./check.sh`.
-- **Skills Oriented**: Si la tarea implica tecnologías estándar (Terraform, K8s, Cloud), debe priorizar el uso de las instrucciones definidas en las *skills* descargadas.
-- [Directriz 3: comportamiento o restricción importante].
+## Guidelines
+- **Harness First**: Every action must be traceable in the SDD and validated via `./check.sh`.
+- **Skills Oriented**: If the task involves standard technologies (Terraform, K8s, Cloud), prioritize the use of the instructions defined in the downloaded *skills*.
+- [Guideline 3: important behavior or restriction].
 
-## Integración con otros subagentes
-- **[Otro subagente]**: [Cómo colaboran, qué información intercambian, en qué orden trabajan].
-- **[Otro subagente]**: [Cómo colaboran, qué información intercambian, en qué orden trabajan].
+## Integration with other sub-agents
+- **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
+- **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
 
 ## Workflow
-1. [Paso 1 del flujo de trabajo típico].
-2. [Paso 2 del flujo de trabajo típico].
-3. [Paso 3 del flujo de trabajo típico].
-4. [Paso 4 del flujo de trabajo típico].
-5. [Paso 5 del flujo de trabajo típico].
+1. [Step 1 of the typical workflow].
+2. [Step 2 of the typical workflow].
+3. [Step 3 of the typical workflow].
+4. [Step 4 of the typical workflow].
+5. [Step 5 of the typical workflow].
 
 ---
 
-*Copia este directorio completo (`.agents/subagents/agent-template/`) como base para crear nuevos subagentes. Renombra la carpeta y ajusta los campos del frontmatter YAML, la misión, tareas y el resto de secciones según el rol del nuevo agente.*
+*Copy this entire directory (`.agents/subagents/agent-template/`) as a base to create new sub-agents. Rename the folder and adjust the YAML frontmatter fields, mission, tasks, and the rest of the sections according to the new agent's role.*

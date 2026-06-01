@@ -1,39 +1,40 @@
-# Convención de Uso del Harness SDD
+# Harness SDD — Usage Convention
 
-## Propósito
+## Purpose
 
-Establecer la guía para que cualquier agente (IA o humano) que trabaje en este repositorio use el harness de forma consistente.
+Establish the guideline so that any agent (AI or human) working in this repository
+uses the harness consistently.
 
-## Reglas Obligatorias
+## Mandatory Rules
 
-1. **Clasifica la tarea primero.** Usa `ROUTING.md` para determinar qué agente(s) usar.
-2. **Harness First.** El Harness SDD es el marco de operación único. No se permiten flujos de trabajo paralelos que no respeten la trazabilidad de `feature_list.json` y `progress/`.
-3. **Skills Registry.** Este template es agnóstico. El conocimiento técnico reside en [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git). Es obligatorio sincronizar skills antes de comenzar tareas técnicas.
-4. **Lee el contexto.** Siempre lee `AGENTS.md`, `feature_list.json` y `progress/current.md` antes de empezar. Consulta `.agents/skills/` por si existen habilidades relevantes para la tarea.
-5. **Una feature a la vez.** `check.sh` rechazará más de un `in_progress`.
-4. **No saltes el spec.** Si `sdd: true`, pasa por spec_author → humano → implementación.
-5. **check.sh es el gateway.** No declares `done` sin que pase limpio.
-6. **Documenta en disco.** Todo avance en `progress/current.md`. Al cerrar, resumen en `progress/progress.md`.
+1. **Classify the task first.** Use `ROUTING.md` to determine which agent(s) to use.
+2. **Harness First.** The Harness SDD is the single operating framework. Parallel workflows that do not respect the traceability of `feature_list.json` and `progress/` are not allowed.
+3. **Skills Registry.** This template is agnostic. Technical knowledge lives in the [Agent Skills Registry](https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/agent-skills-registry.git). It is mandatory to sync skills before starting technical tasks.
+4. **Read the context.** Always read `AGENTS.md`, `feature_list.json` and `progress/current.md` before starting. Check `.agents/skills/` for any relevant skills.
+5. **One feature at a time.** `check.sh` will reject more than one `in_progress`.
+6. **Do not skip the spec.** If `sdd: true`, go through spec_author → human → implementation.
+7. **`check.sh` is the gateway.** Do not declare `done` unless it passes clean.
+8. **Document on disk.** Every advance in `progress/current.md`. On close, summary in `progress/progress.md`.
 
-## Flujo Recomendado
+## Recommended Flow
 
 ```
-1. ./check.sh                            # Verificar que el entorno está listo
-2. Leer feature_list.json                 # Identificar siguiente feature
-3. Leer progress/current.md               # Contexto de la sesión
-4. Leer specs/<feature>/ (si aplica)      # Spec aprobado
-5. Ejecutar tasks.md                       # Implementación secuencial
-6. ./check.sh                              # Verificación final
-7. Actualizar feature_list.json            # Marcar done
-8. Registrar en progress/progress.md       # Cierre
+1. ./check.sh                            # Verify the environment is ready
+2. Read feature_list.json                 # Identify the next feature
+3. Read progress/current.md               # Session context
+4. Read specs/<feature>/ (if applicable)  # Approved spec
+5. Execute tasks.md                       # Sequential implementation
+6. ./check.sh                              # Final verification
+7. Update feature_list.json               # Mark done
+8. Record in progress/progress.md         # Closure
 ```
 
-## Checklist de Recomendaciones
+## Recommendation Checklist
 
-Antes de ejecutar tareas complejas:
+Before executing complex tasks:
 
-- [ ] ¿He clasificado la tarea usando ROUTING.md?
-- [ ] ¿He leído feature_list.json para entender el estado?
-- [ ] ¿He consultado progress/current.md para contexto?
-- [ ] ¿He verificado que no hay otra feature en in_progress?
-- [ ] ¿Ejecutaré `./check.sh` antes de declarar done?
+- [ ] Have I classified the task using `ROUTING.md`?
+- [ ] Have I read `feature_list.json` to understand the state?
+- [ ] Have I checked `progress/current.md` for context?
+- [ ] Have I verified that no other feature is `in_progress`?
+- [ ] Will I run `./check.sh` before declaring `done`?

@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "kind": "harness-sdd",
+  "description": "Canonical CLI-agnostic manifest for the Harness SDD framework. Edit this file to add/change subagents, skills, or commands, then re-run ./.agents/bootstrap.sh <cli> to regenerate the native adapter.",
+  "_template_lifecycle": {
+    "intent": "The entries in `_template_subagents_examples[]` are SCAFFOLDS. Their purpose is to be used as starting points for the project's own sub-agents — copy an entry, customize the name/description/permission/role_file, and add the customized version to `subagents[]`. When you have built the sub-agents your project needs, run `./.agents/bootstrap.sh remove-examples` to delete the scaffolds from this manifest. The leading underscore on the field name signals that scaffolds are never rendered into CLI adapters by default; they are documentation and templates only.",
+    "stages": [
+      "1. SCAFFOLD — read the examples in `_template_subagents_examples[]` to see the patterns this framework provides.",
+      "2. IMPLEMENT — for each sub-agent your project needs, copy a scaffold into `subagents[]` and customize it (name, description, permission, role_file, applies_when).",
+      "3. REMOVE — once the project's sub-agents are in place, run `./.agents/bootstrap.sh remove-examples` to drop the scaffolds. The leading-underscore convention guarantees they were never rendered."
+    ]
+  },
+  "instructions": [
+    "AGENTS.md",
+    ".agents/harness/CONVENTION.md"
+  ],
+  "skills": {
+    "paths": [
+      ".agents/skills"
+    ]
+  },
+  "default_agent": "harness",
+  "subagents": [],
+  "_template_subagents_examples": [
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample orchestrator for the SDD workflow. Copy this entry, rename it (e.g. `<project>-orchestrator`), and adjust description/permission/role_file for your project. Add the customized version to subagents[]. When the project's sub-agents are in place, run `./.agents/bootstrap.sh remove-examples` to drop this scaffold.",
+      "name": "harness",
+      "mode": "primary",
+      "description": "Default orchestrator. Reads feature_list.json, routes tasks to specialized sub-agents, monitors progress.",
+      "role_file": ".agents/subagents/harness/SUBAGENT.md",
+      "category": "canonical",
+      "permission": {
+        "edit": {
+          "*": "ask"
+        }
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample spec author. Copy, customize, and add to subagents[] if your project follows the EARS / spec-driven workflow. Drop the scaffold when done.",
+      "name": "spec-author",
+      "mode": "subagent",
+      "description": "Creates specs/<feature>/{requirements,design,tasks}.md in strict EARS. Never writes production code. Stops at status=spec_ready and waits for human approval.",
+      "role_file": ".agents/subagents/spec-author/SUBAGENT.md",
+      "category": "canonical",
+      "permission": {
+        "edit": {
+          "specs/**": "allow",
+          "progress/**": "allow",
+          "feature_list.json": "allow",
+          "*": "deny"
+        }
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample implementer. Copy, customize (especially the file_glob list to match your project's languages), and add to subagents[] when you need a code-writing agent. Drop the scaffold when done.",
+      "name": "implementer",
+      "mode": "subagent",
+      "description": "Executes tasks.md sequentially on the feature with status=in_progress. Writes code, modules, and configurations per design.md. Does not modify the approved spec.",
+      "role_file": ".agents/subagents/implementer/SUBAGENT.md",
+      "category": "canonical",
+      "applies_when": {
+        "file_glob": [
+          "**/*.py",
+          "**/*.ts",
+          "**/*.tsx",
+          "**/*.js",
+          "**/*.jsx",
+          "**/*.go",
+          "**/*.rs",
+          "**/*.java",
+          "**/*.tf",
+          "**/*.sql",
+          "**/*.sh",
+          "src/**",
+          "lib/**",
+          "modules/**",
+          "app/**",
+          "Dockerfile",
+          "package.json",
+          "pyproject.toml",
+          "go.mod",
+          "Cargo.toml",
+          "pom.xml"
+        ]
+      },
+      "permission": {
+        "edit": {
+          "specs/**": "deny",
+          "feature_list.json": "ask",
+          "*": "allow"
+        }
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample reviewer. Copy, customize, and add to subagents[] if your project uses R<n>↔test traceability. Drop the scaffold when done.",
+      "name": "reviewer",
+      "mode": "subagent",
+      "description": "Verifies R<n>↔test traceability. Runs ./check.sh. Marks the feature as done only if all checks pass.",
+      "role_file": ".agents/subagents/reviewer/SUBAGENT.md",
+      "category": "canonical",
+      "permission": {
+        "edit": {
+          "progress/**": "allow",
+          "feature_list.json": "allow",
+          "*": "deny"
+        }
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample cloud-infra owner. Useful as a starting point if your project manages VPCs/IAM/Terraform modules. Drop the scaffold when done.",
+      "name": "cloud-architect",
+      "mode": "subagent",
+      "description": "Owns cloud infrastructure: VPCs, IAM, networking, Terraform modules, cost. Reads existing modules before changing them.",
+      "role_file": ".agents/subagents/cloud-architect/SUBAGENT.md",
+      "category": "illustrative",
+      "applies_when": {
+        "file_glob": ["**/*.tf", "**/*.tfvars", "cloudformation/**", "pulumi/**", "cdk/**"]
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample frontend owner. Useful as a starting point if your project has React/Vue/etc. components. Drop the scaffold when done.",
+      "name": "frontend-specialist",
+      "mode": "subagent",
+      "description": "Owns frontend code: components, state, accessibility, performance, build tooling. Reads the package.json and existing components before changing anything.",
+      "role_file": ".agents/subagents/frontend-specialist/SUBAGENT.md",
+      "category": "illustrative",
+      "applies_when": {
+        "file_exists": ["src/App.tsx", "src/App.jsx", "src/main.tsx", "src/main.jsx", "app/components/.keep"]
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Sample data-pipeline owner. Useful as a starting point if your project manages SQL transformations, DAGs, or warehouse models. Drop the scaffold when done.",
+      "name": "data-engineer",
+      "mode": "subagent",
+      "description": "Owns data pipelines: SQL transformations, DAGs, models, migrations. Reads the warehouse schema and existing pipelines before changing anything.",
+      "role_file": ".agents/subagents/data-engineer/SUBAGENT.md",
+      "category": "illustrative",
+      "applies_when": {
+        "file_glob": ["**/*.sql", "dags/**", "pipelines/**", "notebooks/**", "models/**", "migrations/**"]
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "init",
+      "description": "Set up Harness SDD for this project (agent-driven scaffold lifecycle)",
+      "body_file": ".agents/commands/init.md"
+    },
+    {
+      "name": "status",
+      "description": "Show project state (active feature, specs pending, last progress entries)",
+      "body_file": ".agents/commands/status.md"
+    },
+    {
+      "name": "spec",
+      "description": "Create spec (requirements/design/tasks) for a pending feature",
+      "body_file": ".agents/commands/spec.md"
+    },
+    {
+      "name": "approve",
+      "description": "Approve a spec_ready feature and flip it to in_progress",
+      "body_file": ".agents/commands/approve.md"
+    },
+    {
+      "name": "implement",
+      "description": "Run the implementer on the current in_progress feature",
+      "body_file": ".agents/commands/implement.md"
+    },
+    {
+      "name": "done",
+      "description": "Run the reviewer, verify traceability, mark feature as done",
+      "body_file": ".agents/commands/done.md"
+    },
+    {
+      "name": "check",
+      "description": "Shortcut to ./check.sh",
+      "body_file": ".agents/commands/check.md"
+    }
+  ],
+  "project_detect": [
+    {
+      "label": "terraform",
+      "when": {
+        "file_glob": [
+          "**/*.tf"
+        ]
+      },
+      "apply": {
+        "add_skills": [
+          ".agents/skills/terraform-structure"
+        ],
+        "implementer_permission_overrides": {
+          "edit": {
+            "**/*.tf": "ask",
+            "modules/**/*.tf": "ask"
+          }
+        }
+      }
+    },
+    {
+      "label": "python",
+      "when": {
+        "file_exists": [
+          "pyproject.toml",
+          "setup.py",
+          "requirements.txt"
+        ]
+      },
+      "apply": {
+        "implementer_permission_overrides": {
+          "edit": {
+            "src/**/*.py": "ask",
+            "tests/**/*.py": "allow"
+          }
+        }
+      }
+    },
+    {
+      "label": "go",
+      "when": {
+        "file_exists": [
+          "go.mod"
+        ]
+      },
+      "apply": {
+        "implementer_permission_overrides": {
+          "edit": {
+            "**/*.go": "ask"
+          }
+        }
+      }
+    },
+    {
+      "label": "typescript",
+      "when": {
+        "file_exists": [
+          "package.json"
+        ]
+      },
+      "apply": {
+        "implementer_permission_overrides": {
+          "edit": {
+            "src/**": "ask"
+          }
+        }
+      }
+    }
+  ]
+}
