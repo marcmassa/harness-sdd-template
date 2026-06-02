@@ -46,9 +46,9 @@ for arg in "$@"; do
 done
 
 if ! $USE_COLOR || [ ! -t 1 ]; then
-	C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""
+	C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""
 else
-	C_RESET=$'\033[0m'; C_BOLD=$'\033[1m'; C_RED=$'\033[31m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'
+	C_RESET=$'\033[0m'; C_BOLD=$'\033[1m'; C_RED=$'\033[31m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_BLUE=$'\033[34m'
 fi
 
 section() {
@@ -61,6 +61,7 @@ section() {
 pass() { echo "  ${C_GREEN}✅ $1${C_RESET}"; }
 fail() { echo "  ${C_RED}❌ $1${C_RESET}"; EXIT_CODE=1; }
 warn() { echo "  ${C_YELLOW}⚠️  $1${C_RESET}"; }
+info() { echo "  ${C_BLUE}ℹ️  $1${C_RESET}"; }
 
 run_or_tail() {
 	if $VERBOSE; then
@@ -269,6 +270,38 @@ if [ -x "./.agents/bootstrap.sh" ] && [ -f ".agents/agentic.json" ]; then
 			echo "       - $o"
 		done
 		echo "       Run ./.agents/bootstrap.sh prune to clean up, or restore the entry in .agents/agentic.json."
+	fi
+
+	section "Init Validation"
+	# The /init completion gate. Detects:
+	#   - scaffold metadata leaked into subagents[] (_lifecycle, _intent, category)
+	#   - sub-agents missing required fields (name, mode, description, role_file, permission)
+	#   - role_file pointing to a non-existent file
+	#   - leftover scaffolds (_template_subagents_examples[]) on a non-fresh install
+	# This is INFORMATIONAL on first run (init may not have been run yet).
+	# Once /init has been run, this MUST be green.
+	init_json=$(python3 ./.agents/adapters/_common/render.py --validate-init --root "$(pwd)" 2>/dev/null)
+	init_rc=$?
+	if [ $init_rc -eq 0 ] && [ -n "${init_json}" ]; then
+		pass "/init completion gate: manifest is shaped correctly"
+	else
+		init_state=$(echo "${init_json}" | python3 -c "import sys, json; print(json.load(sys.stdin).get('state','?'))" 2>/dev/null || echo "?")
+		if [ "${init_state}" = "FRESH" ] || [ "${init_state}" = "EMPTY" ]; then
+			info "/init has not been run yet (state: ${init_state}). The agent should run /init to shape the manifest."
+		else
+			fail "/init completion gate: state=${init_state} — the manifest is not correctly shaped. Run /init (or ./.agents/bootstrap.sh init --validate) for details."
+			echo "${init_json}" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    for e in d.get('errors', []):
+        print(f'       ERROR: {e}')
+    for w in d.get('warnings', []):
+        print(f'       WARN:  {w}')
+except Exception:
+    pass
+" 2>/dev/null
+		fi
 	fi
 fi
 

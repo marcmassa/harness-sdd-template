@@ -18,6 +18,7 @@ This template provides a structured, traceable, and verifiable workflow for AI a
 - [Slash Commands](#slash-commands-available)
 - [How to Customize for Your Stack](#how-to-customize-for-your-stack)
 - [FAQ and Troubleshooting](#faq-and-troubleshooting)
+- [License & Authority](#license--authority)
 
 ---
 
@@ -205,6 +206,8 @@ harness-sdd-template/
 ├── README.md                  # This file
 ├── DESIGN.md                  # High-level architecture
 ├── SECURITY.md                # Security policy
+├── LICENSE                    # MIT License (full text)
+├── AUTHORITY.md               # Authority statement (copyright, contributions)
 ├── check.sh                   # Verification gateway (lint, test, drift, ...)
 ├── feature_list.json          # Source of truth for features (one at a time)
 │
@@ -273,9 +276,21 @@ stages, and reports the result. The human supervises; the agent does the work.
 ```bash
 ./.agents/bootstrap.sh profile               # STAGE 1: read the 7 scaffolds
 ./.agents/bootstrap.sh add-agent <name>      # STAGE 2: borrow a scaffold as-is (or copy + edit agentic.json)
-# ... build your project's sub-agents ...
+# ... build your project's sub-agents (with the schema from .agents/commands/init.md) ...
 ./.agents/bootstrap.sh remove-examples       # STAGE 3: drop the scaffolds when done
+./.agents/bootstrap.sh init --validate       # COMPLETION GATE: MUST exit 0 before init is declared done
 ```
+
+The completion gate (`init --validate`) catches the common agent mistakes
+that the user reported during real-world testing:
+- scaffold metadata leaked into `subagents[]` (`_lifecycle`, `_intent`, `category`)
+- description copied verbatim from the scaffold (not customized)
+- scaffolds not dropped (`_template_subagents_examples[]` still present)
+- `role_file` pointing to a non-existent file
+- required fields missing (`name`, `mode`, `description`, `role_file`, `permission`)
+
+The agent MUST loop until `--validate` exits 0. Do not declare `/init`
+done otherwise.
 
 See [Template Installation Lifecycle](#template-installation-lifecycle) for the full diagram.
 
@@ -365,6 +380,28 @@ A: If the scaffold entry is not in `_template_subagents_examples[]` (e.g. you ty
 **Q: I want the agent to do the project setup, not me. How?**
 A: Tell the agent *"run /init"* (or invoke the `/init` slash command directly). The agent reads `.agents/commands/init.md` and walks the 3-stage lifecycle (SCAFFOLD → IMPLEMENT → REMOVE) on its own, then runs `./check.sh` and reports. The human supervises; the agent does the work. This is the recommended way to adopt the template — it works the same way across opencode, gemini-cli, claude-code, copilot, and any other agentic CLI that supports slash commands.
 
+**Q: The agent ran `/init` but the result is wrong — scaffolds still there, scaffold metadata leaked into `subagents[]`, description copied verbatim. What now?**
+A: This is exactly what `bootstrap.sh init --validate` is designed to catch. Run it: it returns 0 (ok) or 1 (with specific errors). The errors tell you exactly what is wrong. If the agent skipped the validation, run it yourself and feed the errors back to the agent. The validator catches:
+  - Scaffold metadata leaked into `subagents[]` (`_lifecycle`, `_intent`, `category`).
+  - Description copied verbatim from the scaffold.
+  - Scaffolds not dropped (`_template_subagents_examples[]` still present).
+  - `role_file` pointing to a non-existent file.
+  - Required fields missing (`name`, `mode`, `description`, `role_file`, `permission`).
+  - `_template_lifecycle` still in the manifest.
+The agent MUST loop until `init --validate` exits 0. The body of `/init` (`.agents/commands/init.md`) has a strict completion gate that enforces this — re-read the body if the agent is skipping steps.
+
 ---
+
+## License & Authority
+
+This template is released under the **MIT License** — see [`LICENSE`](LICENSE) for the full text.
+
+The **author** of this template is the sole copyright holder. See
+[`AUTHORITY.md`](AUTHORITY.md) for the full authority statement,
+contribution policy, and contact information.
+
+- **License:** MIT (permissive — use, copy, modify, merge, publish, distribute, sublicense, sell)
+- **Copyright:** 2026, mmassac &lt;mmassac@minsait.com&gt;
+- **Repository:** https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/harness-sdd-template
 
 > **Based on:** Real-world implementations in multiple production projects.
