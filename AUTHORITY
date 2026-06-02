@@ -1,0 +1,101 @@
+# Authority
+
+This document certifies the authority of the author over the
+**Harness SDD Template** project.
+
+## Project
+
+- **Name:** Harness SDD Template
+- **Repository:** https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/harness-sdd-template
+- **Purpose:** Template for adopting Harness Engineering + Spec Driven
+  Development (SDD) in any software project, CLI-agnostic
+  (opencode, gemini-cli, claude-code, etc...).
+
+## Author / Copyright Holder
+
+- **Name:** Marc Massa Capó
+- **Email:** marcm117@gmail.com
+- **Copyright year:** 2026
+
+## Authority Statement
+
+The author of this project is the sole copyright holder of the
+**Harness SDD Template** and all of its contents, including but not
+limited to:
+
+- The canonical manifest at `.agents/agentic.json`.
+- The adapter renderer at `.agents/adapters/_common/render.py`.
+- The CLI adapters at `.agents/adapters/{opencode,gemini-cli,claude-code}/`.
+- The sub-agent role definitions at `.agents/subagents/*/SUBAGENT.md`.
+- The skill definitions at `.agents/skills/*/SKILL.md`.
+- The slash-command bodies at `.agents/commands/*.md`.
+- All documentation (`AGENTS.md`, `README.md`, `DESIGN.md`, `SECURITY.md`,
+  `LICENSE`, this `AUTHORITY.md`).
+- The validation script `./check.sh` and the entry-point shell script
+  `./.agents/bootstrap.sh`.
+
+## License
+
+The project is distributed under the **MIT License** (see `LICENSE`).
+The MIT License is one of the most permissive open-source licenses and
+grants the following rights to all recipients, subject to the conditions
+stated in `LICENSE`:
+
+- **Use** the Software for any purpose, commercial or non-commercial.
+- **Copy** the Software in any medium.
+- **Modify** the Software for any purpose.
+- **Merge** the Software with other works.
+- **Publish** the Software, modified or unmodified.
+- **Distribute** the Software, modified or unmodified, including as part
+  of a larger work.
+- **Sublicense** the Software under any license compatible with the MIT
+  License.
+- **Sell** copies of the Software or services that use it.
+
+The only obligations of the MIT License are:
+
+1. Preserve the copyright notice and permission notice in all copies
+   or substantial portions of the Software.
+2. The Software is provided "as is", without warranty of any kind.
+
+## Trademarks
+
+The names "Harness Engineering", "Harness SDD", and the project name
+"Harness SDD Template" are descriptive of the methodology and the
+project itself and are not registered trademarks of the author. They
+may be used by anyone to refer to this project, the methodology, or
+any derivative work, provided the MIT License terms are respected.
+
+## Contributions
+
+Contributions to this project are welcome. By submitting a contribution
+(pull request, merge request, patch, or any other form), the contributor
+agrees that:
+
+- The contribution is the contributor's original work, or the contributor
+  has the right to submit it under the project's MIT License.
+- The contribution is licensed under the project's MIT License upon
+  acceptance.
+- The author of the project retains the right to accept, reject, modify,
+  or relicense contributions as part of the project.
+
+The author is the sole maintainer and decision-maker for the project's
+direction, releases, and licensing. The author may, at their sole
+discretion:
+
+- Accept or reject any contribution.
+- Modify the project's license in future versions (the license of a
+  specific version remains as stated in that version's `LICENSE` file).
+- Stop maintaining the project.
+
+## Contact
+
+For licensing questions, contribution guidelines, or any other
+inquiry related to the authority over this project, contact the
+author at **mmassac@minsait.com**.
+
+---
+
+> This `AUTHORITY.md` is a complementary document to `LICENSE`. It does
+> not replace or supersede the MIT License terms. In case of conflict,
+> `LICENSE` prevails.
