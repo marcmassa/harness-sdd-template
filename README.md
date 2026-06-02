@@ -392,16 +392,4 @@ The agent MUST loop until `init --validate` exits 0. The body of `/init` (`.agen
 
 ---
 
-## License & Authority
-
-This template is released under the **MIT License** — see [`LICENSE`](LICENSE) for the full text.
-
-The **author** of this template is the sole copyright holder. See
-[`AUTHORITY.md`](AUTHORITY.md) for the full authority statement,
-contribution policy, and contact information.
-
-- **License:** MIT (permissive — use, copy, modify, merge, publish, distribute, sublicense, sell)
-- **Copyright:** 2026, mmassac &lt;mmassac@minsait.com&gt;
-- **Repository:** https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/harness-sdd-template
-
 > **Based on:** Real-world implementations in multiple production projects.
