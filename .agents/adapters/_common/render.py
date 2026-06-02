@@ -11,6 +11,9 @@ Usage:
     python3 render.py --prune --root <project_root>
     python3 render.py --list-orphans --root <project_root>
     python3 render.py --detect-stack --root <project_root>
+    python3 render.py --validate-init --root <project_root>
+    python3 render.py --add-agent <name> --root <project_root>
+    python3 render.py --remove-examples --root <project_root>
 
 In `--check` mode, the renderer re-renders to a temp file and diffs against the
 existing on-disk artifact. Exits 0 if identical, 1 if drift (or if the on-disk
@@ -636,7 +639,17 @@ def remove_all_examples(root: Path, manifest: dict[str, Any]) -> list[str]:
     return actions
 
 
+<<<<<<< HEAD
 SCAFFOLD_ONLY_FIELDS = ("_lifecycle", "_intent", "category")
+=======
+# Fields that belong to scaffolds (_template_subagents_examples[]) and MUST NOT
+# appear in active sub-agents (subagents[]). If any of these leak into a
+# subagents[] entry, the init validation gate rejects the manifest.
+SCAFFOLD_ONLY_FIELDS = ("_lifecycle", "_intent", "category")
+
+# Fields REQUIRED in every active sub-agent. The init gate rejects entries
+# missing any of these.
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
 REQUIRED_SUBAGENT_FIELDS = ("name", "mode", "description", "role_file", "permission")
 
 
@@ -644,10 +657,17 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     """Objective completion gate for the /init workflow.
 
     Returns a dict with:
+<<<<<<< HEAD
         state: one of "FRESH" | "PARTIAL" | "INITIALIZED" | "EMPTY"
         ok: True iff state == "INITIALIZED" and there are no schema errors
         errors: list of human-readable error strings (empty if ok)
         warnings: list of human-readable warning strings
+=======
+        state: one of "FRESH" | "PARTIAL" | "INITIALIZED" | "EMPTY" | "BROKEN"
+        ok: True iff state == "INITIALIZED" and there are no schema errors
+        errors: list of human-readable error strings (empty if ok)
+        warnings: list of human-readable warning strings (empty if perfect)
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
         summary: one-line human summary
 
     Exit code from main(): 0 if ok, 1 otherwise.
@@ -675,6 +695,7 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             "Both subagents[] and _template_subagents_examples[] are empty. "
             "The install is in a broken state — restore at least one of them."
         )
+<<<<<<< HEAD
         return {
             "state": state,
             "ok": False,
@@ -684,6 +705,8 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             "active_count": n_active,
             "scaffold_count": n_scaffolds,
         }
+=======
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
 
     if state == "FRESH":
         errors.append(
@@ -696,8 +719,11 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             "errors": errors,
             "warnings": warnings,
             "summary": f"State: {state} — init needed",
+<<<<<<< HEAD
             "active_count": n_active,
             "scaffold_count": n_scaffolds,
+=======
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
         }
 
     if state == "PARTIAL":
@@ -706,6 +732,7 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             f"but {n_scaffolds} scaffolds remain. "
             f"Run `./.agents/bootstrap.sh remove-examples --yes` to drop the scaffolds."
         )
+<<<<<<< HEAD
 
     if state in ("PARTIAL", "INITIALIZED") and has_lifecycle:
         errors.append(
@@ -718,6 +745,25 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             name = sa.get("name", f"<index {i}>")
             for field in REQUIRED_SUBAGENT_FIELDS:
                 if not sa.get(field):
+=======
+        if has_lifecycle:
+            errors.append(
+                "_template_lifecycle is still in the manifest. "
+                "It will be removed by `remove-examples`."
+            )
+
+    if state in ("PARTIAL", "INITIALIZED"):
+        if has_lifecycle and state == "INITIALIZED":
+            errors.append(
+                "_template_lifecycle is still in the manifest but no scaffolds remain. "
+                "Run `./.agents/bootstrap.sh remove-examples --yes` to clean up."
+            )
+
+        for i, sa in enumerate(subagents):
+            name = sa.get("name", f"<index {i}>")
+            for field in REQUIRED_SUBAGENT_FIELDS:
+                if field not in sa or not sa[field]:
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
                     errors.append(
                         f"subagents[{i}] ({name}): missing required field '{field}'"
                     )
@@ -738,6 +784,7 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                     f"subagents[{i}] ({name}): role_file '{role_file}' does not exist on disk"
                 )
             perm = sa.get("permission", {})
+<<<<<<< HEAD
             if not isinstance(perm, dict) or "edit" not in perm:
                 errors.append(
                     f"subagents[{i}] ({name}): permission is missing the 'edit' mapping"
@@ -749,16 +796,35 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                 )
 
     ok = state == "INITIALIZED" and not errors
+=======
+            if isinstance(perm, dict) and "edit" not in perm:
+                errors.append(
+                    f"subagents[{i}] ({name}): permission is missing the 'edit' mapping"
+                )
+            elif isinstance(perm, dict) and isinstance(perm.get("edit"), dict):
+                if "specs/**" not in perm["edit"] and "specs" not in str(perm["edit"]):
+                    warnings.append(
+                        f"subagents[{i}] ({name}): permission has no 'specs/**' rule — "
+                        f"sub-agents should NOT edit the approved spec."
+                    )
+
+    ok = state == "INITIALIZED" and not errors
+
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
     if ok:
         summary = (
             f"State: INITIALIZED — {n_active} project-specific sub-agent(s), "
             f"no scaffolds, no scaffold-only field leaks. /init is complete."
         )
     else:
+<<<<<<< HEAD
         summary = (
             f"State: {state} — {len(errors)} error(s), {len(warnings)} warning(s). "
             f"/init is NOT complete."
         )
+=======
+        summary = f"State: {state} — {len(errors)} error(s), {len(warnings)} warning(s). /init is NOT complete."
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
 
     return {
         "state": state,

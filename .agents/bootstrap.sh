@@ -193,6 +193,58 @@ except Exception as ex:
     local n_scaffolds
     n_scaffolds=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('_template_subagents_examples', [])))")
 
+    local validate="0"
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+            --validate) validate="1" ;;
+            --yes|-y) ;;
+            *)
+                echo "ERROR: unknown init option: $1" >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    if [ "$validate" = "1" ]; then
+        echo "=== /init — VALIDATION (objective completion gate) ==="
+        echo ""
+        local report
+        report=$(python3 "$RENDERER" --validate-init --root "$ROOT_DIR" 2>&1)
+        local rc=$?
+        echo "$report" | python3 -c "
+import json, sys
+try:
+    data = sys.stdin.read()
+    start = data.find('{')
+    r = json.loads(data[start:])
+    print(f'  State:     {r[\"state\"]}')
+    print(f'  Active:    {r.get(\"active_count\", 0)} sub-agent(s)')
+    print(f'  Scaffolds: {r.get(\"scaffold_count\", 0)} remaining')
+    print(f'  Summary:   {r[\"summary\"]}')
+    print()
+    if r.get('errors'):
+        print(f'  ERRORS ({len(r[\"errors\"])}):')
+        for e in r['errors']:
+            print(f'    - {e}')
+    if r.get('warnings'):
+        print(f'  WARNINGS ({len(r[\"warnings\"])}):')
+        for w in r['warnings']:
+            print(f'    - {w}')
+    if r['ok']:
+        print()
+        print('  RESULT: /init is COMPLETE.')
+    else:
+        print()
+        print('  RESULT: /init is NOT complete. Fix the errors above and re-run.')
+except Exception as ex:
+    print(f'  ERROR parsing validation report: {ex}', file=sys.stderr)
+    print(data, file=sys.stderr)
+    sys.exit(1)
+"
+        return $rc
+    fi
+
     echo "=== /init — scaffold lifecycle status ==="
     echo ""
     if [ "${n_active:-0}" -eq 0 ] && [ "${n_scaffolds:-0}" -gt 0 ]; then
@@ -244,7 +296,11 @@ for a in m.get('_template_subagents_examples', []):
     echo "    3. For each: either ./bootstrap.sh add-agent <name> --yes   (borrow as-is)"
     echo "                or copy the entry to subagents[] and customize (recommended)."
     echo "    4. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
+<<<<<<< HEAD
     echo "    5. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
+=======
+    echo "    5. ./bootstrap.sh init --validate         (objective completion gate)."
+>>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
     echo "    6. ./check.sh                              (must be green)."
     echo ""
     echo "  Tell the agent: \"run /init\"  (or invoke the init slash command directly)."
