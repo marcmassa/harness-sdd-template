@@ -45,7 +45,11 @@ shape the manifest to your project.
 tell the agent *"run /init"* (or invoke the slash command directly). The
 agent reads `.agents/commands/init.md` and walks the 3-stage lifecycle on
 its own initiative. The human supervises — the human does **not** run the
-scripts.
+scripts. The `/init` body has a strict **completion gate**:
+`./.agents/bootstrap.sh init --validate` MUST exit 0 before the init is
+declared done. The agent cannot skip this step — the validator catches
+scaffold metadata leaks (`_lifecycle`, `_intent`, `category` in
+`subagents[]`), missing fields, and leftover scaffolds.
 
 **Manual entry point (human-driven, equivalent to `/init`):**
 ```bash
@@ -53,6 +57,7 @@ scripts.
 ./.agents/bootstrap.sh add-agent <name>       # opt-in: borrow a scaffold as-is (Stage 2)
 ./.agents/bootstrap.sh remove-examples        # opt-in: drop the scaffolds (Stage 3)
 ./.agents/bootstrap.sh init                   # status only: shows the /init workflow + current state
+./.agents/bootstrap.sh init --validate        # OBJECTIVE completion gate (exits 0 when /init is complete)
 ```
 
 **The default install is fully clean.**
@@ -77,6 +82,13 @@ When you start a session on a project with `subagents[] = []` and a non-empty
 run `/init` (you can also run it yourself on their behalf). Once the manifest
 is shaped (`_template_*` removed), do not suggest `/init` again — it is a
 one-time operation. To add a sub-agent later, edit `agentic.json` directly.
+
+When you run `/init`, you MUST loop until both
+`./.agents/bootstrap.sh init --validate` and `./check.sh` exit 0. Do not
+declare the init done if either fails — fix the errors and re-run. The
+schema is strict on purpose: it catches the common agent mistakes
+(scaffold metadata leaked, description copied verbatim, scaffolds not
+dropped, role_file missing).
 
 **The scaffold lifecycle (3 stages)**
 
