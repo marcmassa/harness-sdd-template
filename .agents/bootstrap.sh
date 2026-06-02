@@ -9,6 +9,7 @@
 #
 # Scaffold lifecycle (project shaping):
 #   ./.agents/bootstrap.sh init                  # Show /init workflow + current scaffold-lifecycle state
+#   ./.agents/bootstrap.sh init --validate       # Objective completion gate (exits 0 if /init is complete)
 #   ./.agents/bootstrap.sh profile               # Report: active set + matching template examples
 #   ./.agents/bootstrap.sh add-agent <name>      # Promote a template example to the active manifest
 #   ./.agents/bootstrap.sh add-agent --all-matched  # Promote all examples that match this project
@@ -136,6 +137,57 @@ init_show() {
         return 1
     fi
 
+    local validate="0"
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+            --validate) validate="1" ;;
+            --yes|-y) ;;
+            *)
+                echo "ERROR: unknown init option: $1" >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    if [ "$validate" = "1" ]; then
+        local report
+        report=$(python3 "$RENDERER" --validate-init --root "$ROOT_DIR" 2>&1)
+        local rc=$?
+        echo "=== /init — VALIDATION (objective completion gate) ==="
+        echo ""
+        echo "$report" | python3 -c "
+import json, sys
+try:
+    data = sys.stdin.read()
+    start = data.find('{')
+    r = json.loads(data[start:])
+    print(f'  State:     {r[\"state\"]}')
+    print(f'  Active:    {r.get(\"active_count\", 0)} sub-agent(s)')
+    print(f'  Scaffolds: {r.get(\"scaffold_count\", 0)} remaining')
+    print(f'  Summary:   {r[\"summary\"]}')
+    print()
+    if r.get('errors'):
+        print(f'  ERRORS ({len(r[\"errors\"])}):')
+        for e in r['errors']:
+            print(f'    - {e}')
+    if r.get('warnings'):
+        print(f'  WARNINGS ({len(r[\"warnings\"])}):')
+        for w in r['warnings']:
+            print(f'    - {w}')
+    print()
+    if r['ok']:
+        print('  RESULT: /init is COMPLETE.')
+    else:
+        print('  RESULT: /init is NOT complete. Fix the errors above and re-run.')
+except Exception as ex:
+    print(f'  ERROR parsing validation report: {ex}', file=sys.stderr)
+    print(data, file=sys.stderr)
+    sys.exit(1)
+"
+        return $rc
+    fi
+
     local n_active
     n_active=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('subagents', [])))")
     local n_scaffolds
@@ -192,9 +244,11 @@ for a in m.get('_template_subagents_examples', []):
     echo "    3. For each: either ./bootstrap.sh add-agent <name> --yes   (borrow as-is)"
     echo "                or copy the entry to subagents[] and customize (recommended)."
     echo "    4. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
-    echo "    5. ./check.sh                              (must be green)."
+    echo "    5. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
+    echo "    6. ./check.sh                              (must be green)."
     echo ""
     echo "  Tell the agent: \"run /init\"  (or invoke the init slash command directly)."
+    echo "  Completion gate: ./bootstrap.sh init --validate   (MUST exit 0 before init is declared done)"
     echo ""
     echo "  Reference: AGENTS.md §0.5 — Project Profiling (3-stage lifecycle)."
 }
@@ -427,7 +481,7 @@ case "${1:-help}" in
     --list-adapters)   list_adapters ;;
     --list-orphans)    list_orphans ;;
     --list-examples)   list_examples ;;
-    init)              init_show ;;
+    init)              shift; init_show "$@"; exit $? ;;
     prune)             prune_orphans ;;
     profile)           shift; profile_run "$@" ;;
     add-agent)         shift; add_agent_run "$@" ;;
