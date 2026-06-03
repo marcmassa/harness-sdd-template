@@ -296,11 +296,7 @@ for a in m.get('_template_subagents_examples', []):
     echo "    3. For each: either ./bootstrap.sh add-agent <name> --yes   (borrow as-is)"
     echo "                or copy the entry to subagents[] and customize (recommended)."
     echo "    4. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
-<<<<<<< HEAD
     echo "    5. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
-=======
-    echo "    5. ./bootstrap.sh init --validate         (objective completion gate)."
->>>>>>> cfbb532 (feat(init): add validation and completion gate for /init workflow)
     echo "    6. ./check.sh                              (must be green)."
     echo ""
     echo "  Tell the agent: \"run /init\"  (or invoke the init slash command directly)."
