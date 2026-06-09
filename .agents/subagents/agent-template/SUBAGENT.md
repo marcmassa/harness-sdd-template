@@ -48,6 +48,10 @@ model-agnostic: true
 - **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
 - **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
 
+
+## Skills
+- `skill-governance` — Para asegurar que las contribuciones y el código sigan el workflow estricto de GitFlow y SDD.
+
 ## Workflow
 1. [Step 1 of the typical workflow].
 2. [Step 2 of the typical workflow].

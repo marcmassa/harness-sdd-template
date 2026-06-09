@@ -61,6 +61,10 @@ preserving traceability and respecting the boundaries defined in `design.md` and
 - **`spec-author`**: read-only consumer of their output. You do not edit specs.
 - **`reviewer`**: takes your work and validates it. Be ready to fix the defects they find.
 
+
+## Skills
+- `skill-governance` — Para asegurar que las contribuciones y el código sigan el workflow estricto de GitFlow y SDD.
+
 ## Workflow
 
 1. Confirm `in_progress` and read `specs/<feature>/tasks.md`.

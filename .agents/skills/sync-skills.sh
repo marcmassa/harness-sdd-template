@@ -14,6 +14,10 @@ rm -rf "$TEMP_DIR"
 git clone --depth 1 "$REGISTRY_URL" "$TEMP_DIR" --quiet
 
 if [ $? -eq 0 ]; then
+    # Clean current skills (keeping README.md and sync-skills.sh)
+    find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 ! -name 'README.md' ! -name 'sync-skills.sh' -exec rm -rf {} +
+    
+    # Copy new skills
     cp -r "$TEMP_DIR/skills/"* "$SKILLS_DIR/"
     echo "Skills updated successfully."
 else
