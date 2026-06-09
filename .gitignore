@@ -60,3 +60,8 @@ charts/**/charts/*.tgz
 
 # --- Local progress ---
 progress/archive/*.bak
+
+# Ignorar skills descargadas del registry
+.agents/skills/*
+!.agents/skills/README.md
+!.agents/skills/sync-skills.sh

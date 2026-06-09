@@ -53,6 +53,10 @@ request, read the canonical state (`feature_list.json`, `progress/current.md`,
 - **`implementer`**: Delegate code work on approved specs. Receives an `in_progress` feature ID and follows `tasks.md`.
 - **`reviewer`**: Delegate verification. Receives the feature ID, runs `./check.sh`, validates traceability, and either marks `done` or returns defects.
 
+
+## Skills
+- `skill-governance` — Para asegurar que las contribuciones y el código sigan el workflow estricto de GitFlow y SDD.
+
 ## Workflow
 
 1. On first contact, ensure `AGENTS.md` §0 has been satisfied (adapter exists).

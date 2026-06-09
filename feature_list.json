@@ -1,6 +1,6 @@
 {
-  "project": "Your Project Name",
-  "description": "Project Description",
+  "project": "Harness SDD Template",
+  "description": "Plantilla agnóstica para proyectos con SDD",
   "rules": {
     "maxConcurrent": 1,
     "requireSpec": true,
