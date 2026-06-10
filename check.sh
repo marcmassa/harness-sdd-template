@@ -344,6 +344,20 @@ else
 	warn "Missing .agents/BOOTSTRAP.md"
 fi
 
+# ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
+section "CLI Adapter Tests"
+for t in test_cli_adapter_parity test_agent_template_placeholders; do
+	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
+		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
+			pass "${t}"
+		else
+			fail "${t} (see tests/${t}.sh for details)"
+		fi
+	else
+		warn "Missing tests/${t}.sh (skipped)"
+	fi
+done
+
 # ── Summary ─────────────────────────────────────────
 section "Result"
 if [ "$EXIT_CODE" -eq 0 ]; then
