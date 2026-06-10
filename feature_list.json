@@ -20,6 +20,18 @@
       "priority": "P0",
       "agent": "developer",
       "sprint": "S1"
+    },
+    {
+      "id": "FEAT-002",
+      "name": "renderer-skills-fusion-and-parity-tests",
+      "title": "Refactor del renderer: fusión skills_paths+extra_skills, tests de paridad y determinismo",
+      "description": "El CLI-agnostic layer del template tiene 3 debilidades detectadas en uso real: (1) `extra_skills` calculado en `render.py:132-135` nunca se inyecta en el render (el `opencode.json#skills.paths` viene solo de `manifest.skills.paths[]`), bug documentado en progreso; (2) `opencode.json.tmpl` existe como vestigio (64 líneas no leídas por el renderer programático); (3) `agent-template/SUBAGENT.md` contiene placeholders `[Area 1]`, `[Step 1]` sin test que evite su filtración. Este feature arregla el bug 1 con ~5 líneas, marca el bug 2 como vestigio documentado, sanea el bug 3 con sanitización + test, y añade 2 tests genéricos (paridad y placeholders) que cierran el principio de determinismo del framework. Cero breaking changes al schema de `agentic.json`. Ver `specs/renderer-skills-fusion-and-parity-tests/`.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "implementer",
+      "sprint": "S1"
     }
   ]
 }
