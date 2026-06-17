@@ -266,7 +266,9 @@ cd /path/to/your/repo
 
 ```bash
 ./.agents/bootstrap.sh detect                # See which CLIs are supported and detect your stack
-./.agents/bootstrap.sh opencode              # Or: gemini-cli | claude-code | --all
+./.agents/bootstrap.sh opencode              # Render for opencode (default). Others: gemini-cli, claude-code
+./.agents/bootstrap.sh --all                 # Interactive: prompts for each non-opencode CLI
+./.agents/bootstrap.sh --all --yes           # Render all adapters without prompting
                                              # Default install is clean: subagents[] starts empty.
 ```
 
@@ -348,7 +350,7 @@ After every change, re-render the CLI adapters:
 
 ```bash
 ./.agents/bootstrap.sh <cli>                 # Render for one CLI
-./.agents/bootstrap.sh --all                 # Render for every adapter
+./.agents/bootstrap.sh --all --yes           # Render for every adapter (no prompts)
 ./.agents/bootstrap.sh --check               # Drift check (CI-friendly)
 ```
 
