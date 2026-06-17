@@ -32,6 +32,30 @@
       "priority": "P0",
       "agent": "implementer",
       "sprint": "S1"
+    },
+    {
+      "id": "FEAT-003",
+      "name": "steering",
+      "title": "Sistema de Steering Files — directivas de comportamiento por agente",
+      "description": "Formaliza el concepto de 'steering files' (archivos que dirigen el comportamiento del agente) como ciudadanos de primera clase en agentic.json. Añade: campo steering[] en el manifest, directorio steering/ con frontmatter YAML, scope por agente (global vs. applies_to), scaffolding con _template_steering_examples[], comandos bootstrap add-steering/remove-steering, extensión del renderer para mapear steering files al instructions de cada CLI, y validación en check.sh. Inspirado en los 'Rules' de OpenCode, 'Custom Instructions' de Claude Code, y 'Rules' de Gemini CLI. Cero breaking changes.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "implementer",
+      "sprint": "S2"
+    },
+    {
+      "id": "FEAT-004",
+      "name": "hooks",
+      "title": "Sistema de Hooks del Ciclo de Vida SDD — puntos de extensión automatizados",
+      "description": "Añade un sistema de hooks CLI-agnóstico al workflow SDD. Los hooks son scripts shell ejecutables en hooks/ que se disparan en 8 puntos del ciclo de vida (on_spec_created, on_spec_approved, on_implementation_start/complete, on_review_start/complete, on_feature_done, on_check_pass). Incluye: campo hooks[] en agentic.json con política de fallo configurable (warn/error/ignore), script runner hooks/run-hooks.sh con variables de entorno, 3 scaffolds de ejemplo, integración con los comandos slash existentes, comandos bootstrap add-hook/remove-hook, y validación en check.sh. Inspirado en los plugin events de OpenCode y los custom commands de Claude Code/Gemini CLI, pero portable (shell). Cero breaking changes.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "implementer",
+      "sprint": "S2"
     }
   ]
 }

@@ -54,13 +54,27 @@ The `harness` role is the default. When in doubt, read
 - Never edit the approved spec (`specs/<feature>/{requirements,design,tasks}.md` are read-only after approval).
 - Every R<n> must end up with at least one test.
 
-## 5. Project Skills
+## 5. Steering Files
+
+Steering files direct agent behavior globally or per-agent. Declared in
+`.agents/agentic.json#steering[]` and rendered here for reference.
+
+{{ LOOP:steering }}
+- **`{{ item.file }}`** (applies_to: {{ item.applies_to }}) — {{ item.description }}
+{{ ENDLOOP }}
+
+If the list is empty, no steering files are active. Add one with:
+```bash
+./.agents/bootstrap.sh add-steering <name> --description "..." --applies-to "*"
+```
+
+## 6. Project Skills
 
 The canonical skills live under `.agents/skills/`. To use one, read its
 `SKILL.md` file. To sync new skills from the central registry, run
 `./.agents/skills/sync-skills.sh`.
 
-## 6. Slash Commands
+## 7. Slash Commands
 
 The following commands are available; each is a TOML file under
 `.gemini/commands/` that points at a canonical body in `.agents/commands/`:
@@ -71,7 +85,7 @@ The following commands are available; each is a TOML file under
 
 To execute a command, type `/<name>` and then read `.agents/commands/<name>.md`.
 
-## 7. Detected Stack
+## 8. Detected Stack
 
 {{ stack_labels }}
 
@@ -80,7 +94,7 @@ before any Terraform work. The `implementer` role's permission contract may have
 stack-aware overrides applied at generation time; see the `implementer` section
 above.
 
-## 8. CLI-specific Caveats
+## 9. CLI-specific Caveats
 
 - **Gemini CLI has no hard file ACLs.** The `permission` contracts above are
   instructions, not enforcements. They will be honored if the model reads the
@@ -90,13 +104,13 @@ above.
 - **Custom slash commands** are TOML files. The renderer generates one per
   command in `.agents/agentic.json`'s `commands` array.
 
-## 9. Regenerating This File
+## 10. Regenerating This File
 
 ```bash
 ./.agents/bootstrap.sh gemini-cli
 ```
 
-## 10. Related Files
+## 11. Related Files
 
 - `.agents/agentic.json` — canonical manifest
 - `.agents/BOOTSTRAP.md` — bootstrap instructions for any CLI

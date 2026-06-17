@@ -12,7 +12,9 @@ Create the spec for the first pending feature with `sdd: true`.
 6. Create `specs/<feature-name>/design.md` (architecture, alternatives, signatures, risks, **at least one discarded alternative**).
 7. Create `specs/<feature-name>/tasks.md` (T1, T2, ... each referencing R<n>).
 8. Update `feature_list.json`: set the feature's `status` to `"spec_ready"`.
-9. **Stop.** Notify the human to review the spec.
+9. Run `hooks/run-hooks.sh on_spec_created --feature-id "<feature_id>" --feature-name "<feature_name>"`.
+   If hooks with `on_failure=error` fail, report the failure to the user and do NOT proceed.
+10. **Stop.** Notify the human to review the spec.
 
 ## Guardrails
 

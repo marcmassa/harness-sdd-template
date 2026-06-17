@@ -197,6 +197,24 @@ def build_context(
             implementer_perm = merge_permissions(implementer_perm, overrides)
 
     base_paths = manifest.get("skills", {}).get("paths", [])
+
+    steering_global: list[str] = []
+    steering_per_agent: dict[str, list[str]] = {}
+    for s in manifest.get("steering", []):
+        applies = s.get("applies_to", ["*"])
+        file_path = s["file"]
+        if "*" in applies:
+            steering_global.append(file_path)
+        else:
+            for agent_name in applies:
+                steering_per_agent.setdefault(agent_name, []).append(file_path)
+
+    steering_all: list[str] = list(steering_global)
+    for files in steering_per_agent.values():
+        for f in files:
+            if f not in steering_all:
+                steering_all.append(f)
+
     return {
         "manifest": manifest,
         "root": str(root),
@@ -208,6 +226,10 @@ def build_context(
         "implementer_permission": implementer_perm,
         "stack_labels": [m.get("label", "?") for m in stack_matches],
         "extra_skills": extra_skills,
+        "steering_global": steering_global,
+        "steering_per_agent": steering_per_agent,
+        "steering_all": steering_all,
+        "steering": manifest.get("steering", []),
     }
 
 
@@ -280,7 +302,7 @@ def render_opencode(
 ) -> bool:
     cfg: dict[str, Any] = {
         "$schema": "https://opencode.ai/config.json",
-        "instructions": ctx["instructions"],
+        "instructions": list(ctx["instructions"]) + ctx["steering_global"],
         "skills": {"paths": ctx["skills_paths"]},
         "default_agent": ctx["default_agent"],
         "agent": {},
@@ -295,6 +317,8 @@ def render_opencode(
                 f"`{sa['role_file']}` — read that file FIRST and follow it strictly."
             ),
         }
+        if sa["name"] in ctx["steering_per_agent"]:
+            agent_def["instructions"] = ctx["steering_per_agent"][sa["name"]]
         if sa["name"] == "implementer" and ctx["implementer_permission"]:
             agent_def["permission"] = ctx["implementer_permission"]
         elif "permission" in sa:

@@ -13,6 +13,8 @@
 - **Principle 1:** {e.g., Modular and Decoupled — The system should be built as independent modules.}
 - **Principle 2:** {e.g., Security by Design — All resources must follow the principle of least privilege.}
 - **Principle 3:** {e.g., Traceability — Every change must be traceable through SDD and Git.}
+- **Steering System:** Agent behavior is directed via steering files in `steering/` (global and per-role), declared in `agentic.json#steering[]`. See `AGENTS.md` §0.5.
+- **Hooks System:** SDD lifecycle transitions trigger hook scripts in `hooks/` via `hooks/run-hooks.sh`. See `docs/sdd.md §7`.
 
 ## 3. High-Level Architecture
 

@@ -6,9 +6,11 @@ Approve a feature whose spec is in `spec_ready` and flip it to `in_progress`.
 
 1. Read `feature_list.json` and find the feature with `status: "spec_ready"`.
 2. Verify that `specs/<feature-name>/{requirements.md, design.md, tasks.md}` all exist.
-3. If all three files exist: set `status: "in_progress"` in `feature_list.json`.
-4. If any of the three files is missing, refuse and explain.
-5. Notify the implementer that the feature is ready.
+3. If any of the three files is missing, refuse and explain.
+4. If all three files exist: set `status: "in_progress"` in `feature_list.json`.
+5. Run `hooks/run-hooks.sh on_spec_approved --feature-id "<feature_id>" --feature-name "<feature_name>"`.
+   If hooks with `on_failure=error` fail, report the failure to the user.
+6. Notify the implementer that the feature is ready.
 
 ## Guardrails
 

@@ -34,6 +34,7 @@ The harness has 4 pillars:
 | **2. Spec Driven Development** | No code is written until requirements are specified, designed, and approved by a human | `specs/<feature>/{requirements,design,tasks}.md` with R<n> ↔ test traceability |
 | **3. Operational Memory on Disk** | Session state, decisions, and backlog live in files, not in the chat | `progress/{current,progress,backlog,decisions,handoff}.md` |
 | **4. Executable Verification** | A script (`check.sh`) validates builds, tests, spec integrity, and harness rules | `check.sh` — gateway for declaring a task as `done` |
+| **5. Customizable Agent Behavior** | Steering files (`steering/`) customize per-role directives; lifecycle hooks (`hooks/`) automate SDD transition points | `agentic.json#steering[]` and `#hooks[]`, managed via `bootstrap.sh add-steering` / `add-hook` |
 
 ---
 
@@ -107,22 +108,23 @@ When you copy this template into a project, the framework's sub-agents ship as *
    │  STAGE 1 — SCAFFOLD                                                  │
    │  $ ./.agents/bootstrap.sh profile                                   │
    │                                                                     │
-   │  Read the entries in _template_subagents_examples[] to see the      │
-   │  patterns the framework provides.                                   │
-   │  4 canonicals (harness, spec-author, implementer, reviewer) +       │
-   │  3 illustrative (cloud-architect, frontend-specialist, data-engineer)│
-   │  Each entry carries _lifecycle: "scaffold" + an _intent hint.      │
+    │  Read the entries in _template_*_examples[] to see the                │
+    │  patterns the framework provides.                                     │
+    │  7 sub-agent scaffolds (4 canonicals + 3 illustrative) +              │
+    │  2 steering + 3 hooks. Each carries _lifecycle: "scaffold".          │
    └────────────────────────────────────┬────────────────────────────────┘
                                         │
                                         ▼
    ┌─────────────────────────────────────────────────────────────────────┐
-   │  STAGE 2 — IMPLEMENT                                                 │
-   │  For each sub-agent your project needs, copy a scaffold into        │
-   │  subagents[] and customize it (name, description, permission,        │
-   │  role_file, applies_when).                                          │
-   │                                                                     │
-   │  Quick try:    ./.agents/bootstrap.sh add-agent <name> --yes        │
-   │  Customize:    copy + edit .agents/agentic.json by hand             │
+    │  STAGE 2 — IMPLEMENT                                                 │
+    │  For each sub-agent / steering file / hook your project needs,       │
+    │  copy a scaffold into the corresponding active array:                │
+    │  subagents[], steering[], hooks[].                                   │
+    │                                                                     │
+    │  Quick try:    ./.agents/bootstrap.sh add-agent <name> --yes        │
+    │                ./.agents/bootstrap.sh add-steering <name> --yes     │
+    │                ./.agents/bootstrap.sh add-hook --event ... --script  │
+    │  Customize:    copy + edit .agents/agentic.json by hand             │
    │                 (e.g. implementer -> python-implementer)            │
    │                                                                     │
    │  The renderer auto-scaffolds the SUBAGENT.md from                   │
@@ -134,17 +136,17 @@ When you copy this template into a project, the framework's sub-agents ship as *
    │  STAGE 3 — REMOVE                                                    │
    │  $ ./.agents/bootstrap.sh remove-examples --yes                     │
    │                                                                     │
-   │  Drops _template_subagents_examples[] and _template_lifecycle from  │
-   │  .agents/agentic.json. Sub-agents already promoted to subagents[]   │
-   │  are NOT affected. Re-renders all CLI adapters.                     │
-   └────────────────────────────────────┬────────────────────────────────┘
+    │  Drops all _template_*_examples[] and _template_lifecycle from       │
+    │  .agents/agentic.json. Entries already promoted to subagents[],     │
+    │  steering[], hooks[] are NOT affected. Re-renders all adapters.     │
+    └────────────────────────────────────┬────────────────────────────────┘
                                         │
                                         ▼
-   ┌─────────────────────────────────────────────────────────────────────┐
-   │  FINAL — project-only manifest                                      │
-   │                                                                     │
-   │  subagents[] = the project's sub-agents only.                       │
-   │  No _template_* residue, no placeholder entries, no leftover         │
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │  FINAL — project-only manifest                                      │
+    │                                                                     │
+    │  subagents[] / steering[] / hooks[] = the project's definitions.    │
+    │  No _template_* residue, no placeholder entries, no leftover        │
    │  scaffold metadata. Just the project, shaped by the project.        │
    └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -225,6 +227,9 @@ harness-sdd-template/
 │   ├── skills/                #   Specialized skills (sync'd from the registry)
 │   ├── commands/              #   Slash-command bodies (/spec, /implement, ...)
 │   └── harness/               #   Operational docs (CONVENTION, ROUTING, ...)
+│
+├── steering/                  #   Steering files (per-role agent behavior directives)
+├── hooks/                     #   Lifecycle hook scripts + run-hooks.sh runner
 │
 ├── specs/                     # Spec Driven Development artifacts
 │   ├── README.md              #   How to write a spec
@@ -389,6 +394,12 @@ A: This is exactly what `bootstrap.sh init --validate` is designed to catch. Run
   - Required fields missing (`name`, `mode`, `description`, `role_file`, `permission`).
   - `_template_lifecycle` still in the manifest.
 The agent MUST loop until `init --validate` exits 0. The body of `/init` (`.agents/commands/init.md`) has a strict completion gate that enforces this — re-read the body if the agent is skipping steps.
+
+**Q: What are steering files and how do I use them?**
+A: Steering files (in `steering/`) are Markdown files with YAML frontmatter that customize agent behavior globally or per role. Declare them in `agentic.json#steering[]` and manage them with `bootstrap.sh add-steering` / `remove-steering`. The template ships with 2 scaffold examples.
+
+**Q: What are lifecycle hooks and when do they fire?**
+A: Hooks (`hooks/`) are shell scripts that execute automatically at SDD transition points — spec created, approved, implementation start/complete, review, feature done, check pass. The runner is `hooks/run-hooks.sh`. See `docs/sdd.md §7` for the full reference. Managed via `bootstrap.sh add-hook` / `remove-hook`.
 
 ---
 

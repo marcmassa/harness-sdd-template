@@ -54,5 +54,8 @@ The `<feature-name>` must match the `name` field in `feature_list.json`.
 | `done` | Code + tests, reviewer approved, `check.sh` green. |
 | `blocked` | Stuck — reason in `progress/current.md`. |
 
+Each status transition can trigger lifecycle hooks (e.g., `on_spec_created`, `on_feature_done`).
+Hooks are shell scripts in `hooks/`, declared in `agentic.json#hooks[]`. See `docs/sdd.md §7`.
+
 See `docs/sdd.md` for complete documentation of the SDD process.
 See `AGENTS.md` for the agent delegation matrix.

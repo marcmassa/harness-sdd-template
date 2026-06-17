@@ -52,7 +52,21 @@ The following commands are available:
 - **/{{ item.name }}** — {{ item.description }}
 {{ ENDLOOP }}
 
-## 5. Skills
+## 5. Steering Files
+
+Steering files direct agent behavior globally or per-agent. Declared in
+`.agents/agentic.json#steering[]` and rendered here for reference.
+
+{{ LOOP:steering }}
+- **`{{ item.file }}`** (applies_to: {{ item.applies_to }}) — {{ item.description }}
+{{ ENDLOOP }}
+
+If the list is empty, no steering files are active. Add one with:
+```bash
+./.agents/bootstrap.sh add-steering <name> --description "..." --applies-to "*"
+```
+
+## 6. Skills
 
 The canonical skills live in `.agents/skills/`. To make them discoverable by
 Claude Code's auto-loader, symlink the directory:
@@ -63,7 +77,7 @@ ln -s ../.agents/skills .claude/skills
 
 (Or use any equivalent method that puts the skill directories under `.claude/skills/`.)
 
-## 6. Detected Stack
+## 7. Detected Stack
 
 {{ stack_labels }}
 
@@ -71,19 +85,19 @@ If `terraform` is listed, load `.agents/skills/terraform-structure/SKILL.md`
 before any Terraform work. Stack-aware permission overrides for the `implementer`
 role are baked into the generated `.claude/agents/implementer.md`.
 
-## 7. Permissions
+## 8. Permissions
 
 The generated `.claude/settings.json` declares file-level allow/deny lists
 derived from each sub-agent's `permission` block. These are **hard** — Claude
 Code will refuse to edit a denied path even if asked.
 
-## 8. Regenerating This File
+## 9. Regenerating This File
 
 ```bash
 ./.agents/bootstrap.sh claude-code
 ```
 
-## 9. Related Files
+## 10. Related Files
 
 - `.agents/agentic.json` — canonical manifest
 - `.agents/BOOTSTRAP.md` — bootstrap instructions for any CLI
