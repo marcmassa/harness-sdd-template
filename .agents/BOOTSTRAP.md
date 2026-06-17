@@ -17,7 +17,12 @@ expects, and to write the resulting file(s) wherever your CLI scans.
 
 1. **Read the canonical manifest.**
    Open `.agents/agentic.json` and internalize its structure: `instructions`,
-   `skills`, `default_agent`, `subagents`, `commands`, `project_detect`.
+   `skills`, `default_agent`, `subagents`, `steering`, `hooks`, `commands`,
+   `project_detect`. Note that `_template_subagents_examples[]`,
+   `_template_steering_examples[]`, and `_template_hooks_examples[]` are
+   **scaffolds** — patterns, not active definitions. Only arrays without the
+   leading underscore (`subagents[]`, `steering[]`, `hooks[]`) are active
+   and must be translated.
 
 2. **Read the reference examples.**
    Inspect at least one prebuilt adapter for inspiration:
@@ -47,17 +52,27 @@ expects, and to write the resulting file(s) wherever your CLI scans.
    - The command body should be a short stub:
      > "Read `<body_file>` and execute the workflow described there."
 
-6. **Apply `instructions` to your CLI.**
-   If your CLI supports a "system instructions" / "context" / "additional rules"
-   field, copy `agentic.json`'s `instructions` array there (the files are
-   relative paths in the repo root).
+6. **Apply `instructions` and `steering` to your CLI.**
+   Copy `agentic.json`'s `instructions` array (global) plus every file listed
+   in `steering[].file` into your CLI's "system instructions" / "rules" /
+   "context" field. If your CLI supports per-agent instructions, steering files
+   with `applies_to` targeting specific agents should be assigned to those
+   agents. Steering files with `applies_to: ["*"]` are global.
 
 7. **Set up skills.**
    If your CLI has a skill concept, point it at `.agents/skills/` (the canonical
    location). If your CLI cannot discover skills there, symlink or copy the
    skill directories to wherever your CLI expects them.
 
-8. **Write the file(s) to wherever your CLI scans.**
+8. **Map lifecycle hooks.** (optional)
+   The SDD workflow has lifecycle hooks declared in `agentic.json#hooks[]`.
+   The hook runner is `hooks/run-hooks.sh` — a shell script that any CLI can
+   invoke. If your CLI has an event/plugin system, map each hook event
+   (`on_spec_created`, `on_feature_done`, etc.) to your CLI's event
+   mechanism. If not, document that `hooks/run-hooks.sh <event>` should be
+   run at the corresponding SDD workflow transition points.
+
+9. **Write the file(s) to wherever your CLI scans.**
    Examples:
    - opencode → `opencode.json` in repo root
    - gemini-cli → `GEMINI.md` in repo root + `.gemini/commands/<name>.toml`

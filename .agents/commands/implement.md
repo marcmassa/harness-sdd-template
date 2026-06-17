@@ -6,8 +6,9 @@ Execute `tasks.md` for the feature in `in_progress`.
 
 1. Read `feature_list.json` and find the feature with `status: "in_progress"`.
 2. Read `specs/<feature-name>/{requirements.md, design.md, tasks.md}`.
-3. Load any project-relevant skills (e.g. `terraform-structure` for Terraform).
-4. Walk `T1`, `T2`, ... in order. For each:
+3. Run `hooks/run-hooks.sh on_implementation_start --feature-id "<feature_id>" --feature-name "<feature_name>"`.
+4. Load any project-relevant skills (e.g. `terraform-structure` for Terraform).
+5. Walk `T1`, `T2`, ... in order. For each:
    - Read the referenced R<n> in `requirements.md`.
    - Follow the approach in `design.md`.
    - Write the code/configuration.
@@ -15,8 +16,9 @@ Execute `tasks.md` for the feature in `in_progress`.
    - Optionally commit (small, focused commits).
 5. After each implementation task, write at least one test that verifies the referenced R<n>.
 6. Document the `R<n> ↔ test` map in `progress/impl_<feature>.md`.
-7. When all `T<n>` are done, run `./check.sh`. It must pass.
-8. Hand off to the reviewer (do not mark `done` yourself).
+7. When all `T<n>` are done, run `hooks/run-hooks.sh on_implementation_complete --feature-id "<feature_id>" --feature-name "<feature_name>"`.
+8. Run `./check.sh`. It must pass.
+9. Hand off to the reviewer (do not mark `done` yourself).
 
 ## Guardrails
 

@@ -55,6 +55,8 @@ scaffold metadata leaks (`_lifecycle`, `_intent`, `category` in
 ```bash
 ./.agents/bootstrap.sh profile                # report: active set + scaffold lifecycle status
 ./.agents/bootstrap.sh add-agent <name>       # opt-in: borrow a scaffold as-is (Stage 2)
+./.agents/bootstrap.sh add-steering <name>    # opt-in: add a steering file
+./.agents/bootstrap.sh add-hook               # opt-in: add a lifecycle hook (--event, --script)
 ./.agents/bootstrap.sh remove-examples        # opt-in: drop the scaffolds (Stage 3)
 ./.agents/bootstrap.sh init                   # status only: shows the /init workflow + current state
 ./.agents/bootstrap.sh init --validate        # OBJECTIVE completion gate (exits 0 when /init is complete)
@@ -69,6 +71,10 @@ is shaped to your project before anything is written:
 - The template's sub-agents live in `agentic.json#_template_subagents_examples[]`
   as **scaffolds** — patterns to be used as a basis for the project's own
   sub-agents, never rendered into CLI adapters, never active.
+- **Similarly**, `_template_steering_examples[]` and `_template_hooks_examples[]`
+  are scaffolds for steering files and lifecycle hooks. They follow the same
+  3-stage lifecycle (scaffold → implement → remove) and are never rendered
+  into CLI adapters by default.
 - The leading-underscore convention on the field name (`_template_*`) and on
   per-example metadata (`_lifecycle`, `_intent`) is the manifest's way of
   signalling "this is a template artifact, not project state".
@@ -78,10 +84,12 @@ is shaped to your project before anything is written:
 **Auto-detection hint (for the agent):**
 
 When you start a session on a project with `subagents[] = []` and a non-empty
-`_template_subagents_examples[]`, the install is **fresh**. Suggest the user
+`_template_subagents_examples[]` (or `_template_steering_examples[]` or
+`_template_hooks_examples[]`), the install is **fresh**. Suggest the user
 run `/init` (you can also run it yourself on their behalf). Once the manifest
-is shaped (`_template_*` removed), do not suggest `/init` again — it is a
-one-time operation. To add a sub-agent later, edit `agentic.json` directly.
+is shaped (`_template_*` fields removed), do not suggest `/init` again — it is a
+one-time operation. To add a sub-agent, steering file, or hook later, edit
+`agentic.json` directly or use `bootstrap.sh add-agent` / `add-steering` / `add-hook`.
 
 When you run `/init`, you MUST loop until both
 `./.agents/bootstrap.sh init --validate` and `./check.sh` exit 0. Do not
@@ -96,9 +104,9 @@ The intent is documented **inside the manifest** at `agentic.json#_template_life
 
 | Stage | Command                                | What you do                                                                                                                                                      |
 |-------|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. SCAFFOLD   | `./.agents/bootstrap.sh profile`         | Read the entries in `_template_subagents_examples[]` to see the patterns the framework provides (4 canonicals + 3 illustrative). Each entry carries a `_lifecycle: "scaffold"` and a `_intent` field describing how to use it. |
-| 2. IMPLEMENT  | `./.agents/bootstrap.sh add-agent <name>` (or copy + edit `agentic.json` manually) | For each sub-agent your project needs, copy a scaffold, customize `name` / `description` / `permission` / `role_file` / `applies_when`, and add the customized version to `subagents[]`. `add-agent` borrows a scaffold as-is; for customization, copy by hand so you can change fields freely. |
-| 3. REMOVE     | `./.agents/bootstrap.sh remove-examples` | Once the project's sub-agents are in `subagents[]`, drop the scaffolds. This removes `_template_subagents_examples[]` and `_template_lifecycle` from the manifest, and re-renders all CLI adapters. The final state contains only the project's sub-agents. |
+| 1. SCAFFOLD   | `./.agents/bootstrap.sh profile`         | Read the entries in `_template_subagents_examples[]`, `_template_steering_examples[]`, and `_template_hooks_examples[]` to see the patterns the framework provides (4 canonical sub-agents + 3 illustrative + 2 steering + 3 hooks). Each entry carries a `_lifecycle: "scaffold"` and a `_intent` field describing how to use it. |
+| 2. IMPLEMENT  | `./.agents/bootstrap.sh add-agent <name>` (or `add-steering`, `add-hook`; or copy + edit `agentic.json` manually) | For each sub-agent / steering file / hook your project needs, copy a scaffold, customize it, and add the customized version to the corresponding array (`subagents[]`, `steering[]`, `hooks[]`). `add-agent`/`add-steering`/`add-hook` borrow a scaffold as-is; for customization, copy by hand so you can change fields freely. |
+| 3. REMOVE     | `./.agents/bootstrap.sh remove-examples` | Once the project's sub-agents, steering files, and hooks are in place, drop the scaffolds. This removes `_template_subagents_examples[]`, `_template_steering_examples[]`, `_template_hooks_examples[]`, and `_template_lifecycle` from the manifest, and re-renders all CLI adapters. The final state contains only the project's own definitions. |
 
 **Examples**
 
@@ -117,6 +125,11 @@ Scaffold-only browsing:
 #     ~ cloud-architect    matches applies_when (['file_glob'])  (illustrative)
 #     ~ frontend-specialist  (illustrative)
 #     ~ data-engineer        (illustrative)
+#     ~ global-conventions   steering scaffold (applies_to: ['*'])
+#     ~ implementer-patterns steering scaffold (applies_to: ['implementer'])
+#     ~ on-spec-created      hook scaffold (on_failure: warn)
+#     ~ on-feature-done      hook scaffold (on_failure: ignore)
+#     ~ on-check-pass        hook scaffold (on_failure: ignore)
 #
 #   Each entry carries _lifecycle: "scaffold" and a _intent field.
 #   Run `./.agents/bootstrap.sh remove-examples` after implementing your sub-agents.
@@ -142,10 +155,24 @@ Or copy + customize (Stage 2 — recommended for project-specific work):
 # permission policy. The scaffold stays in the manifest for reuse.
 ```
 
+Use `add-steering` and `add-hook` the same way:
+
+```bash
+./.agents/bootstrap.sh add-steering global-conventions --yes
+./.agents/bootstrap.sh add-hook --event on_spec_created --script hooks/on-spec-created_validate.sh
+```
+
 Drop the scaffolds (Stage 3 — final, project-only state):
 
 ```bash
 ./.agents/bootstrap.sh remove-examples
+#   This will drop the template scaffolds from .agents/agentic.json:
+#     - _template_subagents_examples[] (6 entries)
+#     - _template_steering_examples[] (2 entries)
+#     - _template_hooks_examples[] (3 entries)
+#     - _template_lifecycle
+# ...
+```
 #   This will drop the template scaffolds from .agents/agentic.json:
 #     - _template_subagents_examples[] (6 entries)
 #     - _template_lifecycle
@@ -177,10 +204,14 @@ scripts). The default for non-interactive stdin is **N** for safety.
 | `subagents[].role_file`              | Path to the sub-agent's `SUBAGENT.md`. Auto-scaffolded from `agent-template/` if missing. |
 | `_template_subagents_examples[]._lifecycle` | `scaffold` — the entry is a template pattern, not a live sub-agent.                 |
 | `_template_subagents_examples[]._intent`    | Human-readable hint: how to use this scaffold.                                   |
+| `steering[]`                                | Active steering files. Each has `name`, `file`, `description`, `applies_to`.      |
+| `hooks[]`                                   | Active lifecycle hooks. Each has `event`, `script`, `description`, `on_failure`.  |
+| `_template_steering_examples[]`             | Scaffold steering files. Same 3-stage lifecycle as sub-agent scaffolds.           |
+| `_template_hooks_examples[]`                | Scaffold hooks. Same 3-stage lifecycle.                                           |
 
-Re-run `profile` and `add-agent` any time the project stack changes (e.g. you
-add Terraform, a `src/App.tsx`, a `notebooks/` folder, etc.). Run
-`remove-examples` exactly once, when the project's sub-agents are in place.
+Re-run `profile` and `add-agent` / `add-steering` / `add-hook` any time the project
+stack changes. Run `remove-examples` exactly once, when the project's definitions
+are in place.
 
 ---
 
@@ -199,6 +230,8 @@ add Terraform, a `src/App.tsx`, a `notebooks/` folder, etc.). Run
 | `AGENTS.md` | This file (entry point, framework bootstrap) | Every new session — §0 is mandatory |
 | `DESIGN.md` | High-level architecture and global principles | For architectural context |
 | `feature_list.json` | Feature list with status (pending/spec_ready/in_progress/done/blocked) | At the start of every session |
+| `hooks/` | Lifecycle hook scripts (on_spec_created, on_feature_done, etc.). Declared in `agentic.json#hooks[]`. Runner at `hooks/run-hooks.sh`. | When customizing SDD workflow automation |
+| `steering/` | Steering files that direct agent behavior (global and per-role). Declared in `agentic.json#steering[]`. | When customizing agent directives |
 | `progress/current.md` | Current session state | At the start of every session |
 | `progress/history.md` | Append-only log of previous sessions | If historical context is needed |
 | `.agents/agentic.json` | **Canonical CLI-agnostic manifest** (single source of truth for agents/skills/commands) | When regenerating adapters or adding capabilities |

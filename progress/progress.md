@@ -12,7 +12,73 @@ Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migrati
 
 ---
 
-## 2026-06-10 | hardening | FEAT-002 renderer-skills-fusion-and-parity-tests | `.agents/adapters/_common/render.py` `.agents/BOOTSTRAP.md` `CLAUDE.md` `tests/test_cli_adapter_parity.sh` `tests/test_agent_template_placeholders.sh` `check.sh` | none
+## 2026-06-17 | feat | FEAT-004 hooks — sistema de hooks del ciclo de vida SDD | `.agents/agentic.json` `hooks/` `.agents/bootstrap.sh` `.agents/commands/{spec,approve,implement,done,check}.md` `tests/test_hooks.sh` `check.sh` | none
+
+**Resumen**: Añade un sistema de hooks CLI-agnóstico con 8 puntos del ciclo de vida
+SDD (`on_spec_created`, `on_spec_approved`, `on_implementation_start`/`complete`,
+`on_review_start`/`complete`, `on_feature_done`, `on_check_pass`). Los hooks son
+scripts shell en `hooks/` con política de fallo configurable (`warn`/`error`/`ignore`).
+Incluye runner `hooks/run-hooks.sh`, 3 scaffolds de ejemplo, integración con los 5
+comandos slash, comandos bootstrap `add-hook`/`remove-hook`, y validación en
+`check.sh` + test automatizado.
+
+**Componentes implementados**:
+- **Schema**: `hooks: [...]` y `_template_hooks_examples: [...]` en `agentic.json`.
+  Cada entrada tiene `event`, `script`, `description`, `on_failure`.
+- **Runner**: `hooks/run-hooks.sh` — ejecuta hooks secuencialmente por evento,
+  pasa contexto vía variables de entorno (`HOOK_EVENT`, `ROOT_DIR`, `FEATURE_ID`,
+  `FEATURE_NAME`, `AGENT_NAME`), aplica política `on_failure` (warn/error/ignore).
+- **Scaffolds**: 3 hooks de ejemplo — `on-spec-created_validate.sh` (valida estructura
+  de spec), `on-feature-done_notify.sh` (resumen de feature), `on-check-pass_ci.sh`
+  (timestamp CI).
+- **Comandos slash**: hooks integrados en `/spec` (on_spec_created), `/approve`
+  (on_spec_approved), `/implement` (on_implementation_start/complete), `/done`
+  (on_review_start/complete + on_feature_done), `/check` (on_check_pass).
+- **Bootstrap**: comandos `add-hook` (--event, --script, --description, --on-failure),
+  `remove-hook`, `--list-hooks`.
+- **Validación**: sección «Hooks Validation» en `check.sh` (verifica runner, scripts,
+  eventos no estándar). Test `test_hooks.sh` con 4 aserciones.
+
+**Cobertura R↔T↔test**: 16/16 R<n>s cubiertos (ver `specs/hooks/tasks.md`).
+
+**Validación**: `./check.sh` — Hooks Validation ✅, test_hooks ✅, 3 hooks activos,
+runner funcional. Init validation en PARTIAL (scaffolds pendientes de
+`remove-examples`, fuera del scope de este feature).
+
+---
+
+**Resumen**: Formaliza el concepto de «steering files» (archivos que dirigen el
+comportamiento del agente) como ciudadanos de primera clase en `agentic.json`.
+Añade campo `steering[]` con `applies_to` (global `["*"]` o per-agent), directorio
+`steering/` con YAML frontmatter, scaffolding con `_template_steering_examples[]`,
+comandos bootstrap `add-steering`/`remove-steering`, extensión del renderer para
+mapear steering files al `instructions[]` de cada CLI, y validación en `check.sh`
++ test automatizado. Cero breaking changes.
+
+**Componentes implementados**:
+- **Schema**: `steering: []` y `_template_steering_examples: [...]` en `agentic.json`.
+  Cada entrada tiene `name`, `file`, `description`, `applies_to`.
+- **Directorio**: `steering/` con 2 ejemplos (`global-conventions.md`,
+  `implementer-patterns.md`) con YAML frontmatter y placeholders `<!-- TODO -->`.
+- **Renderer**: `build_context` clasifica en `steering_global` y `steering_per_agent`.
+  `render_opencode` añade steering global a `instructions[]` y per-agent a
+  `agent.<name>.instructions[]`. `steering_all` disponible para Gemini y Claude.
+- **Templates Gemini/Claude**: sección «Steering Files» con LOOP sobre `steering`.
+- **Bootstrap**: comandos `add-steering` (crea archivo + registra en manifest),
+  `remove-steering` (elimina del manifest, preserva archivo en disco),
+  `--list-steering`.
+- **Validación**: sección «Steering Validation» en `check.sh` (verifica existencia
+  de archivos, YAML frontmatter, archivos no declarados).
+- **Test**: `tests/test_steering.sh` con 3 aserciones (global en instructions,
+  existencia en disco, YAML frontmatter válido).
+
+**Cobertura R↔T↔test**: 16/16 R<n>s cubiertos (ver `specs/steering/tasks.md`).
+
+**Validación**: `./check.sh` — Steering Validation ✅, test_steering ✅,
+adapter consistency ✅. Init validation en PARTIAL (scaffolds pendientes de
+`remove-examples`, fuera del scope de este feature).
+
+---
 
 **Resumen**: Refactor mínimo del CLI-agnostic layer. Fusiona las dos fuentes
 de `skills_paths` (manifest base + `extra_skills` calculado por stack detect),

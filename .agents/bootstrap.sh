@@ -14,6 +14,12 @@
 #   ./.agents/bootstrap.sh add-agent <name>      # Promote a template example to the active manifest
 #   ./.agents/bootstrap.sh add-agent --all-matched  # Promote all examples that match this project
 #   ./.agents/bootstrap.sh remove-examples       # Drop template scaffolds from the manifest (final stage)
+#   ./.agents/bootstrap.sh add-steering <name>    # Add a steering file and register in agentic.json
+#   ./.agents/bootstrap.sh remove-steering <name> # Remove a steering entry from agentic.json
+#   ./.agents/bootstrap.sh --list-steering        # List current steering files
+#   ./.agents/bootstrap.sh add-hook                # Add a lifecycle hook (--event, --script, --on-failure)
+#   ./.agents/bootstrap.sh remove-hook             # Remove a hook entry from agentic.json
+#   ./.agents/bootstrap.sh --list-hooks            # List registered hooks
 #
 # Housekeeping:
 #   ./.agents/bootstrap.sh --list-adapters       # List adapters in .agents/adapters/
@@ -117,6 +123,322 @@ prune_orphans() {
     python3 "$RENDERER" --prune --root "$ROOT_DIR"
 }
 
+list_steering() {
+    python3 -c "
+import json
+m = json.load(open('$ROOT_DIR/.agents/agentic.json'))
+for s in m.get('steering', []):
+    print(f'{s[\"name\"]}  file={s[\"file\"]}  applies_to={s.get(\"applies_to\",[\"*\"])}  {s.get(\"description\",\"\")}')
+if not m.get('steering'):
+    print('(no steering files active)')
+"
+}
+
+add_steering_run() {
+    if [ ! -f "$RENDERER" ]; then
+        echo "ERROR: Renderer not found at $RENDERER" >&2
+        return 1
+    fi
+
+    local name=""
+    local description=""
+    local applies_to="*"
+
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+            --description) description="$2"; shift 2 ;;
+            --applies-to)  applies_to="$2"; shift 2 ;;
+            --yes|-y) ;;
+            -*)
+                echo "ERROR: unknown add-steering option: $1" >&2
+                echo "Usage: ./.agents/bootstrap.sh add-steering <name> --description '...' [--applies-to 'agent1,agent2']" >&2
+                return 1
+                ;;
+            *)
+                if [ -z "$name" ]; then
+                    name="$1"
+                else
+                    echo "ERROR: unexpected positional argument: $1" >&2
+                    return 1
+                fi
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$name" ]; then
+        echo "Usage: ./.agents/bootstrap.sh add-steering <name> --description '...' [--applies-to 'agent1,agent2']" >&2
+        echo ""
+        echo "Current steering files:"
+        list_steering | sed 's/^/  /'
+        return 1
+    fi
+
+    local file="steering/${name}.md"
+
+    # Create steering/ directory if missing
+    mkdir -p "$ROOT_DIR/steering"
+
+    # Create steering file from template if it doesn't exist
+    if [ ! -f "$ROOT_DIR/$file" ]; then
+        local template="$ROOT_DIR/specs/templates/steering.md"
+        if [ -f "$template" ]; then
+            cp "$template" "$ROOT_DIR/$file"
+        else
+            # Minimal fallback template
+            cat > "$ROOT_DIR/$file" <<EOF
+---
+name: ${name}
+description: "${description}"
+applies_to:
+  - ${applies_to//,/", "}
+---
+
+# ${name}
+
+## Contexto
+
+<!-- TODO: describir el contexto -->
+
+## Reglas
+
+1. <!-- TODO: regla 1 -->
+
+## Anti-patrones
+
+- <!-- TODO: anti-patrón 1 -->
+EOF
+        fi
+        echo "Created $file"
+    else
+        echo "Steering file already exists: $file (reusing)"
+    fi
+
+    # Add entry to agentic.json
+    python3 -c "
+import json, sys
+manifest_path = '$ROOT_DIR/.agents/agentic.json'
+with open(manifest_path) as f:
+    m = json.load(f)
+name = '$name'
+# Remove if already exists (update)
+m['steering'] = [h for h in m.get('steering', []) if h.get('name') != name]
+# Parse applies_to list
+applies_raw = '$applies_to'
+applies_list = [a.strip() for a in applies_raw.split(',') if a.strip()]
+m['steering'].append({
+    'name': name,
+    'file': '$file',
+    'description': '$description',
+    'applies_to': applies_list,
+})
+with open(manifest_path, 'w') as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+print(f'Added steering entry: {name}')
+"
+
+    echo ""
+    echo "Re-rendering adapters for all CLIs..."
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    echo "Done."
+}
+
+remove_steering_run() {
+    if [ ! -f "$RENDERER" ]; then
+        echo "ERROR: Renderer not found at $RENDERER" >&2
+        return 1
+    fi
+
+    local name="${1:-}"
+    if [ -z "$name" ]; then
+        echo "Usage: ./.agents/bootstrap.sh remove-steering <name>" >&2
+        echo ""
+        echo "Current steering files:"
+        list_steering | sed 's/^/  /'
+        return 1
+    fi
+
+    python3 -c "
+import json, sys
+manifest_path = '$ROOT_DIR/.agents/agentic.json'
+with open(manifest_path) as f:
+    m = json.load(f)
+name = '$name'
+before = len(m.get('steering', []))
+m['steering'] = [h for h in m.get('steering', []) if h.get('name') != name]
+after = len(m['steering'])
+with open(manifest_path, 'w') as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+if before == after:
+    print(f'Steering entry \"{name}\" not found in agentic.json (no change)')
+else:
+    print(f'Removed steering entry: {name} (file on disk NOT deleted)')
+"
+
+    echo ""
+    echo "Re-rendering adapters for all CLIs..."
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    echo "Done."
+}
+
+list_hooks() {
+    python3 -c "
+import json
+m = json.load(open('$ROOT_DIR/.agents/agentic.json'))
+for h in m.get('hooks', []):
+    print(f'{h[\"event\"]:<28} script={h[\"script\"]}  on_failure={h.get(\"on_failure\",\"warn\")}  {h.get(\"description\",\"\")}')
+if not m.get('hooks'):
+    print('(no hooks registered)')
+"
+}
+
+add_hook_run() {
+    if [ ! -f "$RENDERER" ]; then
+        echo "ERROR: Renderer not found at $RENDERER" >&2
+        return 1
+    fi
+
+    local event=""
+    local script=""
+    local description=""
+    local on_failure="warn"
+
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+            --event)        event="$2"; shift 2 ;;
+            --script)       script="$2"; shift 2 ;;
+            --description)  description="$2"; shift 2 ;;
+            --on-failure)   on_failure="$2"; shift 2 ;;
+            --yes|-y) ;;
+            -*)
+                echo "ERROR: unknown add-hook option: $1" >&2
+                echo "Usage: ./.agents/bootstrap.sh add-hook --event <event> --script <path> [--description '...'] [--on-failure warn|error|ignore]" >&2
+                return 1
+                ;;
+            *)
+                echo "ERROR: unexpected positional argument: $1" >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$event" ] || [ -z "$script" ]; then
+        echo "Usage: ./.agents/bootstrap.sh add-hook --event <event> --script <path> [--description '...'] [--on-failure warn|error|ignore]" >&2
+        echo ""
+        echo "Known events: on_spec_created, on_spec_approved, on_implementation_start, on_implementation_complete, on_review_start, on_review_complete, on_feature_done, on_check_pass"
+        echo ""
+        echo "Current hooks:"
+        list_hooks | sed 's/^/  /'
+        return 1
+    fi
+
+    if [ -z "$description" ]; then
+        description="Hook for event: $event"
+    fi
+
+    # Create script if it doesn't exist
+    if [ ! -f "$ROOT_DIR/$script" ]; then
+        mkdir -p "$(dirname "$ROOT_DIR/$script")"
+        cat > "$ROOT_DIR/$script" <<EOF
+#!/bin/bash
+# Hook: $event — $description
+echo "Hook $event triggered"
+echo "Feature: \${FEATURE_ID:-\?} — \${FEATURE_NAME:-\?}"
+# TODO: customize this hook
+EOF
+        chmod +x "$ROOT_DIR/$script"
+        echo "Created $script (+x)"
+    else
+        echo "Script already exists: $script (reusing)"
+    fi
+
+    # Add entry to agentic.json
+    python3 -c "
+import json
+manifest_path = '$ROOT_DIR/.agents/agentic.json'
+with open(manifest_path) as f:
+    m = json.load(f)
+# Remove existing entry for same event+script (update)
+m['hooks'] = [h for h in m.get('hooks', []) if not (h.get('event') == '$event' and h.get('script') == '$script')]
+m['hooks'].append({
+    'event': '$event',
+    'script': '$script',
+    'description': '$description',
+    'on_failure': '$on_failure',
+})
+with open(manifest_path, 'w') as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+print(f'Added hook: {event} -> {script}')
+"
+
+    echo ""
+    echo "Re-rendering adapters for all CLIs..."
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    echo "Done."
+}
+
+remove_hook_run() {
+    if [ ! -f "$RENDERER" ]; then
+        echo "ERROR: Renderer not found at $RENDERER" >&2
+        return 1
+    fi
+
+    local event=""
+    local script=""
+
+    while [ "${1:-}" != "" ]; do
+        case "$1" in
+            --event)   event="$2"; shift 2 ;;
+            --script)  script="$2"; shift 2 ;;
+            --yes|-y)  ;;
+            -*)
+                echo "ERROR: unknown remove-hook option: $1" >&2
+                echo "Usage: ./.agents/bootstrap.sh remove-hook --event <event> --script <path>" >&2
+                return 1
+                ;;
+            *)
+                echo "ERROR: unexpected positional argument: $1" >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$event" ] || [ -z "$script" ]; then
+        echo "Usage: ./.agents/bootstrap.sh remove-hook --event <event> --script <path>" >&2
+        echo ""
+        echo "Current hooks:"
+        list_hooks | sed 's/^/  /'
+        return 1
+    fi
+
+    python3 -c "
+import json
+manifest_path = '$ROOT_DIR/.agents/agentic.json'
+with open(manifest_path) as f:
+    m = json.load(f)
+before = len(m.get('hooks', []))
+m['hooks'] = [h for h in m.get('hooks', []) if not (h.get('event') == '$event' and h.get('script') == '$script')]
+after = len(m['hooks'])
+with open(manifest_path, 'w') as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+if before == after:
+    print(f'Hook ({event}=\"$event\", script=\"$script\") not found in agentic.json (no change)')
+else:
+    print(f'Removed hook: {event}=$event script=$script (file on disk NOT deleted)')
+"
+
+    echo ""
+    echo "Re-rendering adapters for all CLIs..."
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    echo "Done."
+}
+
 list_orphans() {
     if [ ! -f "$RENDERER" ]; then
         echo "ERROR: Renderer not found at $RENDERER" >&2
@@ -192,6 +514,11 @@ except Exception as ex:
     n_active=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('subagents', [])))")
     local n_scaffolds
     n_scaffolds=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('_template_subagents_examples', [])))")
+    local n_steering_scaffolds
+    n_steering_scaffolds=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('_template_steering_examples', [])))")
+    local n_hooks_scaffolds
+    n_hooks_scaffolds=$(python3 -c "import json; m=json.load(open('$manifest')); print(len(m.get('_template_hooks_examples', [])))")
+    local total_scaffolds=$((n_scaffolds + n_steering_scaffolds + n_hooks_scaffolds))
 
     local validate="0"
     while [ "${1:-}" != "" ]; do
@@ -247,18 +574,21 @@ except Exception as ex:
 
     echo "=== /init — scaffold lifecycle status ==="
     echo ""
-    if [ "${n_active:-0}" -eq 0 ] && [ "${n_scaffolds:-0}" -gt 0 ]; then
-        echo "  State:  FRESH INSTALL — subagents[] is empty, $n_scaffolds scaffolds in _template_subagents_examples[]."
+    if [ "${n_active:-0}" -eq 0 ] && [ "${total_scaffolds:-0}" -gt 0 ]; then
+        echo "  State:  FRESH INSTALL — subagents[] is empty, $total_scaffolds scaffold(s) in _template_* arrays"
+        echo "          (${n_scaffolds:-0} sub-agent(s), ${n_steering_scaffolds:-0} steering, ${n_hooks_scaffolds:-0} hook(s))."
         echo "          The agent should run /init to shape the manifest to this project."
         echo "          Suggested next command: tell the agent \"run /init\"."
-    elif [ "${n_active:-0}" -gt 0 ] && [ "${n_scaffolds:-0}" -gt 0 ]; then
-        echo "  State:  PARTIAL — subagents[] has $n_active entries (project-specific), $n_scaffolds scaffolds remain."
-        echo "          The agent should finish /init by running 'remove-examples' once the project's sub-agents are in place."
-    elif [ "${n_active:-0}" -gt 0 ] && [ "${n_scaffolds:-0}" -eq 0 ]; then
-        echo "  State:  INITIALIZED — subagents[] has $n_active project-specific entries, no scaffolds remain."
+    elif [ "${n_active:-0}" -gt 0 ] && [ "${total_scaffolds:-0}" -gt 0 ]; then
+        echo "  State:  PARTIAL — subagents[] has $n_active entries (project-specific), $total_scaffolds scaffold(s) remain"
+        echo "          (${n_scaffolds:-0} sub-agent(s), ${n_steering_scaffolds:-0} steering, ${n_hooks_scaffolds:-0} hook(s))."
+        echo "          The agent should finish /init by running 'remove-examples' once the project's"
+        echo "          sub-agents, steering files, and hooks are in place."
+    elif [ "${n_active:-0}" -gt 0 ] && [ "${total_scaffolds:-0}" -eq 0 ]; then
+        echo "  State:  INITIALIZED — subagents[] has $n_active project-specific entry(ies), no scaffolds remain."
         echo "          The project is shaped. /init is not needed again."
     else
-        echo "  State:  EMPTY — subagents[] and _template_subagents_examples[] are both empty."
+        echo "  State:  EMPTY — subagents[] and all _template_* arrays are empty."
         echo "          Run ./check.sh to diagnose."
     fi
     echo ""
@@ -289,15 +619,45 @@ for a in m.get('_template_subagents_examples', []):
         echo "    (none)"
     fi
     echo ""
+    echo "  Steering scaffolds (_template_steering_examples[]):"
+    if [ "${n_steering_scaffolds:-0}" -gt 0 ]; then
+        python3 -c "
+import json
+m = json.load(open('$manifest'))
+for a in m.get('_template_steering_examples', []):
+    applies = a.get('applies_to', ['*'])
+    intent = a.get('_intent', '').split('.')[0][:60]
+    print(f'    - {a[\"name\"]:<24} applies_to={applies}  {intent}')
+"
+    else
+        echo "    (none)"
+    fi
+    echo ""
+    echo "  Hook scaffolds (_template_hooks_examples[]):"
+    if [ "${n_hooks_scaffolds:-0}" -gt 0 ]; then
+        python3 -c "
+import json
+m = json.load(open('$manifest'))
+for a in m.get('_template_hooks_examples', []):
+    failure = a.get('on_failure', 'warn')
+    intent = a.get('_intent', '').split('.')[0][:60]
+    print(f'    - {a[\"event\"]:<28} on_failure={failure}  {intent}')
+"
+    else
+        echo "    (none)"
+    fi
+    echo ""
     echo "  Agent workflow (./.agents/commands/init.md):"
     echo "    1. Read the project (README, feature_list.json, layout)."
     echo "    2. Decide which sub-agents the project needs (always the 4 canonicals,"
     echo "       plus any stack-specific illustratives: python, terraform, frontend, data)."
     echo "    3. For each: either ./bootstrap.sh add-agent <name> --yes   (borrow as-is)"
     echo "                or copy the entry to subagents[] and customize (recommended)."
-    echo "    4. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
-    echo "    5. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
-    echo "    6. ./check.sh                              (must be green)."
+    echo "    4. Decide which steering files and hooks the project needs."
+    echo "       Use ./bootstrap.sh add-steering <name> and add-hook --event <event> --script <path>."
+    echo "    5. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
+    echo "    6. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
+    echo "    7. ./check.sh                              (must be green)."
     echo ""
     echo "  Tell the agent: \"run /init\"  (or invoke the init slash command directly)."
     echo "  Completion gate: ./bootstrap.sh init --validate   (MUST exit 0 before init is declared done)"
@@ -354,6 +714,16 @@ print('    STAGE 1. Scaffold   — read this profile to see the patterns.')
 print('    STAGE 2. Implement  — copy a scaffold into subagents[] and customize it.')
 print('                       (or: ./bootstrap.sh add-agent <name>   to borrow as-is)')
 print('    STAGE 3. Remove     — ./bootstrap.sh remove-examples     to drop the scaffolds.')
+
+# Also show steering and hooks information
+print()
+n_steer = len(json.loads('''$(python3 -c "import json; m=json.load(open('$manifest')); print(json.dumps(m.get('_template_steering_examples', [])))")'''))
+n_hooks = len(json.loads('''$(python3 -c "import json; m=json.load(open('$manifest')); print(json.dumps(m.get('_template_hooks_examples', [])))")'''))
+n_active_steer = len(json.loads('''$(python3 -c "import json; m=json.load(open('$manifest')); print(json.dumps(m.get('steering', [])))")'''))
+n_active_hooks = len(json.loads('''$(python3 -c "import json; m=json.load(open('$manifest')); print(json.dumps(m.get('hooks', [])))")'''))
+print(f'  Steering: {n_active_steer} active, {n_steer} scaffold(s)')
+print(f'  Hooks:    {n_active_hooks} active, {n_hooks} scaffold(s)')
+print(f'  Use add-steering / add-hook to promote scaffolds.')
 "
 }
 
@@ -538,6 +908,12 @@ case "${1:-help}" in
     profile)           shift; profile_run "$@" ;;
     add-agent)         shift; add_agent_run "$@" ;;
     remove-examples)   shift; remove_examples_run "$@" ;;
+    add-steering)      shift; add_steering_run "$@" ;;
+    remove-steering)   shift; remove_steering_run "$@" ;;
+    --list-steering)   list_steering ;;
+    add-hook)          shift; add_hook_run "$@" ;;
+    remove-hook)       shift; remove_hook_run "$@" ;;
+    --list-hooks)      list_hooks ;;
     --all)             render_all ;;
     --check)
         shift
