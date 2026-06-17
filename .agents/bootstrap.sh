@@ -3,7 +3,8 @@
 #
 # Workflow:
 #   ./.agents/bootstrap.sh <cli>                 # Render the native config for <cli>
-#   ./.agents/bootstrap.sh --all                 # Render for every adapter that exists
+#   ./.agents/bootstrap.sh --all                 # Render all adapters (prompts for non-opencode CLIs)
+#   ./.agents/bootstrap.sh --all --yes           # Render all adapters without prompting
 #   ./.agents/bootstrap.sh --check               # Re-render to a temp file and diff; exit 1 if drift
 #   ./.agents/bootstrap.sh detect                # Detect available CLIs and project stack
 #
@@ -105,7 +106,7 @@ remove_examples_run() {
             python3 "$RENDERER" --remove-examples --root "$ROOT_DIR"
             echo ""
             echo "Re-rendering adapters for all CLIs..."
-            ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+            ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
             echo ""
             echo "Done. The manifest now contains only the project's sub-agents."
             ;;
@@ -240,7 +241,7 @@ print(f'Added steering entry: {name}')
 
     echo ""
     echo "Re-rendering adapters for all CLIs..."
-    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
     echo "Done."
 }
 
@@ -279,7 +280,7 @@ else:
 
     echo ""
     echo "Re-rendering adapters for all CLIs..."
-    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
     echo "Done."
 }
 
@@ -377,7 +378,7 @@ print(f'Added hook: {event} -> {script}')
 
     echo ""
     echo "Re-rendering adapters for all CLIs..."
-    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
     echo "Done."
 }
 
@@ -435,7 +436,7 @@ else:
 
     echo ""
     echo "Re-rendering adapters for all CLIs..."
-    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
     echo "Done."
 }
 
@@ -791,7 +792,7 @@ print('\n'.join(e['name'] for e in r['examples_matching']))
                 if [ "$any_added" -eq 1 ]; then
                     echo ""
                     echo "Re-rendering adapters for all CLIs..."
-                    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+                    ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
                 fi
                 ;;
             *)
@@ -822,7 +823,7 @@ print('\n'.join(e['name'] for e in r['examples_matching']))
             python3 "$RENDERER" --add-agent "$name" --root "$ROOT_DIR"
             echo ""
             echo "Re-rendering adapters for all CLIs..."
-            ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all >/dev/null
+            ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" --all --yes >/dev/null
             ;;
         *)
             echo "Aborted. No changes made."
@@ -865,19 +866,60 @@ render_one() {
 }
 
 render_all() {
+    local force_all=""
+    for arg in "$@"; do
+        case "$arg" in
+            --yes|-y|--force) force_all="1" ;;
+            --all) ;;
+            *) ;;
+        esac
+    done
+
     local rc=0
+    local rendered=0
+
+    # opencode is always rendered (the default native CLI — rendered programmatically, no .tmpl)
+    if [ -d "$ADAPTERS_DIR/opencode" ]; then
+        echo "=== Rendering for opencode (default) ==="
+        if ! render_one "opencode"; then
+            rc=1
+        fi
+        rendered=$((rendered + 1))
+        echo ""
+    fi
+
     for dir in "$ADAPTERS_DIR"/*/; do
         [ -d "$dir" ] || continue
         name=$(basename "$dir")
-        [ "$name" = "_common" ] || [ "$name" = "_generic" ] && continue
+        [ "$name" = "_common" ] || [ "$name" = "_generic" ] || [ "$name" = "opencode" ] && continue
         if ls "$dir"/*.tmpl &>/dev/null; then
-            echo "=== Rendering for $name ==="
-            if ! render_one "$name"; then
-                rc=1
+            # For other CLIs (gemini, claude), ask unless --yes
+            local confirm="n"
+            if [ -n "$force_all" ]; then
+                confirm="y"
+            elif [ -t 0 ]; then
+                printf "Generate adapter for %s? [y/N]: " "$name"
+                read -r confirm
             fi
-            echo ""
+            case "$confirm" in
+                y|Y|yes|YES)
+                    echo "=== Rendering for $name ==="
+                    if ! render_one "$name"; then
+                        rc=1
+                    fi
+                    rendered=$((rendered + 1))
+                    echo ""
+                    ;;
+                *)
+                    echo "Skipping $name (use --all --yes to generate all adapters)"
+                    echo ""
+                    ;;
+            esac
         fi
     done
+    if [ "$rendered" -eq 0 ]; then
+        echo "No adapters rendered. Available: $(ls -d "$ADAPTERS_DIR"/*/ 2>/dev/null | xargs -n1 basename | grep -v '^_' | tr '\n' ' ')"
+    fi
     return $rc
 }
 
@@ -914,7 +956,7 @@ case "${1:-help}" in
     add-hook)          shift; add_hook_run "$@" ;;
     remove-hook)       shift; remove_hook_run "$@" ;;
     --list-hooks)      list_hooks ;;
-    --all)             render_all ;;
+    --all)             shift; render_all "$@" ;;
     --check)
         shift
         if [ $# -eq 0 ]; then
