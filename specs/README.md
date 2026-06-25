@@ -16,8 +16,8 @@ pending → [spec_author] → spec_ready → ⏸ HUMAN → in_progress → [impl
 | **Design** | `spec_author` | `specs/<name>/design.md` — technical decisions, discarded alternatives |
 | **Tasks** | `spec_author` | `specs/<name>/tasks.md` — executable checklist with R<n> traceability |
 | **Gate** | **Human** | Reads the 3 files → approves or requests changes |
-| **Implementation** | `implementer` | Code, Terraform modules, configurations |
-| **Tests** | `tester-agent` | Infrastructure, unit, and integration tests |
+| **Implementation** | `implementer` | Code, configurations, and any project artifacts |
+| **Tests** | `tester-agent` | Unit, integration, and end-to-end tests |
 | **Review** | `reviewer` | Verifies traceability: each R<n> has a test |
 
 ## Structure

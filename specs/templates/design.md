@@ -10,29 +10,28 @@
 
 | File | Action | Reason |
 |---------|--------|-------|
-| `path/to/file.tf` | create | {reason} |
-| `path/to/file_test.go` | create | {reason} |
-| `path/to/file.py` | modify | {reason} |
+| `src/module/handler.{ext}` | create | {reason} |
+| `src/module/service.{ext}` | create | {reason} |
+| `tests/module/test_service.{ext}` | create | {reason} |
+| `config/example.yaml` | modify | {reason} |
 
 ## Signatures and Structures
 
-### Infrastructure / Configuration
-```hcl
-module "example" {
-  source = "./modules/example"
-  # inputs
-  name        = string
-  environment = optional(string, "dev")
-  tags        = optional(map(string), {})
-}
+*[Specify function signatures, classes, interfaces, or API contracts according to the project language and layer]*
+
+```
+# Example: HTTP endpoint contract
+POST /resource
+Request:  { field1: string, field2: int }
+Response: { id: uuid, created_at: iso8601 }
 ```
 
-### Programming Languages (Python / Go / TS / etc.)
-*[Specify function signatures, classes, or interfaces according to the project language]*
-
-```python
-# module.function — description
-def function(param: str) -> dict: ...
+```
+# Example: service function signature (language-agnostic pseudo-code)
+function do_thing(input: InputType) -> Result | Error
+  1. validate input
+  2. call dependency
+  3. return result
 ```
 
 ## Algorithm / Flow
