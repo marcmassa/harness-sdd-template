@@ -57,5 +57,17 @@
       "agent": "implementer",
       "sprint": "S2"
     }
+  ,{
+      "id": "FEAT-005",
+      "name": "soul-md-subagent-identity",
+      "title": "SOUL.md — capa de identidad y principios de decisión por subagente",
+      "description": "Introduce SOUL.md como artefacto de primera clase en el framework. Cada subagente declara un .agents/subagents/<name>/SOUL.md que define su identidad, principios de decisión ante ambigüedad, límites no negociables y estilo. Separado de SUBAGENT.md (instrucciones operativas) y steering (contexto de proyecto). El bootstrap lo renderiza en el stub del agente, agentic.json lo declara, check.sh valida su presencia, e /init guía al agente implementador a poblarlo. DESIGN.md se puebla además con contenido meta que explica que es una plantilla y cómo adaptarla.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P1",
+      "agent": "implementer",
+      "sprint": "S3"
+    }
   ]
 }

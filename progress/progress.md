@@ -12,6 +12,41 @@ Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migrati
 
 ---
 
+## 2026-06-28 | feat | FEAT-005 soul-md-subagent-identity — capa de identidad por subagente | `.agents/subagents/agent-template/SOUL.md` `.agents/subagents/templates/SOUL.md` `.agents/agentic.json` `.agents/adapters/_common/render.py` `.agents/adapters/claude-code/claude-agents/_template.md.tmpl` `.agents/commands/init.md` `check.sh` `DESIGN.md` `tests/test_soul_md.sh` | none
+
+**Resumen**: Introduce SOUL.md como artefacto de primera clase del framework.
+Cada subagente tiene un `.agents/subagents/<name>/SOUL.md` que define su
+identidad, principios de decisión ante ambigüedad, límites no negociables y
+estilo. Separa la capa de identidad (SOUL.md) de las instrucciones operativas
+(SUBAGENT.md) y el contexto de proyecto (steering files).
+
+**Componentes implementados**:
+- **Scaffold template**: `agent-template/SOUL.md` con cuatro secciones canónicas
+  (Identity, Decision Principles, Boundaries, Tone & Style) y placeholders
+  descriptivos.
+- **Implementación de referencia**: `templates/SOUL.md` con contenido real del
+  subagente meta-agente del framework.
+- **agentic.json**: campo `soul` opcional en cada entrada de `subagents[]`.
+  Retrocompatible — si el campo está ausente, el renderer usa la ruta
+  convencional `.agents/subagents/<name>/SOUL.md`.
+- **render.py**: función `load_soul_content()` + enriquecimiento de subagentes
+  en `build_context()` con `soul_content` y `soul_section`. Claude template
+  inyecta `{{ item.soul_section }}`; opencode incluye soul en el `prompt`.
+- **check.sh**: sección SOUL.md check que itera subagentes declarados y falla
+  con error si falta algún SOUL.md en disco. Añadido `test_soul_md` al runner.
+- **/init**: sección 3e con instrucciones explícitas para poblar SOUL.md,
+  campo en completion gate, y Mistake 8 en errores comunes.
+- **DESIGN.md**: poblado con contenido meta completo — describe naturaleza de
+  plantilla, propósito de cada sección, y usa Harness SDD como ejemplo.
+
+**Cobertura R↔T↔test**: 10/10 R<n>s cubiertos. Tests: 4/4 passing.
+Ver `progress/impl_soul-md-subagent-identity.md`.
+
+**Validación**: check.sh — SOUL.md check ✅, test_soul_md ✅, adapter consistency ✅.
+Init validation en PARTIAL (preexistente, fuera del scope de este feature).
+
+---
+
 ## 2026-06-17 | feat | FEAT-004 hooks — sistema de hooks del ciclo de vida SDD | `.agents/agentic.json` `hooks/` `.agents/bootstrap.sh` `.agents/commands/{spec,approve,implement,done,check}.md` `tests/test_hooks.sh` `check.sh` | none
 
 **Resumen**: Añade un sistema de hooks CLI-agnóstico con 8 puntos del ciclo de vida
