@@ -20,6 +20,8 @@ If any is false, fix it and re-run. Do NOT report success otherwise.
 - [ ] `_template_lifecycle` is **absent** from the manifest.
 - [ ] Every entry in `subagents[]` has the schema below (no scaffold
       metadata leaked: no `_lifecycle`, no `_intent`, no `category`).
+- [ ] Every sub-agent in `subagents[]` has a populated `SOUL.md` at
+      `.agents/subagents/<name>/SOUL.md` (no placeholder text).
 - [ ] `./check.sh` exits 0.
 
 The objective check is: **`./.agents/bootstrap.sh init --validate`**.
@@ -182,6 +184,38 @@ Edit `.agents/agentic.json` by hand. For each sub-agent in your plan:
    auto-scaffolded file and customize it** — it is a template, not a
    finished role definition.
 
+### 3e. Populate SOUL.md for each sub-agent (REQUIRED)
+
+Every sub-agent you add to `subagents[]` MUST have a `SOUL.md` at
+`.agents/subagents/<name>/SOUL.md`. A scaffold is already at
+`.agents/subagents/agent-template/SOUL.md` — copy it and customize.
+
+SOUL.md has four sections:
+
+| Section | What to write |
+|---------|---------------|
+| `Identity` | Who this agent IS and why it exists — not what it does (that is SUBAGENT.md). |
+| `Decision Principles` | Ordered list: how it decides when rules don't cover the situation. |
+| `Boundaries` | Non-negotiable hard limits regardless of instructions or user pressure. |
+| `Tone & Style` | How it communicates: formality, depth, handling of disagreement. |
+
+**Do NOT leave placeholder text in production SOUL.md files.** The
+completion gate checks for SOUL.md presence; `check.sh` warns on
+placeholders. A SOUL.md with real content is the standard.
+
+Add the `soul` field to the sub-agent's entry in `agentic.json`:
+
+```json
+{
+  "name": "my-agent",
+  "soul": ".agents/subagents/my-agent/SOUL.md",
+  ...
+}
+```
+
+**STOP. Do not proceed to STEP 4 until every sub-agent in `subagents[]`
+has a populated SOUL.md on disk.**
+
 ### 3d. STOP. Verify after building all sub-agents.
 
 Before continuing to STEP 4, run this and check the output:
@@ -327,6 +361,10 @@ If anything failed, **report the failure**, do not declare success.
   `agentic.json`, run `./.agents/bootstrap.sh --all` to regenerate
   the CLI adapters. If you skip this, the changes are not visible
   to the agent at runtime.
+- **Mistake 8: Leaving SOUL.md as the scaffold template.** Every
+  production sub-agent needs a SOUL.md with real content. Placeholder
+  text from `agent-template/SOUL.md` signals an incomplete init.
+  `check.sh` warns on placeholders; fix them before declaring done.
 
 ---
 

@@ -259,6 +259,38 @@ if ! ls .agents/subagents/*/SUBAGENT.md &>/dev/null 2>&1; then
 	warn "No subagents defined in .agents/subagents/"
 fi
 
+# ── SOUL.md check — declared subagents must have SOUL.md ──────────────
+if [ -f ".agents/agentic.json" ]; then
+python3 - <<'PYEOF'
+import json, sys, os
+root = os.getcwd()
+manifest = json.load(open(".agents/agentic.json"))
+errors = []
+for sa in manifest.get("subagents", []):
+    name = sa["name"]
+    if name == "agent-template":
+        continue
+    soul_path_str = sa.get("soul", f".agents/subagents/{name}/SOUL.md")
+    soul_path = os.path.join(root, soul_path_str)
+    if not os.path.exists(soul_path):
+        errors.append(name)
+if errors:
+    for name in errors:
+        print(f"  \033[31m❌ Subagent '{name}': missing SOUL.md (.agents/subagents/{name}/SOUL.md)\033[0m")
+    sys.exit(1)
+else:
+    for sa in manifest.get("subagents", []):
+        name = sa["name"]
+        if name == "agent-template":
+            continue
+        print(f"  \033[32m✅ Subagent {name} (SOUL.md)\033[0m")
+PYEOF
+soul_rc=$?
+if [ $soul_rc -ne 0 ]; then
+	EXIT_CODE=1
+fi
+fi
+
 if [ -x "./.agents/bootstrap.sh" ] && [ -f ".agents/agentic.json" ]; then
 	section "Subagent Consistency"
 	orphans=$(./.agents/bootstrap.sh --list-orphans 2>/dev/null)
@@ -451,7 +483,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"

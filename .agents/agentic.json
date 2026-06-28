@@ -26,6 +26,7 @@
       "mode": "subagent",
       "description": "Expert in the Harness SDD template internals. Guides implementation, extension, and maintenance of the template repository itself — the meta-agent for the framework that builds frameworks.",
       "role_file": ".agents/subagents/templates/SUBAGENT.md",
+      "soul": ".agents/subagents/templates/SOUL.md",
       "permission": {
         "edit": {
           ".agents/**": "allow",

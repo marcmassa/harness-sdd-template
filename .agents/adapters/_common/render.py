@@ -179,6 +179,15 @@ def _sanitize_template_body(body: str) -> str:
     return "\n".join(sanitized) + "\n"
 
 
+def load_soul_content(root: Path, sa: dict[str, Any]) -> str:
+    """Load SOUL.md content for a subagent. Returns empty string if not found."""
+    soul_path_str = sa.get("soul", f".agents/subagents/{sa['name']}/SOUL.md")
+    soul_path = root / soul_path_str
+    if soul_path.exists():
+        return soul_path.read_text()
+    return ""
+
+
 def build_context(
     root: Path, manifest: dict[str, Any], stack_matches: list[dict[str, Any]]
 ) -> dict[str, Any]:
@@ -215,13 +224,21 @@ def build_context(
             if f not in steering_all:
                 steering_all.append(f)
 
+    enriched_subagents: list[dict[str, Any]] = []
+    for sa in manifest.get("subagents", []):
+        soul_content = load_soul_content(root, sa)
+        soul_section = (
+            f"\n## Agent Soul\n\n{soul_content}" if soul_content else ""
+        )
+        enriched_subagents.append({**sa, "soul_content": soul_content, "soul_section": soul_section})
+
     return {
         "manifest": manifest,
         "root": str(root),
         "default_agent": manifest.get("default_agent", "harness"),
         "instructions": manifest.get("instructions", []),
         "skills_paths": _merge_unique_ordered(base_paths, extra_skills),
-        "subagents": manifest.get("subagents", []),
+        "subagents": enriched_subagents,
         "commands": manifest.get("commands", []),
         "implementer_permission": implementer_perm,
         "stack_labels": [m.get("label", "?") for m in stack_matches],
@@ -309,13 +326,17 @@ def render_opencode(
         "command": {},
     }
     for sa in ctx["subagents"]:
+        soul_section = sa.get("soul_section", "")
+        prompt = (
+            f"You are `{sa['name']}`. Your complete role is defined in "
+            f"`{sa['role_file']}` — read that file FIRST and follow it strictly."
+        )
+        if soul_section:
+            prompt += soul_section
         agent_def: dict[str, Any] = {
             "mode": sa.get("mode", "subagent"),
             "description": sa["description"],
-            "prompt": (
-                f"You are `{sa['name']}`. Your complete role is defined in "
-                f"`{sa['role_file']}` — read that file FIRST and follow it strictly."
-            ),
+            "prompt": prompt,
         }
         if sa["name"] in ctx["steering_per_agent"]:
             agent_def["instructions"] = ctx["steering_per_agent"][sa["name"]]
