@@ -1,21 +1,18 @@
-# Current Session State — 2026-10-13
+# Current Session State — 2026-10-19
 
 ## Active Task
-FEAT-006 portable-template — implementation complete, waiting for review.
+None. FEAT-006 portable-template closed as done.
 
 ## Progress
-- [x] Spec approved and status set to in_progress
-- [x] T1–T16 executed
-- [x] Traceability recorded in progress/impl_portable-template.md
-- [x] ./check.sh exits 0
-- [ ] Reviewer marks the feature done
+- [x] FEAT-006 implemented, tested and reviewed
+- [x] feature_list.json status set to done
+- [x] Summary logged in progress/progress.md
 
 ## Pending
-- T17 set status to done
-- T18 log the summary in progress/progress.md
+- FEAT-001 is a pending example placeholder with sdd:true. Treat it as template illustration, not as a feature to implement.
 
 ## Blockers
 - None
 
 ## Next Step
-Reviewer reads specs/portable-template/ and progress/impl_portable-template.md, then runs /done.
+Nothing in progress. A new session can pick up a new feature or run /init to shape an adopted copy.
