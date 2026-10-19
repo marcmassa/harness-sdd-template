@@ -1,10 +1,10 @@
 ---
 name: implementer-patterns
-description: "Patrones de código y convenciones para el implementer"
+description: "Code patterns and conventions for the implementer"
 applies_to:
   - implementer
 ---
 
 # implementer-patterns
 
-<!-- TODO: personalizar este steering file -->
+<!-- TODO: customize this steering file for the project -->

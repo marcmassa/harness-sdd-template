@@ -78,13 +78,17 @@ cd "$ROOT_DIR"
 # Customize these blocks for your stack.
 # Commented examples for Terraform, Docker, and K8s.
 
-if ! $SPEC_ONLY && command -v terraform &>/dev/null; then
+has_tf_files() {
+	find . -name '*.tf' -not -path './.git/*' -print -quit | grep -q .
+}
+
+if ! $SPEC_ONLY && has_tf_files && command -v terraform &>/dev/null; then
 	section "Terraform — Format & Validate"
 	terraform fmt -check -recursive 2>/dev/null && pass "terraform fmt" || warn "terraform fmt found differences (fix with 'terraform fmt')"
 	terraform validate 2>/dev/null && pass "terraform validate" || warn "terraform validate has warnings"
 fi
 
-if ! $SPEC_ONLY && command -v tflint &>/dev/null; then
+if ! $SPEC_ONLY && has_tf_files && command -v tflint &>/dev/null; then
 	section "Terraform — TFLint"
 	tflint --recursive 2>&1 | tail -5 && pass "tflint" || warn "tflint found issues"
 fi
@@ -246,11 +250,24 @@ done
 
 # ── Sub-Agent check ───────────────────────────────
 section "Sub-Agents"
+declared_subagents=""
+if [ -f ".agents/agentic.json" ]; then
+	declared_subagents=$(python3 -c "
+import json
+m = json.load(open('.agents/agentic.json'))
+names = []
+for sa in m.get('subagents', []) + m.get('_template_subagents_examples', []):
+    name = sa.get('name')
+    if name:
+        names.append(name)
+print('\n'.join(names))
+")
+fi
 for dir in .agents/subagents/*/; do
 	name=$(basename "$dir")
 	if [ -f "${dir}SUBAGENT.md" ]; then
 		pass "Subagent $name (SUBAGENT.md)"
-	else
+	elif printf '%s\n' "$declared_subagents" | grep -qx "$name"; then
 		warn "Subagent $name: missing SUBAGENT.md"
 	fi
 done
@@ -378,7 +395,7 @@ fi
 
 # ── Hooks Validation ──────────────────────────
 section "Hooks Validation"
-python3 /dev/stdin <<'PYEOF' 2>/dev/null || true
+python3 /dev/stdin <<'PYEOF'
 import json, os, sys
 with open('.agents/agentic.json') as f:
     m = json.load(f)
@@ -402,8 +419,10 @@ for h in hooks:
     event = h.get('event', '?')
     if not os.path.isfile(script):
         errors.append(f"hook script '{script}' (event={event}) not found")
+    elif os.path.getsize(script) == 0:
+        errors.append(f"hook script '{script}' (event={event}) is empty")
     elif not os.access(script, os.X_OK):
-        warnings.append(f"hook script '{script}' is not executable")
+        errors.append(f"hook script '{script}' (event={event}) is not executable")
     if event not in known_events:
         warnings.append(f"hook event '{event}' is not a standard SDD event (custom?)")
 
@@ -428,7 +447,7 @@ fi
 # ── Steering Validation ────────────────────────
 section "Steering Validation"
 if [ -f ".agents/agentic.json" ]; then
-    python3 /dev/stdin <<'PYEOF' 2>/dev/null || true
+    python3 /dev/stdin <<'PYEOF'
 import json, os, sys
 with open('.agents/agentic.json') as f:
     m = json.load(f)
@@ -443,6 +462,8 @@ for s in steering:
     else:
         with open(fpath) as sf:
             content = sf.read()
+        if "<!-- TODO" in content:
+            errors.append(f"steering '{name}': file '{fpath}' still contains '<!-- TODO'")
         if not content.startswith('---'):
             warnings.append(f"steering '{name}': missing YAML frontmatter (---)")
         else:
@@ -483,7 +504,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"

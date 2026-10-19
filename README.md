@@ -77,12 +77,14 @@ Agent (implementer):
 
 ## Quickstart — 3 steps
 
-### Step 1 — Copy the framework into your repo
+### Step 1 — Export the framework into your repo
 
 ```bash
-cp -r harness-sdd-template/. /path/to/your/repo/
+./.agents/bootstrap.sh export /path/to/your/repo
 cd /path/to/your/repo
 ```
+
+`export` copies the portable payload and resets feature history. Do not use `cp -r`: that copies this repository's own specs, progress log, and maintainer files.
 
 ### Step 2 — Bootstrap the CLI adapter
 

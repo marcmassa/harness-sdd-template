@@ -19,32 +19,7 @@
       ".agents/skills"
     ]
   },
-  "default_agent": "harness",
-  "subagents": [
-    {
-      "name": "templates",
-      "mode": "subagent",
-      "description": "Expert in the Harness SDD template internals. Guides implementation, extension, and maintenance of the template repository itself — the meta-agent for the framework that builds frameworks.",
-      "role_file": ".agents/subagents/templates/SUBAGENT.md",
-      "soul": ".agents/subagents/templates/SOUL.md",
-      "permission": {
-        "edit": {
-          ".agents/**": "allow",
-          "specs/**": "deny",
-          "feature_list.json": "ask",
-          "progress/**": "allow",
-          "*.sh": "allow",
-          "*.md": "allow",
-          "DESIGN.md": "allow",
-          "AGENTS.md": "allow",
-          "docs/**": "allow",
-          "*.json": "allow",
-          "*.jsonc": "allow",
-          "*": "ask"
-        }
-      }
-    }
-  ],
+  "subagents": [],
   "_template_subagents_examples": [
     {
       "_lifecycle": "scaffold",
@@ -190,31 +165,14 @@
       }
     }
   ],
-  "steering": [
-    {
-      "name": "global-conventions",
-      "file": "steering/global-conventions.md",
-      "description": "Convenciones globales del proyecto que aplican a todos los agentes",
-      "applies_to": [
-        "*"
-      ]
-    },
-    {
-      "name": "implementer-patterns",
-      "file": "steering/implementer-patterns.md",
-      "description": "Patrones de código y convenciones para el implementer",
-      "applies_to": [
-        "implementer"
-      ]
-    }
-  ],
+  "steering": [],
   "_template_steering_examples": [
     {
       "_lifecycle": "scaffold",
       "_intent": "Ejemplo de steering global. Copia, personaliza (description, file), y añade a steering[] con applies_to: ['*'].",
       "name": "global-conventions",
       "file": "steering/global-conventions.md",
-      "description": "Convenciones globales del proyecto que aplican a todos los agentes",
+      "description": "Project-wide conventions that apply to every agent",
       "applies_to": [
         "*"
       ]
@@ -224,39 +182,20 @@
       "_intent": "Ejemplo de steering por agente. Copia, personaliza, y añade a steering[] con applies_to: ['implementer'] o el agente que corresponda.",
       "name": "implementer-patterns",
       "file": "steering/implementer-patterns.md",
-      "description": "Patrones de código y convenciones para el implementer",
+      "description": "Code patterns and conventions for the implementer",
       "applies_to": [
         "implementer"
       ]
     }
   ],
-  "hooks": [
-    {
-      "event": "on_spec_created",
-      "script": "hooks/on-spec-created_validate.sh",
-      "description": "Verifica que specs/<feature>/ contiene 3 .md con requisitos EARS",
-      "on_failure": "warn"
-    },
-    {
-      "event": "on_feature_done",
-      "script": "hooks/on-feature-done_notify.sh",
-      "description": "Imprime resumen del feature completado para integraciones externas",
-      "on_failure": "ignore"
-    },
-    {
-      "event": "on_check_pass",
-      "script": "hooks/on-check-pass_ci.sh",
-      "description": "Registra timestamp del último check.sh exitoso",
-      "on_failure": "ignore"
-    }
-  ],
+  "hooks": [],
   "_template_hooks_examples": [
     {
       "_lifecycle": "scaffold",
       "_intent": "Valida la estructura de spec tras crearla. Promover con add-hook.",
       "event": "on_spec_created",
       "script": "hooks/on-spec-created_validate.sh",
-      "description": "Verifica que specs/<feature>/ contiene 3 .md con requisitos EARS",
+      "description": "Checks that specs/<feature>/ contains three markdown files with EARS requirements",
       "on_failure": "warn"
     },
     {
@@ -264,7 +203,7 @@
       "_intent": "Notifica feature completado. Personalizar para Slack/Jira/etc.",
       "event": "on_feature_done",
       "script": "hooks/on-feature-done_notify.sh",
-      "description": "Imprime resumen del feature completado para integraciones externas",
+      "description": "Prints a summary of the completed feature for external integrations",
       "on_failure": "ignore"
     },
     {
@@ -272,7 +211,7 @@
       "_intent": "Registra timestamp de check.sh exitoso. Placeholder para CI/CD.",
       "event": "on_check_pass",
       "script": "hooks/on-check-pass_ci.sh",
-      "description": "Registra timestamp del último check.sh exitoso",
+      "description": "Records the timestamp of the last successful check.sh run",
       "on_failure": "ignore"
     }
   ],

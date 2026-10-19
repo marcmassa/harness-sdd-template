@@ -1,21 +1,11 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Security fixes for the Harness SDD Template are applied on the current main line of this repository. This project does not publish numbered releases.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+Report a vulnerability through the issue tracker of the repository that hosts this template. If a private channel is listed by the maintainer, use that instead of a public issue.
 
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Include the affected path, a short description, and a minimal reproduction. You will receive an acknowledgement when the report is triaged.
