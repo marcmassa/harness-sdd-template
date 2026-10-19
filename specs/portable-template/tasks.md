@@ -26,8 +26,8 @@
 
 - [x] **T15** — Document traceability `R<n> ↔ test` in `progress/impl_portable-template.md`
 - [x] **T16** — Re-render adapters with `./.agents/bootstrap.sh --all` and run `./check.sh` until it exits 0 _(R25)_
-- [ ] **T17** — Update `feature_list.json`: set `status` to `"done"`
-- [ ] **T18** — Log the summary in `progress/progress.md`
+- [x] **T17** — Update `feature_list.json`: set `status` to `"done"`
+- [x] **T18** — Log the summary in `progress/progress.md`
 
 ## R<n> ↔ Task map
 

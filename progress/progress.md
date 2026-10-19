@@ -12,6 +12,47 @@ Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migrati
 
 ---
 
+## 2026-10-19 | feat | FEAT-006 portable-template — plantilla portable: manifiesto FRESH e instalación por export | `.agents/agentic.json` `.agents/bootstrap.sh` `.agents/adapters/_common/render.py` `.agents/adapters/gemini-cli/GEMINI.md.tmpl` `check.sh` `README.md` `SECURITY.md` `hooks/*.sh` `steering/*.md` `tests/test_portable_template.sh` `tests/test_soul_md.sh` `tests/test_steering.sh` | none
+
+**Resumen**: Consolida la plantilla como artefacto portable. El manifiesto de
+entrega queda en estado FRESH (arrays activos vacíos, scaffolds conservados,
+sin `default_agent`), el render ya no reactiva scaffolds, y `./check.sh` pasa
+en un clone sin `/init`. `./.agents/bootstrap.sh export <dest>` es el camino
+de instalación soportado: copia el payload portable y resetea el estado del
+consumidor sin arrastrar la historia del framework.
+
+**Componentes implementados**:
+- **agentic.json**: `subagents[]`, `steering[]`, `hooks[]` vacíos; `default_agent`
+  eliminado; descripciones de scaffolds en inglés. `templates` ya no está activo.
+- **render.py**: `_active_default_agent` omite `default_agent` colgante (R4, R5);
+  `scaffold_subagent_soul_file` crea SOUL.md en `add-agent` (R28); `--list-renderers`
+  y `--export` nuevos; `add-agent` limpia también `category`; `export_template`
+  con allowlist, reset de `feature_list.json`/`progress/` y rechazo de destino
+  no vacío (R18–R22).
+- **bootstrap.sh**: `auto_scaffold_content` ya no escribe el manifiesto — solo
+  crea archivos de ejemplo ausentes (R6, R8); `list_adapters` une renderers
+  programáticos con `*.tmpl` (R16); `detect` etiqueta `Project stack:` (R17);
+  subcomando `export` (R18).
+- **check.sh**: terraform/tflint solo si hay `*.tf` fuera de `.git` (R14);
+  warning de SUBAGENT.md solo para nombres declarados (R15); hooks activos
+  vacíos o no ejecutables fallan (R10); steering activo con `<!-- TODO` falla
+  (R12); los validadores ya no tragan el exit code con `|| true`.
+- **Contenido**: hooks de ejemplo reales y ejecutables fuera de `hooks[]` (R9);
+  steering placeholders en inglés; SECURITY.md real (R23); GEMINI.tmpl sin
+  default hardcodeado (R29); README quickstart vía `export`.
+
+**Tests**: `tests/test_portable_template.sh` — 21 aserciones cubriendo R1–R29
+(manifiesto FRESH, detect, export payload/límites, fail-closed de hooks/steering
+activos, determinismo, adopción hasta INITIALIZED). `test_soul_md.sh` T9 ahora
+usa fixture; `test_steering.sh` añade fixture de inyección global (R30).
+
+**Cobertura R↔T↔test**: 30/30 R<n>s cubiertos (ver `progress/impl_portable-template.md`).
+
+**Validación**: `./check.sh` exit 0 — 6/6 tests, adapter consistency ✅,
+init FRESH informativo. FEAT-006 → `done`.
+
+---
+
 ## 2026-06-28 | feat | FEAT-005 soul-md-subagent-identity — capa de identidad por subagente | `.agents/subagents/agent-template/SOUL.md` `.agents/subagents/templates/SOUL.md` `.agents/agentic.json` `.agents/adapters/_common/render.py` `.agents/adapters/claude-code/claude-agents/_template.md.tmpl` `.agents/commands/init.md` `check.sh` `DESIGN.md` `tests/test_soul_md.sh` | none
 
 **Resumen**: Introduce SOUL.md como artefacto de primera clase del framework.
