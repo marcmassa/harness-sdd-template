@@ -32,6 +32,44 @@ for s in m.get('steering', []):
         for agent in applies:
             print(f'{s[\"file\"]} -> agent.{agent}')
 ")
+echo "--- Fixture: global steering is injected into instructions ---"
+STEER_FIX=$(mktemp -d)
+mkdir -p "$STEER_FIX/steering" "$STEER_FIX/.agents"
+printf 'fixture\n' > "$STEER_FIX/steering/global.md"
+python3 - "$STEER_FIX" << 'PY'
+import json, sys
+dest = sys.argv[1]
+manifest = {
+    "version": 1,
+    "kind": "harness-sdd",
+    "instructions": [],
+    "skills": {"paths": []},
+    "commands": [],
+    "subagents": [],
+    "steering": [{
+        "name": "global",
+        "file": "steering/global.md",
+        "description": "fixture",
+        "applies_to": ["*"],
+    }],
+}
+with open(dest + "/.agents/agentic.json", "w") as f:
+    json.dump(manifest, f)
+PY
+if python3 "$ROOT_DIR/.agents/adapters/_common/render.py" --cli opencode --root "$STEER_FIX" >/dev/null \
+    && python3 -c "
+import json
+cfg = json.load(open('$STEER_FIX/opencode.json'))
+assert 'steering/global.md' in cfg.get('instructions', []), cfg.get('instructions')
+"; then
+    echo "PASS: fixture global steering injected into instructions"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: fixture global steering was not injected"
+    FAIL=$((FAIL + 1))
+fi
+rm -rf "$STEER_FIX"
+
 if [ -z "$STEERING_GLOBAL" ] && [ -z "$STEERING_PER_AGENT" ]; then
     echo "SKIP: no steering files declared in agentic.json"
     PASS=$((PASS + 1))

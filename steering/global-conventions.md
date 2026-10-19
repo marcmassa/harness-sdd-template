@@ -1,10 +1,10 @@
 ---
 name: global-conventions
-description: "Convenciones globales del proyecto que aplican a todos los agentes"
+description: "Project-wide conventions that apply to every agent"
 applies_to:
   - *
 ---
 
 # global-conventions
 
-<!-- TODO: personalizar este steering file para el proyecto -->
+<!-- TODO: customize this steering file for the project -->

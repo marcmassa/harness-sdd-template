@@ -1,19 +1,21 @@
-# Current Session State — {YYYY-MM-DD}
+# Current Session State — 2026-10-13
 
 ## Active Task
-{Brief description of the task in progress}
+FEAT-006 portable-template — implementation complete, waiting for review.
 
 ## Progress
-- [ ] {Step 1 completed}
-- [ ] {Step 2 completed}
-- [ ] {Step 3 in progress}
+- [x] Spec approved and status set to in_progress
+- [x] T1–T16 executed
+- [x] Traceability recorded in progress/impl_portable-template.md
+- [x] ./check.sh exits 0
+- [ ] Reviewer marks the feature done
 
 ## Pending
-- {Backlog item remaining}
-- {Unresolved dependencies}
+- T17 set status to done
+- T18 log the summary in progress/progress.md
 
 ## Blockers
-- {Describe any blockers here}
+- None
 
 ## Next Step
-{What to do next when the session resumes}
+Reviewer reads specs/portable-template/ and progress/impl_portable-template.md, then runs /done.

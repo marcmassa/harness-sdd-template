@@ -67,6 +67,17 @@ CANONICAL_SUBAGENTS: set[str] = {
 }
 
 
+def _active_default_agent(manifest: dict[str, Any]) -> str:
+    """Return default_agent only when it names an active subagent."""
+    requested = manifest.get("default_agent")
+    if not requested:
+        return ""
+    active = {sa.get("name") for sa in manifest.get("subagents", [])}
+    if requested not in active:
+        return ""
+    return str(requested)
+
+
 def load_manifest(root: Path) -> dict[str, Any]:
     manifest_path = root / ".agents" / "agentic.json"
     with manifest_path.open() as f:
@@ -235,7 +246,7 @@ def build_context(
     return {
         "manifest": manifest,
         "root": str(root),
-        "default_agent": manifest.get("default_agent", "harness"),
+        "default_agent": _active_default_agent(manifest),
         "instructions": manifest.get("instructions", []),
         "skills_paths": _merge_unique_ordered(base_paths, extra_skills),
         "subagents": enriched_subagents,
@@ -321,7 +332,6 @@ def render_opencode(
         "$schema": "https://opencode.ai/config.json",
         "instructions": list(ctx["instructions"]) + ctx["steering_global"],
         "skills": {"paths": ctx["skills_paths"]},
-        "default_agent": ctx["default_agent"],
         "agent": {},
         "command": {},
     }
@@ -352,6 +362,8 @@ def render_opencode(
                 f"Read `{cmd['body_file']}` and execute the workflow described there."
             ),
         }
+    if ctx.get("default_agent"):
+        cfg["default_agent"] = ctx["default_agent"]
     out = root / "opencode.json"
     body = json.dumps(cfg, indent=2, ensure_ascii=False)
     return write_file(out, body + "\n", check, body + "\n")
@@ -545,6 +557,29 @@ def scaffold_subagent_role_file(root: Path, sa: dict[str, Any]) -> bool:
     return True
 
 
+def scaffold_subagent_soul_file(root: Path, sa: dict[str, Any]) -> bool:
+    """Create `.agents/subagents/<name>/SOUL.md` from agent-template if missing."""
+    name = sa["name"]
+    target = root / ".agents" / "subagents" / name / "SOUL.md"
+    if target.exists():
+        return False
+    source = root / ".agents" / "subagents" / "agent-template" / "SOUL.md"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if source.exists():
+        body = source.read_text()
+        body = re.sub(
+            r"^agent:\s+agent-template\s*$",
+            f"agent: {name}",
+            body,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        target.write_text(body)
+    else:
+        target.write_text(f"---\nagent: {name}\nversion: 1.0\n---\n\n## Identity\n\n{name}\n")
+    return True
+
+
 def _default_subagent_body(sa: dict[str, Any]) -> str:
     name = sa["name"]
     description = sa.get("description", name)
@@ -708,14 +743,16 @@ def add_agent_from_example(root: Path, manifest: dict[str, Any], name: str) -> l
     new_sa = dict(ex)
     new_sa["default"] = True
     new_sa.pop("applies_when", None)
-    new_sa.pop("_lifecycle", None)
-    new_sa.pop("_intent", None)
+    for field in ("_lifecycle", "_intent", "category"):
+        new_sa.pop(field, None)
     manifest.setdefault("subagents", []).append(new_sa)
     manifest["_template_subagents_examples"] = [e for e in examples if e.get("name") != name]
 
     actions: list[str] = []
     if scaffold_subagent_role_file(root, new_sa):
         actions.append(f"scaffolded {new_sa['role_file']}")
+    if scaffold_subagent_soul_file(root, new_sa):
+        actions.append(f"scaffolded .agents/subagents/{name}/SOUL.md")
     save_manifest(root, manifest)
     actions.insert(0, "saved .agents/agentic.json")
     actions.insert(0, f"promoted '{name}' from _template_subagents_examples to subagents[]")
@@ -877,6 +914,159 @@ def validate_init(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _ignore_agents(dirpath: str, names: list[str]) -> set[str]:
+    ignored = {"__pycache__"}
+    if Path(dirpath).name == "subagents":
+        ignored.add("templates")
+    return ignored
+
+
+def _write_consumer_state(dest: Path) -> None:
+    feature_list = {
+        "project": "Harness SDD",
+        "description": "Project using the Harness SDD template",
+        "rules": {
+            "maxConcurrent": 1,
+            "requireSpec": True,
+            "requireTests": True,
+            "requireCheck": True,
+            "validStatus": ["pending", "spec_ready", "in_progress", "done", "blocked"],
+        },
+        "features": [
+            {
+                "id": "FEAT-001",
+                "name": "example-feature",
+                "title": "Example feature",
+                "description": "Replace this example with the first feature for this project.",
+                "type": "feat",
+                "status": "pending",
+                "sdd": True,
+                "priority": "P0",
+                "agent": "implementer",
+                "sprint": "S1",
+            }
+        ],
+    }
+    (dest / "feature_list.json").write_text(
+        json.dumps(feature_list, indent=2, ensure_ascii=False) + "\n"
+    )
+    progress = dest / "progress"
+    progress.mkdir(exist_ok=True)
+    files = {
+        "current.md": (
+            "# Current Session State — {YYYY-MM-DD}\n\n"
+            "## Active Task\n\n"
+            "None. Run /init before starting a feature.\n\n"
+            "## Progress\n\n"
+            "- [ ] Shape the manifest with /init\n\n"
+            "## Pending\n\n"
+            "- First project feature\n\n"
+            "## Blockers\n\n"
+            "- None\n\n"
+            "## Next Step\n\n"
+            "Run /init.\n"
+        ),
+        "progress.md": (
+            "# Progress Log\n\n"
+            "Append-only chronological log of project progress.\n\n"
+            "## Entry Format\n\n"
+            "```\n"
+            "{YYYY-MM-DD} | {type} | {brief title} | {affected files} | {next step}\n"
+            "```\n"
+        ),
+        "backlog.md": (
+            "# Backlog\n\n"
+            "Prioritized list of pending features for the project.\n\n"
+            "## P0 — Critical (current sprint)\n\n"
+            "- [ ] First project feature\n"
+        ),
+        "decisions.md": (
+            "# Decisions\n\n"
+            "Append-only log of architectural decisions.\n"
+        ),
+        "handoff.md": (
+            "# Handoff\n\n"
+            "Notes for the next session. Empty until the first handoff.\n"
+        ),
+    }
+    for name, body in files.items():
+        (progress / name).write_text(body)
+
+
+def export_template(root: Path, dest: Path) -> int:
+    """Copy the portable template payload into dest. Refuse a non-empty dest."""
+    dest = dest.expanduser()
+    if not dest.is_absolute():
+        dest = (Path.cwd() / dest).resolve()
+    else:
+        dest = dest.resolve()
+    if dest == root or root in dest.parents:
+        print("ERROR: destination must not be inside the source repository", file=sys.stderr)
+        return 1
+    if dest.exists() and any(dest.iterdir()):
+        print(f"ERROR: destination {dest} exists and is not empty", file=sys.stderr)
+        return 1
+    if not dest.parent.exists():
+        print(f"ERROR: destination parent {dest.parent} does not exist", file=sys.stderr)
+        return 1
+
+    root_files = (
+        "AGENTS.md",
+        "DESIGN.md",
+        "README.md",
+        "LICENSE",
+        "SECURITY.md",
+        "check.sh",
+        ".gitignore",
+        "docs/sdd.md",
+    )
+    hook_files = (
+        "hooks/run-hooks.sh",
+        "hooks/on-spec-created_validate.sh",
+        "hooks/on-feature-done_notify.sh",
+        "hooks/on-check-pass_ci.sh",
+    )
+    created = not dest.exists()
+    try:
+        dest.mkdir(exist_ok=True)
+        for rel in root_files:
+            src = root / rel
+            if not src.is_file():
+                raise FileNotFoundError(rel)
+            target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, target)
+        shutil.copytree(root / ".agents", dest / ".agents", ignore=_ignore_agents, dirs_exist_ok=True)
+        (dest / "specs").mkdir(exist_ok=True)
+        shutil.copy2(root / "specs" / "README.md", dest / "specs" / "README.md")
+        shutil.copytree(
+            root / "specs" / "templates",
+            dest / "specs" / "templates",
+            dirs_exist_ok=True,
+        )
+        if (root / "examples").is_dir():
+            shutil.copytree(root / "examples", dest / "examples", dirs_exist_ok=True)
+        for rel in hook_files:
+            src = root / rel
+            if not src.is_file():
+                raise FileNotFoundError(rel)
+            target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, target)
+        steering_dest = dest / "steering"
+        steering_dest.mkdir(exist_ok=True)
+        for src in sorted((root / "steering").glob("*.md")):
+            shutil.copy2(src, steering_dest / src.name)
+        _write_consumer_state(dest)
+    except Exception as exc:
+        print(f"ERROR: export failed: {exc}", file=sys.stderr)
+        if created and dest.exists():
+            shutil.rmtree(dest, ignore_errors=True)
+        return 1
+    print(f"Exported portable template to {dest}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cli", help="CLI to render (e.g. opencode, gemini-cli, claude-code)")
@@ -918,12 +1108,30 @@ def main() -> int:
         help="Validate the post-init manifest state. Exits 0 if subagents[] is shaped correctly, "
              "1 otherwise. Used by the /init completion gate (see .agents/commands/init.md).",
     )
+    parser.add_argument(
+        "--list-renderers",
+        action="store_true",
+        help="Print programmatic renderer names, one per line.",
+    )
+    parser.add_argument(
+        "--export",
+        metavar="DEST",
+        help="Copy the portable template payload into DEST. Refuses a non-empty destination.",
+    )
     args = parser.parse_args()
+
+    if args.list_renderers:
+        for name in RENDERERS:
+            print(name)
+        return 0
 
     root = Path(args.root).resolve()
     if not root.exists():
         print(f"ERROR: root {root} does not exist", file=sys.stderr)
         return 1
+
+    if args.export is not None:
+        return export_template(root, Path(args.export))
 
     manifest = load_manifest(root)
     stack = detect_stack(root, manifest)

@@ -30,25 +30,51 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  SOUL.md Tests"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# ── T9: Claude stub for 'templates' contains '## Agent Soul' ─────────────────
+# ── T9: fixture render of 'templates' contains '## Agent Soul' ───────────────
 echo ""
-echo "T9: Claude stub contains '## Agent Soul' with content"
-STUB="$ROOT_DIR/.claude/agents/templates.md"
-if [ ! -f "$STUB" ]; then
-    fail "T9: $STUB not found — run bootstrap first"
-else
-    if grep -q "## Agent Soul" "$STUB"; then
-        # Check there is content after the header (at least one non-empty line)
+echo "T9: fixture Claude stub contains '## Agent Soul' with content"
+FIXTURE=$(mktemp -d)
+mkdir -p "$FIXTURE/.agents/subagents/templates" "$FIXTURE/.agents/adapters"
+ln -s "$ROOT_DIR/.agents/adapters/claude-code" "$FIXTURE/.agents/adapters/claude-code"
+cp "$ROOT_DIR/.agents/subagents/templates/SOUL.md" "$FIXTURE/.agents/subagents/templates/SOUL.md"
+cp "$ROOT_DIR/.agents/subagents/templates/SUBAGENT.md" "$FIXTURE/.agents/subagents/templates/SUBAGENT.md"
+python3 - "$FIXTURE" << 'PY'
+import json, sys
+dest = sys.argv[1]
+manifest = {
+    "version": 1,
+    "kind": "harness-sdd",
+    "instructions": [],
+    "skills": {"paths": []},
+    "commands": [],
+    "subagents": [{
+        "name": "templates",
+        "mode": "subagent",
+        "description": "fixture",
+        "role_file": ".agents/subagents/templates/SUBAGENT.md",
+        "soul": ".agents/subagents/templates/SOUL.md",
+        "permission": {"edit": {"*": "ask"}},
+    }],
+}
+with open(dest + "/.agents/agentic.json", "w") as f:
+    json.dump(manifest, f)
+PY
+if python3 "$ROOT_DIR/.agents/adapters/_common/render.py" --cli claude-code --root "$FIXTURE" >/dev/null; then
+    STUB="$FIXTURE/.claude/agents/templates.md"
+    if [ -f "$STUB" ] && grep -q "## Agent Soul" "$STUB"; then
         soul_content=$(awk '/## Agent Soul/{found=1; next} found && /^##/{exit} found{print}' "$STUB" | grep -v '^[[:space:]]*$' | head -1)
         if [ -n "$soul_content" ]; then
-            pass "T9: .claude/agents/templates.md contains '## Agent Soul' with content"
+            pass "T9: fixture .claude/agents/templates.md contains '## Agent Soul' with content"
         else
-            fail "T9: '## Agent Soul' section is empty in .claude/agents/templates.md"
+            fail "T9: '## Agent Soul' section is empty in fixture stub"
         fi
     else
-        fail "T9: '## Agent Soul' not found in .claude/agents/templates.md"
+        fail "T9: '## Agent Soul' not found in fixture stub"
     fi
+else
+    fail "T9: fixture claude-code render failed"
 fi
+rm -rf "$FIXTURE"
 
 # ── T10: check.sh fails when a declared subagent is missing SOUL.md ──────────
 echo ""

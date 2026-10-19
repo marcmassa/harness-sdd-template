@@ -7,6 +7,7 @@
 #   ./.agents/bootstrap.sh --all --yes           # Render all adapters without prompting
 #   ./.agents/bootstrap.sh --check               # Re-render to a temp file and diff; exit 1 if drift
 #   ./.agents/bootstrap.sh detect                # Detect available CLIs and project stack
+#   ./.agents/bootstrap.sh export <dest>         # Copy the portable template into <dest>
 #
 # Scaffold lifecycle (project shaping):
 #   ./.agents/bootstrap.sh init                  # Show /init workflow + current scaffold-lifecycle state
@@ -45,11 +46,22 @@ print_help() {
 
 list_adapters() {
     echo "Available adapters in $ADAPTERS_DIR:"
+    seen=""
+    if [ -f "$RENDERER" ]; then
+        while IFS= read -r name; do
+            [ -z "$name" ] && continue
+            echo "  - $name"
+            seen="$seen $name "
+        done < <(python3 "$RENDERER" --list-renderers --root "$ROOT_DIR")
+    fi
     for dir in "$ADAPTERS_DIR"/*/; do
         [ -d "$dir" ] || continue
         name=$(basename "$dir")
         [ "$name" = "_common" ] && continue
         [ "$name" = "_generic" ] && continue
+        case " $seen " in
+            *" $name "*) continue ;;
+        esac
         if ls "$dir"/*.tmpl &>/dev/null; then
             echo "  - $name"
         fi
@@ -837,6 +849,7 @@ detect() {
     echo "Available adapters:"
     list_adapters
     echo ""
+    echo "Project stack:"
     if [ -x "$RENDERER" ] || [ -f "$RENDERER" ]; then
         python3 "$RENDERER" --detect-stack --root "$ROOT_DIR"
     else
@@ -901,19 +914,11 @@ applies_to:
 
 # {name}
 
-<!-- TODO: personalizar este steering file para el proyecto -->
+<!-- TODO: customize this steering file for the project -->
 ''')
         created.append(fname)
-    entry = {k: v for k, v in ex.items() if not k.startswith('_')}
-    if not any(s.get('name') == entry['name'] for s in m.get('steering', [])):
-        m.setdefault('steering', []).append(entry)
 if created:
-    print(f'Auto-scaffolded steering: {\", \".join(created)}')
-else:
-    print('  (steering files already present, skipping)')
-with open(manifest_path, 'w') as f:
-    json.dump(m, f, indent=2, ensure_ascii=False)
-    f.write('\n')
+    print(f'Created missing steering examples: {\", \".join(created)}')
 " 2>/dev/null
         fi
     fi
@@ -989,14 +994,8 @@ echo \"Hook {event} triggered (feature=\${FEATURE_ID:-?} \${FEATURE_NAME:-?})\"
 ''')
         os.chmod(fpath, 0o755)
         created.append(fname)
-    entry = {k: v for k, v in ex.items() if not k.startswith('_')}
-    if not any(h.get('event') == entry['event'] and h.get('script') == entry['script'] for h in m.get('hooks', [])):
-        m.setdefault('hooks', []).append(entry)
 if created:
-    print(f'Auto-scaffolded hooks: {\", \".join(created)}')
-with open(manifest_path, 'w') as f:
-    json.dump(m, f, indent=2, ensure_ascii=False)
-    f.write('\n')
+    print(f'Created missing hook examples: {\", \".join(created)}')
 " 2>/dev/null
         fi
     fi
@@ -1098,6 +1097,15 @@ check_drift() {
 }
 
 case "${1:-help}" in
+    export)
+        shift
+        if [ -z "${1:-}" ]; then
+            echo "Usage: ./.agents/bootstrap.sh export <dest>" >&2
+            exit 1
+        fi
+        python3 "$RENDERER" --export "$1" --root "$ROOT_DIR"
+        exit $?
+        ;;
     detect)            detect ;;
     --detect)          detect ;;
     --list-adapters)   list_adapters ;;

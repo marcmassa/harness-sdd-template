@@ -68,6 +68,18 @@
       "priority": "P1",
       "agent": "implementer",
       "sprint": "S3"
+    },
+    {
+      "id": "FEAT-006",
+      "name": "portable-template",
+      "title": "Portable template — FRESH shipping manifest and export install",
+      "description": "The template ships PARTIAL: templates is active while scaffolds remain, steering and hooks are registered copies of the scaffolds, and cp -r carries framework history. This feature ships a FRESH manifest, stops render from re-activating scaffolds, makes check.sh stack- and declaration-gated, and adds bootstrap.sh export as the supported install path. See specs/portable-template/.",
+      "type": "feat",
+      "status": "in_progress",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "spec-author",
+      "sprint": "S4"
     }
   ]
 }
