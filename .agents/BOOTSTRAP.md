@@ -13,12 +13,28 @@ does not ship a prebuilt adapter for. Your job is to translate the canonical
 manifest at `.agents/agentic.json` into whatever native config format your CLI
 expects, and to write the resulting file(s) wherever your CLI scans.
 
+## Observe first (mandatory)
+
+Before generating anything:
+
+1. Run `./.agents/bootstrap.sh detect --clis` and read the evidence JSON.
+2. Propose a `target_clis` list to the human (default: the CLIs whose
+   generated paths exist; `opencode` if none). Include CLIs without a
+   prebuilt adapter (e.g. `cursor`) — the LLM fallback handles them.
+3. Confirm the list with the human via prompt. Do not assume.
+4. Write the confirmed list to `agentic.json#target_clis` and run
+   `./.agents/bootstrap.sh clean` to delete generated adapters of CLIs
+   that are not in the list.
+
+Generate files only for the CLI in use. Never leave adapters for CLIs the
+human did not confirm.
+
 ## Steps
 
 1. **Read the canonical manifest.**
    Open `.agents/agentic.json` and internalize its structure: `instructions`,
-   `skills`, `default_agent`, `subagents`, `steering`, `hooks`, `commands`,
-   `project_detect`. Note that `_template_subagents_examples[]`,
+   `skills`, `default_agent`, `target_clis`, `subagents`, `steering`, `hooks`,
+   `commands`, `project_detect`. Note that `_template_subagents_examples[]`,
    `_template_steering_examples[]`, and `_template_hooks_examples[]` are
    **scaffolds** — patterns, not active definitions. Only arrays without the
    leading underscore (`subagents[]`, `steering[]`, `hooks[]`) are active

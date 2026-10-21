@@ -89,10 +89,12 @@ cd /path/to/your/repo
 ### Step 2 — Bootstrap the CLI adapter
 
 ```bash
-./.agents/bootstrap.sh detect          # See which CLIs are supported and detect your stack
-./.agents/bootstrap.sh claude-code     # Render for claude-code. Others: opencode, gemini-cli
-./.agents/bootstrap.sh --all --yes     # Render for all supported CLIs at once
+./.agents/bootstrap.sh detect --clis   # Observe which CLIs have evidence in this project
+./.agents/bootstrap.sh --all           # Proposes target_clis from the evidence and asks you to confirm
+./.agents/bootstrap.sh opencode        # Or render just one CLI explicitly
 ```
+
+The confirmed choice is persisted in `target_clis` inside `.agents/agentic.json`, so `--all` never generates adapters for CLIs the project does not use (a Cursor-only project never gets `CLAUDE.md`/`.claude/` or `GEMINI.md`/`.gemini/`). `./.agents/bootstrap.sh clean` removes stray adapters later.
 
 ### Step 3 — Tell your agent to set up the project
 
@@ -321,7 +323,7 @@ After every change, re-render the CLI adapters:
 
 ```bash
 ./.agents/bootstrap.sh <cli>          # Render for one CLI
-./.agents/bootstrap.sh --all --yes    # Render for every adapter (no prompts)
+./.agents/bootstrap.sh clean          # Remove generated adapters of CLIs not in target_clis
 ./.agents/bootstrap.sh --check        # Drift check (CI-friendly)
 ```
 

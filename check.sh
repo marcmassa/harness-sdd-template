@@ -177,6 +177,33 @@ else
 	warn "./.agents/bootstrap.sh not found — skipping adapter consistency"
 fi
 
+# ── Adapter Hygiene (FEAT-007) ────────────────────
+if [ -f ".agents/agentic.json" ]; then
+	section "Adapter Hygiene"
+	python3 - <<'PYEOF'
+import json, os, sys
+m = json.load(open('.agents/agentic.json'))
+tc = m.get('target_clis') or []
+if not tc:
+    print("[OK]    target_clis not declared — adapter hygiene is not enforced")
+    sys.exit(0)
+owned = {
+    "opencode": ["opencode.json"],
+    "gemini-cli": ["GEMINI.md", ".gemini"],
+    "claude-code": ["CLAUDE.md", ".claude"],
+}
+declared = set(tc)
+stray = [(cli, p) for cli, paths in owned.items() if cli not in declared for p in paths if os.path.exists(p)]
+for cli, p in stray:
+    print(f"[WARN]  generated adapter '{p}' belongs to '{cli}' which is not in target_clis — run ./.agents/bootstrap.sh clean")
+if not stray:
+    print("[OK]    no stray generated adapters")
+PYEOF
+	pass "Adapter hygiene checked"
+else
+	warn ".agents/agentic.json not found — skipping adapter hygiene"
+fi
+
 # ── Feature list validation ───────────────────────
 section "Feature List Validation"
 if [ -f "feature_list.json" ]; then
@@ -504,7 +531,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"
