@@ -6,7 +6,13 @@
     "requireSpec": true,
     "requireTests": true,
     "requireCheck": true,
-    "validStatus": ["pending", "spec_ready", "in_progress", "done", "blocked"]
+    "validStatus": [
+      "pending",
+      "spec_ready",
+      "in_progress",
+      "done",
+      "blocked"
+    ]
   },
   "features": [
     {
@@ -56,8 +62,8 @@
       "priority": "P0",
       "agent": "implementer",
       "sprint": "S2"
-    }
-  ,{
+    },
+    {
       "id": "FEAT-005",
       "name": "soul-md-subagent-identity",
       "title": "SOUL.md — capa de identidad y principios de decisión por subagente",
@@ -80,6 +86,18 @@
       "priority": "P0",
       "agent": "spec-author",
       "sprint": "S4"
+    },
+    {
+      "id": "FEAT-007",
+      "name": "target-clis",
+      "title": "target_clis — CLI en uso observado por el agente, confirmado por prompt y persistido",
+      "description": "bootstrap.sh --all --yes genera adapters de los 3 CLIs aunque el proyecto solo use uno (p.ej. Cursor), dejando CLAUDE.md/.claude/, GEMINI.md/.gemini/ sobrantes. Este feature hace la eleccion prompt-first: detect --clis observa evidencias (archivos generados + host hints), el agente propone, el humano confirma por prompt, y la lista confirmada persiste en target_clis en agentic.json. --all renderiza solo lo declarado (o solo opencode si es no interactivo), clean borra los adapters sobrantes, check.sh avisa si quedan, y /init + BOOTSTRAP.md + README explicitan el flujo.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P1",
+      "agent": "spec-author",
+      "sprint": "S5"
     }
   ]
 }

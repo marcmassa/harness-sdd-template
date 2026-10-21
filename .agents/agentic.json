@@ -1,7 +1,7 @@
 {
   "version": 1,
   "kind": "harness-sdd",
-  "description": "Canonical CLI-agnostic manifest for the Harness SDD framework. Edit this file to add/change subagents, skills, or commands, then re-run ./.agents/bootstrap.sh <cli> to regenerate the native adapter.",
+  "description": "Canonical CLI-agnostic manifest for the Harness SDD framework. Edit this file to add/change subagents, skills, or commands, then re-run ./.agents/bootstrap.sh <cli> to regenerate the native adapter. Optional field target_clis lists the CLI adapters this project uses: --all renders only those and clean removes the generated adapters of the rest.",
   "_template_lifecycle": {
     "intent": "The entries in `_template_subagents_examples[]`, `_template_steering_examples[]`, and `_template_hooks_examples[]` are SCAFFOLDS. Their purpose is to be used as starting points for the project's own sub-agents, steering files, and lifecycle hooks — copy an entry, customize it, and add the customized version to `subagents[]`, `steering[]`, or `hooks[]`. When you have built the definitions your project needs, run `./.agents/bootstrap.sh remove-examples` to delete all `_template_*` scaffolds from this manifest. The leading underscore on the field name signals that scaffolds are never rendered into CLI adapters by default; they are documentation and templates only.",
     "stages": [

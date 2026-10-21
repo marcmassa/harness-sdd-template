@@ -8,6 +8,8 @@
 #   ./.agents/bootstrap.sh --check               # Re-render to a temp file and diff; exit 1 if drift
 #   ./.agents/bootstrap.sh detect                # Detect available CLIs and project stack
 #   ./.agents/bootstrap.sh export <dest>         # Copy the portable template into <dest>
+#   ./.agents/bootstrap.sh detect --clis         # Observe CLI evidence (generated adapters, host hints)
+#   ./.agents/bootstrap.sh clean [cli...] | --all # Delete generated adapters of CLIs not in target_clis
 #
 # Scaffold lifecycle (project shaping):
 #   ./.agents/bootstrap.sh init                  # Show /init workflow + current scaffold-lifecycle state
@@ -844,6 +846,10 @@ print('\n'.join(e['name'] for e in r['examples_matching']))
 }
 
 detect() {
+    if [ "${1:-}" = "--clis" ]; then
+        detect_clis
+        return 0
+    fi
     echo "Detecting CLIs and project stack..."
     echo ""
     echo "Available adapters:"
@@ -855,6 +861,97 @@ detect() {
     else
         echo "(project stack detection unavailable: $RENDERER not found)"
     fi
+}
+
+detect_clis() {
+    ROOT_DIR="$ROOT_DIR" python3 - <<'PYEOF'
+import json, os
+root = os.environ.get("ROOT_DIR", os.getcwd())
+owned = {
+    "opencode": ["opencode.json"],
+    "gemini-cli": ["GEMINI.md", ".gemini"],
+    "claude-code": ["CLAUDE.md", ".claude"],
+}
+out = {}
+for name, paths in owned.items():
+    existing = [p for p in paths if os.path.exists(os.path.join(root, p))]
+    out[name] = {"generated_paths": existing, "state": "present" if existing else "absent"}
+out["host_hints"] = {
+    var: ("set" if os.environ.get(var) else "unset")
+    for var in ("CLAUDECODE", "CURSOR_TRACE_ID")
+}
+print(json.dumps(out, indent=2))
+PYEOF
+}
+
+get_target_clis() {
+    python3 -c "
+import json
+m = json.load(open('$ROOT_DIR/.agents/agentic.json'))
+tc = m.get('target_clis')
+print('\n'.join(tc) if isinstance(tc, list) else '')
+" 2>/dev/null
+}
+
+set_target_clis() {
+    python3 - "$ROOT_DIR" "$@" <<'PYEOF'
+import json, sys
+root, names = sys.argv[1], [a for a in sys.argv[2:] if a]
+path = root + "/.agents/agentic.json"
+m = json.load(open(path))
+m["target_clis"] = names
+with open(path, "w") as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+PYEOF
+}
+
+clean_adapters() {
+    local all_flag=""
+    local keep=()
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --all) all_flag="1" ;;
+            -*) echo "ERROR: unknown clean option: $1" >&2; return 1 ;;
+            *) keep+=("$1") ;;
+        esac
+        shift
+    done
+
+    if [ -n "$all_flag" ]; then
+        :
+    elif [ ${#keep[@]} -gt 0 ]; then
+        :
+    else
+        # shellcheck disable=SC2207
+        keep=($(get_target_clis))
+        if [ ${#keep[@]} -eq 0 ]; then
+            echo "ERROR: no target_clis declared in .agents/agentic.json and no CLI arguments given." >&2
+            echo "Usage: ./.agents/bootstrap.sh clean [cli...] | clean --all" >&2
+            return 1
+        fi
+    fi
+
+    local removed=0
+    local entry cli path k in_keep
+    for entry in "opencode:opencode.json" "gemini-cli:GEMINI.md" "gemini-cli:.gemini" "claude-code:CLAUDE.md" "claude-code:.claude"; do
+        cli="${entry%%:*}"
+        path="${entry##*:}"
+        if [ -z "$all_flag" ]; then
+            in_keep=""
+            for k in "${keep[@]}"; do
+                [ "$k" = "$cli" ] && in_keep="1"
+            done
+            [ -n "$in_keep" ] && continue
+        fi
+        if [ -e "$ROOT_DIR/$path" ]; then
+            rm -rf "$ROOT_DIR/$path"
+            echo "removed: $path"
+            removed=$((removed + 1))
+        fi
+    done
+    [ "$removed" -eq 0 ] && echo "nothing to clean"
+    return 0
 }
 
 auto_scaffold_content() {
@@ -1035,7 +1132,89 @@ render_all() {
     local rc=0
     local rendered=0
 
-    # opencode is always rendered (the default native CLI — rendered programmatically, no .tmpl)
+    local declared
+    declared=$(get_target_clis | tr '\n' ' ')
+
+    if [ -n "${declared// /}" ]; then
+        # target_clis declared: render only that list (FEAT-007 R5/R6)
+        local name
+        for name in $declared; do
+            if [ -d "$ADAPTERS_DIR/$name" ]; then
+                echo "=== Rendering for $name (target_clis) ==="
+                if ! render_one "$name"; then
+                    rc=1
+                fi
+                rendered=$((rendered + 1))
+                echo ""
+            else
+                echo "  (no prebuilt adapter for '$name' — the LLM fallback in .agents/BOOTSTRAP.md handles it)"
+            fi
+        done
+        if [ "$rendered" -eq 0 ]; then
+            echo "No prebuilt adapters were rendered — target_clis names no prebuilt adapter."
+        fi
+        return $rc
+    fi
+
+    # target_clis not declared: prompt-first selection (FEAT-007 R3)
+    if [ -t 0 ]; then
+        local evidence present_list answer custom sel
+        evidence=$(detect_clis)
+        echo "Observed CLI evidence:"
+        echo "$evidence" | sed 's/^/  /'
+        echo ""
+        present_list=$(echo "$evidence" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+print('\n'.join(k for k, v in d.items() if isinstance(v, dict) and v.get('state') == 'present'))
+")
+        if [ -z "$present_list" ]; then
+            present_list="opencode"
+        fi
+        echo "Proposed target_clis: $(echo "$present_list" | tr '\n' ' ')"
+        printf "Use this target_clis? [y/n/edit]: "
+        read -r answer
+        case "$answer" in
+            y|Y|yes|YES)
+                # shellcheck disable=SC2086
+                set_target_clis $present_list
+                echo "Persisted target_clis in .agents/agentic.json"
+                ;;
+            n|N|no|NO)
+                echo "Aborted. Nothing rendered, nothing changed."
+                return 0
+                ;;
+            *)
+                echo "Enter the adapter names, space-separated (e.g. opencode cursor):"
+                read -r custom
+                # shellcheck disable=SC2086
+                set_target_clis $custom
+                echo "Persisted target_clis: $custom"
+                ;;
+        esac
+        sel=$(get_target_clis | tr '\n' ' ')
+        for name in $sel; do
+            if [ -d "$ADAPTERS_DIR/$name" ]; then
+                echo "=== Rendering for $name ==="
+                if ! render_one "$name"; then
+                    rc=1
+                fi
+                rendered=$((rendered + 1))
+                echo ""
+            else
+                echo "  (no prebuilt adapter for '$name' — the LLM fallback in .agents/BOOTSTRAP.md handles it)"
+            fi
+        done
+        if [ "$rendered" -eq 0 ]; then
+            echo "No prebuilt adapters were rendered."
+        fi
+        return $rc
+    fi
+
+    # Non-interactive and undeclared: opencode only, no litter (FEAT-007 R4)
+    echo "No target_clis declared — non-interactive run renders opencode only."
+    echo "Make the choice explicit: declare target_clis in .agents/agentic.json, or run ./.agents/bootstrap.sh --all interactively."
+    echo ""
     if [ -d "$ADAPTERS_DIR/opencode" ]; then
         echo "=== Rendering for opencode (default) ==="
         if ! render_one "opencode"; then
@@ -1044,36 +1223,6 @@ render_all() {
         rendered=$((rendered + 1))
         echo ""
     fi
-
-    for dir in "$ADAPTERS_DIR"/*/; do
-        [ -d "$dir" ] || continue
-        name=$(basename "$dir")
-        [ "$name" = "_common" ] || [ "$name" = "_generic" ] || [ "$name" = "opencode" ] && continue
-        if ls "$dir"/*.tmpl &>/dev/null; then
-            # For other CLIs (gemini, claude), ask unless --yes
-            local confirm="n"
-            if [ -n "$force_all" ]; then
-                confirm="y"
-            elif [ -t 0 ]; then
-                printf "Generate adapter for %s? [y/N]: " "$name"
-                read -r confirm
-            fi
-            case "$confirm" in
-                y|Y|yes|YES)
-                    echo "=== Rendering for $name ==="
-                    if ! render_one "$name"; then
-                        rc=1
-                    fi
-                    rendered=$((rendered + 1))
-                    echo ""
-                    ;;
-                *)
-                    echo "Skipping $name (use --all --yes to generate all adapters)"
-                    echo ""
-                    ;;
-            esac
-        fi
-    done
     if [ "$rendered" -eq 0 ]; then
         echo "No adapters rendered. Available: $(ls -d "$ADAPTERS_DIR"/*/ 2>/dev/null | xargs -n1 basename | grep -v '^_' | tr '\n' ' ')"
     fi
@@ -1088,6 +1237,12 @@ check_drift() {
         name=$(basename "$dir")
         [ "$name" = "_common" ] || [ "$name" = "_generic" ] && continue
         if ls "$dir"/*.tmpl &>/dev/null; then
+            # FEAT-007: only verify consistency for adapters actually rendered in this tree
+            case "$name" in
+                gemini-cli)   [ -e "$ROOT_DIR/GEMINI.md" ] || [ -d "$ROOT_DIR/.gemini" ] || continue ;;
+                claude-code)  [ -e "$ROOT_DIR/CLAUDE.md" ] || [ -d "$ROOT_DIR/.claude" ] || continue ;;
+                opencode)     [ -e "$ROOT_DIR/opencode.json" ] || continue ;;
+            esac
             if ! python3 "$RENDERER" --cli "$name" --root "$ROOT_DIR" --check; then
                 rc=1
             fi
@@ -1106,8 +1261,9 @@ case "${1:-help}" in
         python3 "$RENDERER" --export "$1" --root "$ROOT_DIR"
         exit $?
         ;;
-    detect)            detect ;;
+    detect)            shift; detect "$@" ;;
     --detect)          detect ;;
+    clean)             shift; clean_adapters "$@" ;;
     --list-adapters)   list_adapters ;;
     --list-orphans)    list_orphans ;;
     --list-examples)   list_examples ;;

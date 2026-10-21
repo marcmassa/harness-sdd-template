@@ -12,6 +12,45 @@ Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migrati
 
 ---
 
+## 2026-10-21 | feat | FEAT-007 target-clis — CLI en uso observado, confirmado por prompt y persistido | `.agents/bootstrap.sh` `check.sh` `.agents/commands/init.md` `.agents/BOOTSTRAP.md` `README.md` `.agents/agentic.json` `tests/test_target_clis.sh` | none
+
+**Resumen**: La eleccion del CLI deja de ser implicita. `detect --clis` observa
+evidencias (adapters generados en disco + host hints), `--all` interactivo
+propone una lista y pide confirmacion por prompt (`[y/n/edit]`), la lista
+confirmada persiste en `agentic.json#target_clis`, y el render solo genera lo
+declarado. `clean` borra los adapters sobrantes de CLIs no declarados. Un
+proyecto solo-Cursor ya no acaba con `CLAUDE.md`/`.claude/` ni
+`GEMINI.md`/`.gemini/` en su arbol.
+
+**Componentes implementados**:
+- **bootstrap.sh**: `detect --clis` (JSON de evidencias, read-only), helpers
+  `get_target_clis`/`set_target_clis`, `render_all` prompt-first (declarado →
+  selectivo; interactivo sin declarar → propuesta + prompt + persistencia;
+  no interactivo sin declarar → solo opencode + hint), `clean [cli...]|--all`
+  (borra paths generados de CLIs fuera de la lista efectiva, nunca toca
+  `.agents/`, `hooks/`, `steering/`, `progress/`, `specs/`, imprime lo borrado,
+  rechaza ambigüedad con exit 1), `check_drift` solo verifica adapters cuyo
+  output existe en el arbol.
+- **check.sh**: sección Adapter Hygiene — warning (sin fallo) por cada adapter
+  generado cuyo CLI no está en `target_clis`; silenciosa si no hay lista;
+  `test_target_clis` registrado en el runner.
+- **Docs**: `/init` STEP 0 (observar → preguntar → persistir → clean);
+  `BOOTSTRAP.md` "Observe first (mandatory)" y `target_clis` en el inventario
+  del manifest; README quickstart observe+prompt y sin `--all --yes` por defecto.
+- **agentic.json**: descripcion documenta `target_clis`; el campo queda
+  ausente en el manifiesto de entrega (FRESH).
+
+**Tests**: `tests/test_target_clis.sh` — 11 aserciones: evidencia JSON sin
+mutar, render selectivo con lista declarada (cursor/opencode), no-litter
+no interactivo, clean (strays/keep/refusal/--all), stray warning con exit 0,
+export sin adapters, docs con contrato observe-first.
+
+**Cobertura R↔T↔test**: 13/13 R<n>s cubiertos (ver `progress/impl_target-clis.md`).
+
+**Validación**: `./check.sh` exit 0 — 7/7 tests. FEAT-007 → `done`.
+
+---
+
 ## 2026-10-19 | feat | FEAT-006 portable-template — plantilla portable: manifiesto FRESH e instalación por export | `.agents/agentic.json` `.agents/bootstrap.sh` `.agents/adapters/_common/render.py` `.agents/adapters/gemini-cli/GEMINI.md.tmpl` `check.sh` `README.md` `SECURITY.md` `hooks/*.sh` `steering/*.md` `tests/test_portable_template.sh` `tests/test_soul_md.sh` `tests/test_steering.sh` | none
 
 **Resumen**: Consolida la plantilla como artefacto portable. El manifiesto de

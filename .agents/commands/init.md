@@ -46,6 +46,54 @@ re-render.
 
 ---
 
+---
+
+## STEP 0 — Observe the CLI in use and declare `target_clis` (before anything else)
+
+Run:
+
+```bash
+./.agents/bootstrap.sh detect --clis
+```
+
+Read the JSON. For each known CLI it lists the generated adapter paths that
+exist in the working tree and whether the CLI is `present` or `absent`.
+
+Then **ask the human**: "Which CLIs does this project use?" Propose the list
+of `present` CLIs (default: `opencode` if none are present). Include CLIs
+without a prebuilt adapter (e.g. `cursor`) — they are handled by the LLM
+fallback in `.agents/BOOTSTRAP.md`.
+
+Write the confirmed list to the manifest:
+
+```bash
+# example — the agent composes the real list after the human answers
+python3 - <<'PY'
+import json
+p = ".agents/agentic.json"
+m = json.load(open(p))
+m["target_clis"] = ["opencode"]   # <- the confirmed list
+with open(p, "w") as f:
+    json.dump(m, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+PY
+```
+
+Then prune the litter:
+
+```bash
+./.agents/bootstrap.sh clean
+```
+
+This deletes generated adapters of CLIs not in `target_clis`, so the tree
+only contains the adapters the project actually uses. Never render adapters
+for CLIs the human did not confirm.
+
+**STOP. Do not continue until `target_clis` is written and the human has
+confirmed the list.**
+
+---
+
 ## STEP 1 — Pre-flight check (run these commands, do not skip)
 
 **RUN, do not paraphrase:**
