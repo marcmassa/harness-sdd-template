@@ -871,6 +871,8 @@ owned = {
     "opencode": ["opencode.json"],
     "gemini-cli": ["GEMINI.md", ".gemini"],
     "claude-code": ["CLAUDE.md", ".claude"],
+    "cursor": [".cursor/rules/harness-sdd.mdc", ".cursor/commands", ".cursor/hooks.json"],
+    "codex": [".codex/prompts"],
 }
 out = {}
 for name, paths in owned.items():
@@ -933,23 +935,34 @@ clean_adapters() {
     fi
 
     local removed=0
-    local entry cli path k in_keep
-    for entry in "opencode:opencode.json" "gemini-cli:GEMINI.md" "gemini-cli:.gemini" "claude-code:CLAUDE.md" "claude-code:.claude"; do
-        cli="${entry%%:*}"
-        path="${entry##*:}"
-        if [ -z "$all_flag" ]; then
-            in_keep=""
-            for k in "${keep[@]}"; do
-                [ "$k" = "$cli" ] && in_keep="1"
-            done
-            [ -n "$in_keep" ] && continue
-        fi
-        if [ -e "$ROOT_DIR/$path" ]; then
-            rm -rf "$ROOT_DIR/$path"
-            echo "removed: $path"
+    local paths p
+    paths=$(python3 - "$ROOT_DIR" "${keep[@]:-}" <<'PYEOF'
+import json, os, glob, sys
+root = sys.argv[1]
+keep = set(a for a in sys.argv[2:] if a)
+owned = {
+    "opencode": ["opencode.json"],
+    "gemini-cli": ["GEMINI.md", ".gemini"],
+    "claude-code": ["CLAUDE.md", ".claude"],
+    "cursor": [".cursor/rules/harness-sdd.mdc", ".cursor/hooks.json"]
+              + [os.path.relpath(p, root) for p in glob.glob(os.path.join(root, ".cursor", "commands", "harness-*.md"))],
+    "codex": [os.path.relpath(p, root) for p in glob.glob(os.path.join(root, ".codex", "prompts", "harness-*.md"))],
+}
+for cli in owned:
+    if cli in keep:
+        continue
+    for p in owned[cli]:
+        print(p)
+PYEOF
+)
+    while IFS= read -r p; do
+        [ -z "$p" ] && continue
+        if [ -e "$ROOT_DIR/$p" ]; then
+            rm -rf "$ROOT_DIR/$p"
+            echo "removed: $p"
             removed=$((removed + 1))
         fi
-    done
+    done <<< "$paths"
     [ "$removed" -eq 0 ] && echo "nothing to clean"
     return 0
 }
@@ -1242,6 +1255,11 @@ check_drift() {
                 gemini-cli)   [ -e "$ROOT_DIR/GEMINI.md" ] || [ -d "$ROOT_DIR/.gemini" ] || continue ;;
                 claude-code)  [ -e "$ROOT_DIR/CLAUDE.md" ] || [ -d "$ROOT_DIR/.claude" ] || continue ;;
                 opencode)     [ -e "$ROOT_DIR/opencode.json" ] || continue ;;
+                cursor)
+                    [ -e "$ROOT_DIR/.cursor/rules/harness-sdd.mdc" ] \
+                        || [ -n "$(ls "$ROOT_DIR"/.cursor/commands/harness-*.md 2>/dev/null)" ] \
+                        || [ -e "$ROOT_DIR/.cursor/hooks.json" ] || continue ;;
+                codex)        [ -n "$(ls "$ROOT_DIR"/.codex/prompts/harness-*.md 2>/dev/null)" ] || continue ;;
             esac
             if ! python3 "$RENDERER" --cli "$name" --root "$ROOT_DIR" --check; then
                 rc=1

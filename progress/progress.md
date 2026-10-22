@@ -12,6 +12,53 @@ Types: `feat`, `fix`, `refactor`, `chore`, `test`, `docs`, `hardening`, `migrati
 
 ---
 
+## 2026-10-22 | feat | FEAT-008 native-plugin-adapters — adapters nativos para Cursor y Codex | `.agents/adapters/cursor/` `.agents/adapters/codex/` `.agents/adapters/_common/render.py` `.agents/bootstrap.sh` `check.sh` `AGENTS.md` `README.md` `.agents/BOOTSTRAP.md` `tests/test_plugin_adapters.sh` `tests/test_target_clis.sh` | none
+
+**Resumen**: Los cuatro CLIs pedidos (Claude Code, Codex, Cursor, OpenCode)
+tienen integración determinista in-repo. Cursor ahora se renderiza nativamente
+(regla `.mdc` con alwaysApply + comandos namespaced `harness-*`); Codex queda
+documentado como integración nativa (AGENTS.md de entrada + `.agents/skills`
+leído por Codex a nivel REPO) sin archivos generados. `clean` pasa a
+granularidad por-path y nunca borra archivos de usuario.
+
+**Hallazgos verificados en docs oficiales (2026-10-22)**:
+- **Cursor hooks**: formato `hooks.json` confirmado, pero los 18+ eventos son
+  tool/session-scoped — ninguno equivale a una transición SDD. Por R4 NO se
+  emite `hooks.json`; el puente son los cuerpos de los comandos
+  (`hooks/run-hooks.sh <event>`). Hueco documentado en el README del adapter.
+- **Codex prompts**: deprecados y user-level (`~/.codex/prompts`, "not shared
+  through your repository"). Por R6 no se emiten.
+- **Codex skills**: Codex escanea `.agents/skills` nativamente (REPO scope,
+  CWD→repo root) — nuestra ubicación canónica exacta. Cero bridging.
+
+**Componentes implementados**:
+- **cursor adapter**: `.cursor/rules/harness-sdd.mdc` (frontmatter
+  `alwaysApply: true`, reglas duras SDD, tabla de roles con punteros a
+  SUBAGENT.md, índice de comandos), `.cursor/commands/harness-<name>.md`
+  (stub al body_file), `render_cursor` + registro en RENDERERS.
+- **codex adapter**: `render_codex` (no-op con resumen de integración),
+  registro en RENDERERS, README con el contrato nativo completo.
+- **clean**: owned paths calculados en python (globs `harness-*.md` para
+  cursor/codex); `.gemini`/`.claude` mantienen borrado de directorio completo;
+  `.cursor/`/`.codex/` nunca se borran wholesale.
+- **check_drift**: guards por-owned-path para cursor/codex (no por directorio
+  compartido — bug cazado por el test de drift-skip).
+- **detect --clis + Adapter Hygiene**: evidencias y owned set de 5 adapters.
+- **Docs**: AGENTS.md §0 tabla (+2 filas), README (línea 3 + árbol), 
+  BOOTSTRAP.md step 9, READMEs de adapter con field mapping y decisiones.
+
+**Tests**: `tests/test_plugin_adapters.sh` — 10 aserciones (render cursor,
+determinismo, codex nativo, detect, clean user-safe, drift-skip, hygiene
+stray, export payload, docs). `tests/test_target_clis.sh` actualizado: el
+fixture de CLI-desconocido pasa de `cursor` (ahora adapter prebuilt) a
+`windsurf`, preservando la cobertura R6 de FEAT-007.
+
+**Cobertura R↔T↔test**: 14/14 R<n>s cubiertos (ver `progress/impl_native-plugin-adapters.md`).
+
+**Validación**: `./check.sh` exit 0 — 8/8 suites. FEAT-008 → `done`.
+
+---
+
 ## 2026-10-21 | feat | FEAT-007 target-clis — CLI en uso observado, confirmado por prompt y persistido | `.agents/bootstrap.sh` `check.sh` `.agents/commands/init.md` `.agents/BOOTSTRAP.md` `README.md` `.agents/agentic.json` `tests/test_target_clis.sh` | none
 
 **Resumen**: La eleccion del CLI deja de ser implicita. `detect --clis` observa

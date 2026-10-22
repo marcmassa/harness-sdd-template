@@ -98,6 +98,18 @@
       "priority": "P1",
       "agent": "spec-author",
       "sprint": "S5"
+    },
+    {
+      "id": "FEAT-008",
+      "name": "native-plugin-adapters",
+      "title": "Adapters nativos para Cursor y Codex — integración plugin en 4 CLIs",
+      "description": "El template solo tiene adapters prebuilt para opencode, gemini-cli y claude-code; Cursor y Codex van por fallback LLM. Este feature añade adapters deterministas: cursor (.cursor/rules/harness-sdd.mdc, .cursor/commands/harness-<cmd>.md, hooks.json solo donde haya equivalente SDD) y codex (AGENTS.md ya es entrada nativa; .codex/prompts/harness-<cmd>.md si hay soporte project-level). clean pasa a granularidad por-path con prefijo harness- para no borrar archivos de usuario. detect --clis, check_drift, hygiene y tests cubren los 5 adapters.",
+      "type": "feat",
+      "status": "done",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "spec-author",
+      "sprint": "S6"
     }
   ]
 }

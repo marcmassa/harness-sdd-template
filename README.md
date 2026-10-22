@@ -1,6 +1,6 @@
 # Harness SDD — Agentic Development Framework
 
-An opinionated framework for collaborating with AI agents on software projects of any kind. One canonical manifest drives the native config for any agentic CLI — opencode, gemini-cli, claude-code, or any other. Spec-driven. Traceable. Verifiable.
+An opinionated framework for collaborating with AI agents on software projects of any kind. One canonical manifest drives the native config for any agentic CLI — opencode, gemini-cli, claude-code, cursor, codex, or any other. Spec-driven. Traceable. Verifiable.
 
 ---
 
@@ -255,7 +255,7 @@ harness-sdd-template/
 │   ├── agentic.json           #   Canonical manifest (source of truth)
 │   ├── BOOTSTRAP.md           #   LLM fallback for unknown CLIs
 │   ├── bootstrap.sh           #   Renderer dispatcher
-│   ├── adapters/              #   CLI adapter templates (opencode, gemini-cli, claude-code, ...)
+│   ├── adapters/              #   CLI adapter templates (opencode, gemini-cli, claude-code, cursor, codex, ...)
 │   ├── subagents/             #   Sub-agent role files
 │   │   ├── agent-template/    #     Scaffold source for new sub-agents
 │   │   ├── harness/           #     Orchestrator
