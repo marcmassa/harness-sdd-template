@@ -39,14 +39,14 @@ echo "--- R5/R6 declared target_clis renders selectively ---"
 FIX2=$(mktemp -d)
 mkdir -p "$FIX2/.agents/subagents"
 ln -s "$ROOT_DIR/.agents/adapters" "$FIX2/.agents/adapters"
-printf '{"version":1,"kind":"harness-sdd","instructions":[],"skills":{"paths":[]},"commands":[],"subagents":[],"target_clis":["cursor"]}' > "$FIX2/.agents/agentic.json"
+printf '{"version":1,"kind":"harness-sdd","instructions":[],"skills":{"paths":[]},"commands":[],"subagents":[],"target_clis":["windsurf"]}' > "$FIX2/.agents/agentic.json"
 m_before=$(cksum "$FIX2/.agents/agentic.json")
 out2=$(ROOT_DIR="$FIX2" "$BOOT" --all --yes 2>&1)
 rc2=$?
 m_after=$(cksum "$FIX2/.agents/agentic.json")
 if [ "$rc2" -eq 0 ] && [ ! -e "$FIX2/opencode.json" ] && [ ! -e "$FIX2/GEMINI.md" ] && [ ! -e "$FIX2/CLAUDE.md" ] \
-    && echo "$out2" | grep -q "no prebuilt adapter for 'cursor'" && [ "$m_before" = "$m_after" ]; then
-    pass "target_clis [cursor]: no known adapters rendered, fallback pointer, exit 0"
+    && echo "$out2" | grep -q "no prebuilt adapter for 'windsurf'" && [ "$m_before" = "$m_after" ]; then
+    pass "target_clis [windsurf]: no known adapters rendered, fallback pointer, exit 0"
 else
     fail "selective render for declared list"; echo "$out2"
 fi

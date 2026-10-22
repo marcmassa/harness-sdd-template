@@ -191,6 +191,8 @@ owned = {
     "opencode": ["opencode.json"],
     "gemini-cli": ["GEMINI.md", ".gemini"],
     "claude-code": ["CLAUDE.md", ".claude"],
+    "cursor": [".cursor/rules/harness-sdd.mdc", ".cursor/commands", ".cursor/hooks.json"],
+    "codex": [".codex/prompts"],
 }
 declared = set(tc)
 stray = [(cli, p) for cli, paths in owned.items() if cli not in declared for p in paths if os.path.exists(p)]
@@ -531,7 +533,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"

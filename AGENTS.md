@@ -22,6 +22,8 @@ Look in the repository root for the native config file your CLI expects:
 | opencode     | `opencode.json` or `opencode.jsonc` |
 | gemini-cli   | `GEMINI.md` (and optionally `.gemini/commands/*.toml`) |
 | claude-code  | `CLAUDE.md` and `.claude/` |
+| cursor       | `.cursor/rules/harness-sdd.mdc` and `.cursor/commands/harness-*.md` |
+| codex        | `AGENTS.md` (native entry — adapter generates nothing) |
 | other        | varies — see `.agents/BOOTSTRAP.md` |
 
 ### Step 3 — If the adapter is MISSING, bootstrap NOW

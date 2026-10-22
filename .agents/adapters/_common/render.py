@@ -445,10 +445,60 @@ def render_claude(
     return ok
 
 
+def render_cursor(
+    root: Path,
+    manifest: dict[str, Any],
+    ctx: dict[str, Any],
+    check: bool,
+) -> bool:
+    adapter_dir = root / ".agents" / "adapters" / "cursor"
+    ok = True
+
+    rule_tmpl = adapter_dir / "cursor-rule.md.tmpl"
+    if rule_tmpl.exists():
+        body = render_template_str(rule_tmpl.read_text(), ctx)
+        ok &= write_file(root / ".cursor" / "rules" / "harness-sdd.mdc", body, check, None)
+    else:
+        print(f"  WARN: {rule_tmpl} not found, skipping cursor rule")
+
+    cmds_tmpl_dir = adapter_dir / "cursor-commands"
+    if cmds_tmpl_dir.exists():
+        tf = next(iter(cmds_tmpl_dir.glob("_template.*.tmpl")), None)
+        if tf:
+            for cmd in ctx["commands"]:
+                cmd_ctx = {**ctx, "item": cmd, "command": cmd}
+                body = render_template_str(tf.read_text(), cmd_ctx)
+                out = root / ".cursor" / "commands" / f"harness-{cmd['name']}.md"
+                ok &= write_file(out, body, check, None)
+
+    # R4 evidence gate (verified 2026-10-22 against cursor.com/docs/hooks):
+    # no Cursor hook event has a genuine SDD-transition equivalent, so
+    # hooks.json is deliberately NOT emitted. The command bodies bridge
+    # hooks/run-hooks.sh instead. Gap documented in the adapter README.
+    return ok
+
+
+def render_codex(
+    root: Path,
+    manifest: dict[str, Any],
+    ctx: dict[str, Any],
+    check: bool,
+) -> bool:
+    # R5/R6 evidence gate (verified 2026-10-22 against learn.chatgpt.com/codex
+    # docs): AGENTS.md is the native entry point and .agents/skills is read
+    # natively at REPO scope. Custom prompts are deprecated and user-level
+    # only ("not shared through your repository"), so nothing is rendered.
+    # Contract documented in .agents/adapters/codex/README.md.
+    print("  codex: AGENTS.md native entry + .agents/skills repo-scope skills — no generated files required")
+    return True
+
+
 RENDERERS = {
     "opencode": render_opencode,
     "gemini-cli": render_gemini,
     "claude-code": render_claude,
+    "cursor": render_cursor,
+    "codex": render_codex,
 }
 
 
@@ -1069,7 +1119,7 @@ def export_template(root: Path, dest: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cli", help="CLI to render (e.g. opencode, gemini-cli, claude-code)")
+    parser.add_argument("--cli", help="CLI to render (e.g. opencode, gemini-cli, claude-code, cursor, codex)")
     parser.add_argument("--root", required=True, help="Project root directory")
     parser.add_argument("--check", action="store_true", help="Diff mode, no writes")
     parser.add_argument("--detect-stack", action="store_true", help="Print detected stack labels as JSON")
