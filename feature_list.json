@@ -110,6 +110,18 @@
       "priority": "P0",
       "agent": "spec-author",
       "sprint": "S6"
+    },
+    {
+      "id": "FEAT-009",
+      "name": "plugin-packaging",
+      "title": "Empaquetado distribuible — repo como marketplace de Claude y plugin TS de OpenCode",
+      "description": "El framework se integra in-repo en 5 CLIs pero no se DISTRIBUYE como plugin. Este feature hace el repo instalable: .claude-plugin/marketplace.json (generado y COMMITTEADO, entry-as-manifest, source '.') con los 7 comandos SDD y 4 agents canónicos self-contained (stubs generados en .agents/plugin/claude/agents/ con SUBAGENT.md+SOUL.md inlined, derivados de scaffolds canónicos — no del active set); y .opencode/plugins/harness-sdd.ts (generado, zero-dep) con enforcement real: bloquea editar specs aprobadas y adapters generados via tool.execute.before. Hooks: mismo hallazgo que Cursor (sin equivalente SDD) — documentado. claude plugin validate como verificación opcional.",
+      "type": "feat",
+      "status": "spec_ready",
+      "sdd": true,
+      "priority": "P1",
+      "agent": "spec-author",
+      "sprint": "S7"
     }
   ]
 }

@@ -1,19 +1,19 @@
 # Current Session State — 2026-10-22
 
 ## Active Task
-None. FEAT-008 native-plugin-adapters closed as done.
+FEAT-009 plugin-packaging — spec written, waiting for human approval.
 
 ## Progress
-- [x] FEAT-008 implemented (T1–T9), tested (10/10 + 8/8 suites green) and reviewed
-- [x] Doc-verified findings recorded (Cursor hooks gap, Codex native skills)
-- [x] feature_list.json status set to done
-- [x] Summary logged in progress/progress.md
+- [x] Verified Claude plugin/marketplace schemas and OpenCode plugins docs (2026-10-22)
+- [x] Wrote specs/plugin-packaging/{requirements,design,tasks}.md
+- [x] Set feature_list.json status to spec_ready
+- [ ] Human reviews the spec and approves or requests changes
 
 ## Pending
-- FEAT-001 remains a pending example placeholder — template illustration, not a feature to implement.
+- Implementation is blocked on approval. No production code was changed.
 
 ## Blockers
 - None
 
 ## Next Step
-Nothing in progress. Possible follow-up: FEAT-009 distributable plugin packaging (Claude plugin.json, opencode npm) — scoped out of FEAT-008 by decision.
+Human reads specs/plugin-packaging/ and approves. Then set status to in_progress and execute tasks.md from T1.

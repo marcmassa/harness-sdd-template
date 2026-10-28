@@ -60,6 +60,7 @@ charts/**/charts/*.tgz
 
 # --- Local progress ---
 progress/archive/*.bak
+/specs/
 
 # Ignorar skills descargadas del registry
 .agents/skills/*
