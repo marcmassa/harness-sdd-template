@@ -110,3 +110,12 @@ The review records further issues and preserves T13 as incomplete.
 Files: `.agents/schemas/versions.json`, `.agents/lib/inventory.py`,
 `docs/maintenance.md`, `bootstrap.sh` (`version`, `inventory-adopt`, format gate,
 inventory on export), `check.sh` format check. T20 box left for the reviewer.
+
+## First remote CI evidence — 2026-11-11
+
+Run 43109307463 (commit 6cd752c) failed in all four jobs on one cause: the
+FEAT-009 spec was git-ignored and missing remotely. Run 43110408983 (commit
+0a66652) passed on ubuntu-latest and macos-latest with Python 3.10 and 3.13,
+including the changed-file size gate. `trusted-review.yml` has still never run
+(it triggers on pull requests only), so R15/T13 remain without remote evidence.
+

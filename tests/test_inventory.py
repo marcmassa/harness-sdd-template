@@ -94,6 +94,8 @@ class ExportInventoryTests(InventoryTest):
         for seed in ('feature_list.json', '.agents/agentic.json', 'DESIGN.md', 'progress/current.md'):
             self.assertEqual(files[seed]['ownership'], 'seed', seed)
         self.assertEqual(files['check.sh']['sha256'], inventory.digest(self.root / 'check.sh'))
+        self.assertEqual(inventory.ownership('.agents/skills/some-skill/SKILL.md'), 'seed')
+        self.assertEqual(inventory.ownership('.agents/skills/sync-skills.sh'), 'framework')
 
     def test_export_is_deterministic_and_carries_no_maintainer_history(self):
         second = Path(self.shared.name) / 'release-again'
