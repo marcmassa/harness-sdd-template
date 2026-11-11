@@ -1,0 +1,42 @@
+# Trusted repository-review verification (FEAT-010 R15). See docs/trusted-review.md.
+#
+# pull_request_target runs this file from the default branch, never from the
+# pull request. The job checks out only the trusted default-branch commit,
+# fetches the pull request as Git objects, and reads them as data. It never
+# checks out, builds, imports, or executes pull-request content, and its token
+# is read-only. With review_mode "local" in the default-branch policy, the
+# verifier reports not-required and succeeds.
+#
+# Deployment and the required workflow ruleset are in docs/trusted-review.md.
+# Require this workflow by source identity in the ruleset.
+name: Trusted review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: trusted-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: harness-sdd trusted review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check out the trusted default-branch commit (never the pull request)
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify provider review, candidate revision, and spec binding
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -E -s -B .agents/lib/trusted_verify.py --trusted-ci

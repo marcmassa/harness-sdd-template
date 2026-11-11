@@ -35,7 +35,7 @@ model-agnostic: true
 - `[path/file]` — [Description of when and how to use it]
 
 ## Style rules
-- **Harness Compliance**: This agent operates under the **Harness SDD** framework. It must always consult `AGENTS.md`, `feature_list.json` and `progress/current.md` before acting.
+- **Harness Compliance**: This agent operates under the **Harness SDD** framework. It follows `AGENTS.md` and starts from `./.agents/bootstrap.sh brief` instead of reading state files in full.
 - **Modular Skills**: It must not reinvent standard workflows. It must verify the existence of skills in `.agents/skills/` and, if they don't exist, sync them using `./.agents/skills/sync-skills.sh`.
 - **[Rule 3]**: [Description of the rule and how to apply it].
 

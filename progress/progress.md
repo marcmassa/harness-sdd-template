@@ -1,3 +1,15 @@
+## 2026-11-09 — MAINT-001 staged token limit
+
+Installed `.githooks/pre-commit` and set local `core.hooksPath=.githooks`.
+Checks only staged blobs against 20,000 bytes (bytes/4 <= 5,000 tokens),
+exempts lockfiles/generated output, and prints splitting instructions.
+Seven isolated integration tests cover the threshold, partial staging,
+attributes, unusual filenames, generated output, and actual commit rejection.
+Registered the suite in check.sh; all nine suites pass. Existing optional
+Python-check warnings are documented for FEAT-010 M1, not hidden.
+
+---
+
 # Progress Log
 
 Append-only chronological log of project progress.
