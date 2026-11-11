@@ -99,3 +99,14 @@ Codex also reproduced retrospective lightweight registration through
 `workflow-init` after changing an active feature to `sdd:false`. The subsequent
 strict `workflow-check` passed without an approval or classification decision.
 The review records further issues and preserves T13 as incomplete.
+
+## M5 started before M4 (ADR-2) — T20 implemented 2026-11-11, awaiting review
+
+| Requirement | Task | Evidence (tests/test_inventory.py) | State |
+|---|---|---|---|
+| R23 | T20 | VersionDeclarationTests; UnknownVersionTests (inventory, manifest, newer framework, malformed paths) | Local PASS |
+| R26 (part) | T20 | ExportInventoryTests: per-path ownership and baselines, foreign files excluded; LegacyAdoptionTests | Local PASS; update/cleanup by inventory is T21 |
+
+Files: `.agents/schemas/versions.json`, `.agents/lib/inventory.py`,
+`docs/maintenance.md`, `bootstrap.sh` (`version`, `inventory-adopt`, format gate,
+inventory on export), `check.sh` format check. T20 box left for the reviewer.

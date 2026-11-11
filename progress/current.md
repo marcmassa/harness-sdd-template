@@ -13,11 +13,13 @@ FEAT-010 — M3 corrections reviewed a second time; three new defects fixed.
 - [x] Hardening: hook runner (no injection, contained paths, fail closed,
   timeout), pinned skill sync, CI actions pinned. Tests: tests/test_hook_runner.py.
 - [x] Default-mode spec digest (ADR-1); FEAT-010 bound to its 2026-11-09 approval.
+- [x] Committed 6cd752c on feat/hybrid-team-stable-release and pushed; T11, T12, T14, T15 checked.
+- [ ] T20 (versions, inventory, legacy adoption) implemented, uncommitted, awaiting review.
 
 ## Pending
 Maintainer decides the T11, T12, T14, T15 boxes (review recommends checking
 them). Order per ADR-2: M5 (T20–T24) before M4, then M6. FEAT-009 stays separately spec_ready.
-All FEAT-010 work is uncommitted.
+
 
 ## Blockers
 Trusted provider verification needs a real run of trusted-review.yml with
@@ -25,4 +27,4 @@ allowed reviewers. Real pilots, remote CI, and publication remain external
 evidence gates.
 
 ## Next Step
-Commit, push to observe the CI matrix, then start M5 with T20.
+Review T20, then T21 (update plan, apply, restore).

@@ -20,6 +20,8 @@
 #   ./.agents/bootstrap.sh workflow-recover ...  # Human-confirmed failed-hook recovery
 #   ./.agents/bootstrap.sh workflow-rollback ... # Undo an interrupted two-file mutation
 #   ./.agents/bootstrap.sh workflow-check        # Validate policy and all work records
+#   ./.agents/bootstrap.sh version               # Framework and format versions; installed inventory status
+#   ./.agents/bootstrap.sh inventory-adopt <dir> # Give a legacy install an inventory, judged against an export in <dir>
 #   ./.agents/bootstrap.sh brief                 # Compact session brief (use instead of reading state files)
 #   ./.agents/bootstrap.sh archive-log <file>    # Move an oversized progress log to progress/archive/
 #   ./.agents/bootstrap.sh detect --clis         # Observe CLI evidence (generated adapters, host hints)
@@ -64,7 +66,26 @@ source "$BOOTSTRAP_LIB/bootstrap-configuration.sh"
 source "$BOOTSTRAP_LIB/bootstrap-content.sh"
 source "$BOOTSTRAP_LIB/bootstrap-render.sh"
 
+# An unknown manifest or inventory format is refused before any command can change files.
 case "${1:-help}" in
+    --help|-h|help|version|brief) ;;
+    *) python3 "$BOOTSTRAP_LIB/inventory.py" --root "$ROOT_DIR" --check || exit 1 ;;
+esac
+
+case "${1:-help}" in
+    version)
+        python3 "$BOOTSTRAP_LIB/inventory.py" --root "$ROOT_DIR" --describe
+        exit $?
+        ;;
+    inventory-adopt)
+        shift
+        if [ -z "${1:-}" ]; then
+            echo "Usage: ./.agents/bootstrap.sh inventory-adopt <exported-release-dir>" >&2
+            exit 1
+        fi
+        python3 "$BOOTSTRAP_LIB/inventory.py" --root "$ROOT_DIR" --adopt "$1"
+        exit $?
+        ;;
     export)
         shift
         if [ -z "${1:-}" ]; then
@@ -90,6 +111,8 @@ case "${1:-help}" in
             python3 "$BOOTSTRAP_LIB/team_policy.py" --sanitize-scenarios \
                 "$ROOT_DIR/docs/team-policy/scenarios.json" "$1/docs/team-policy/scenarios.json" || exit $?
         fi
+        # Record what was installed: version, formats, and a baseline digest per owned path.
+        python3 "$BOOTSTRAP_LIB/inventory.py" --root "$1" --create >/dev/null || exit $?
         exit 0
         ;;
     spec-digest)
