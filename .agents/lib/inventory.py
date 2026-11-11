@@ -78,6 +78,9 @@ def plain_path(relative):
 def ownership(relative):
     if relative in SEED_FILES or relative.startswith(SEED_PREFIXES):
         return 'seed'
+    # Synced skills come from the registry (sync-skills.sh), not from a framework release.
+    if relative.startswith('.agents/skills/') and relative.count('/') > 2:
+        return 'seed'
     if relative.startswith('specs/') and relative != 'specs/README.md' \
             and not relative.startswith('specs/templates/'):
         return 'seed'
