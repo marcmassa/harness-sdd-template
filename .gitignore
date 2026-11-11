@@ -60,7 +60,9 @@ charts/**/charts/*.tgz
 
 # --- Local progress ---
 progress/archive/*.bak
-/specs/
+progress/work/.workflow.lock
+/specs/*
+!/specs/hybrid-team-stable-release/
 
 # Ignorar skills descargadas del registry
 .agents/skills/*

@@ -13,16 +13,35 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-GENERATED_FILES=(opencode.json GEMINI.md CLAUDE.md .claude .gemini)
-
-# ── Aserción 1: dos renders consecutivos → mismo SHA256 agregado ──
-./.agents/bootstrap.sh --all >/dev/null 2>&1
-HASH_1=$(find "${GENERATED_FILES[@]}" -type f -exec sha256sum {} \; 2>/dev/null \
-    | sha256sum | cut -d' ' -f1)
-
-./.agents/bootstrap.sh --all >/dev/null 2>&1
-HASH_2=$(find "${GENERATED_FILES[@]}" -type f -exec sha256sum {} \; 2>/dev/null \
-    | sha256sum | cut -d' ' -f1)
+# Render all parity targets explicitly; --all intentionally selects only the
+# declared/default CLI and cannot establish three-adapter parity on a clean clone.
+render_parity_targets() {
+    local cli
+    for cli in opencode gemini-cli claude-code; do
+        ./.agents/bootstrap.sh "$cli" >/dev/null
+    done
+}
+hash_outputs() {
+    python3 - <<'PYHASH'
+import hashlib
+from pathlib import Path
+h = hashlib.sha256()
+for base in ('opencode.json', 'GEMINI.md', 'CLAUDE.md', '.claude', '.gemini'):
+    root = Path(base)
+    files = sorted(root.rglob('*')) if root.is_dir() else [root]
+    for path in files:
+        if path.is_file():
+            name = path.as_posix().encode()
+            body = path.read_bytes()
+            h.update(len(name).to_bytes(8, 'big') + name)
+            h.update(len(body).to_bytes(8, 'big') + body)
+print(h.hexdigest())
+PYHASH
+}
+render_parity_targets
+HASH_1=$(hash_outputs)
+render_parity_targets
+HASH_2=$(hash_outputs)
 
 if [ "$HASH_1" != "$HASH_2" ]; then
     echo "FAIL: render no determinista"
@@ -67,12 +86,12 @@ fi
 # extra_skills porque no hay matches. Esta aserción valida el flujo end-to-end
 # solo en el caso de uso real.
 DETECTED_STACK=$(python3 -c "
-import sys
+import json, sys
 sys.path.insert(0, '.agents/adapters/_common')
 import render
 m = json.load(open('.agents/agentic.json'))
 stack = render.detect_stack(__import__('pathlib').Path('.'), m)
-print(','.join(s.get('label', '?') for s in stack))" 2>/dev/null || echo "")
+print(','.join(s.get('label', '?') for s in stack))")
 
 if [ -n "$DETECTED_STACK" ]; then
     # Stack detectado: las skills de add_skills[] que existen en disco deben aparecer

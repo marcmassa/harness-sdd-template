@@ -15,7 +15,7 @@ preserving traceability and respecting the boundaries defined in `design.md` and
 ## Main tasks
 
 1. **Confirm preconditions**:
-   - Read `feature_list.json` and verify the active feature has `status: "in_progress"`.
+   - Run `./.agents/bootstrap.sh brief` and verify the active feature is `in_progress`.
    - Read `specs/<feature-name>/tasks.md`. If it does not exist or has unmarked tasks, refuse and report.
 
 2. **Load project skills**:

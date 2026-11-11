@@ -4,9 +4,11 @@
 # Runs builds, lints, tests, and SDD integrity validations. Acts as the gateway
 # for declaring a task as done — if it fails, the task is not finished.
 #
-# Usage: ./check.sh [--verbose] [--py-only] [--ts-only] [--go-only] [--spec-only] [--no-color]
+# Usage: ./check.sh [--quiet] [--verbose] [--py-only] [--ts-only] [--go-only] [--spec-only] [--no-color]
 #
 # Flags:
+#   --quiet      Print only warnings, failures, and the result (full output on failure);
+#                the form agents should use, to keep session context small
 #   --verbose    Show full command output instead of tail-only
 #   --py-only    Skip non-Python sections
 #   --ts-only    Skip non-TypeScript sections
@@ -32,6 +34,7 @@ TS_ONLY=false
 GO_ONLY=false
 SPEC_ONLY=false
 USE_COLOR=true
+QUIET=false
 EXIT_CODE=0
 
 for arg in "$@"; do
@@ -42,8 +45,26 @@ for arg in "$@"; do
 		--go-only)   GO_ONLY=true ;;
 		--spec-only) SPEC_ONLY=true ;;
 		--no-color)  USE_COLOR=false ;;
+		--quiet)     QUIET=true ;;
 	esac
 done
+
+if $QUIET; then
+	# Same checks, same exit code; only the passing detail is withheld.
+	passthrough=()
+	for arg in "$@"; do
+		[ "$arg" = "--quiet" ] || passthrough+=("$arg")
+	done
+	output=$("$0" --no-color ${passthrough[@]+"${passthrough[@]}"} 2>&1)
+	code=$?
+	if [ "$code" -eq 0 ]; then
+		printf '%s\n' "$output" | grep -E '\[(WARN|FAIL|ERROR)\]' || true
+		echo "check.sh: PASS ($(printf '%s\n' "$output" | grep -c '\[PASS\]') checks passed)"
+	else
+		printf '%s\n' "$output"
+	fi
+	exit "$code"
+fi
 
 if ! $USE_COLOR || [ ! -t 1 ]; then
 	C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""
@@ -58,10 +79,10 @@ section() {
 	echo "${C_BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C_RESET}"
 }
 
-pass() { echo "  ${C_GREEN}✅ $1${C_RESET}"; }
-fail() { echo "  ${C_RED}❌ $1${C_RESET}"; EXIT_CODE=1; }
-warn() { echo "  ${C_YELLOW}⚠️  $1${C_RESET}"; }
-info() { echo "  ${C_BLUE}ℹ️  $1${C_RESET}"; }
+pass() { echo "  ${C_GREEN}[PASS] $1${C_RESET}"; }
+fail() { echo "  ${C_RED}[FAIL] $1${C_RESET}"; EXIT_CODE=1; }
+warn() { echo "  ${C_YELLOW}[WARN] $1${C_RESET}"; }
+info() { echo "  ${C_BLUE}[INFO] $1${C_RESET}"; }
 
 run_or_tail() {
 	if $VERBOSE; then
@@ -74,85 +95,16 @@ run_or_tail() {
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT_DIR"
 
-# ── Stack checks ──────────────────────────────────
-# Customize these blocks for your stack.
-# Commented examples for Terraform, Docker, and K8s.
-
-has_tf_files() {
-	find . -name '*.tf' -not -path './.git/*' -print -quit | grep -q .
-}
-
-if ! $SPEC_ONLY && has_tf_files && command -v terraform &>/dev/null; then
-	section "Terraform — Format & Validate"
-	terraform fmt -check -recursive 2>/dev/null && pass "terraform fmt" || warn "terraform fmt found differences (fix with 'terraform fmt')"
-	terraform validate 2>/dev/null && pass "terraform validate" || warn "terraform validate has warnings"
-fi
-
-if ! $SPEC_ONLY && has_tf_files && command -v tflint &>/dev/null; then
-	section "Terraform — TFLint"
-	tflint --recursive 2>&1 | tail -5 && pass "tflint" || warn "tflint found issues"
-fi
-
-if ! $SPEC_ONLY && [ -d "charts" ] && command -v helm &>/dev/null; then
-	section "Helm — Lint"
-	for chart in charts/*/; do
-		helm lint "$chart" 2>/dev/null && pass "helm lint $chart" || warn "helm lint $chart"
-	done
-fi
-
-# ── Python checks (if applicable) ─────────────────────
-if ! $SPEC_ONLY && ! $TS_ONLY && ! $GO_ONLY; then
-	has_python_files=false
-	for pat in '*.py' '**/*.py'; do
-		if ls $pat 2>/dev/null | grep -q .; then has_python_files=true; break; fi
-	done
-	if $has_python_files; then
-		section "Python — Syntax check"
-		python3 -m py_compile -x .venv -x __pycache__ . 2>/dev/null && pass "py_compile" || warn "py_compile found errors"
-
-		section "Python — Tests"
-		python_found_tests=false
-		for d in tests test __tests__ spec tests-*; do
-			if [ -d "$d" ]; then python_found_tests=true; break; fi
-		done
-		if $python_found_tests; then
-			if command -v pytest &>/dev/null; then
-				run_or_tail python3 -m pytest -v --tb=short -x
-				if [ ${PIPESTATUS[0]} -eq 0 ]; then
-					pass "pytest: all passed"
-				else
-					fail "pytest: broken tests"
-				fi
-			else
-				warn "tests/ found but pytest is not available"
-			fi
-		fi
-	fi
-fi
-
-# ── Go checks (if applicable) ─────────────────────────
-if ! $SPEC_ONLY && ! $PY_ONLY && ! $TS_ONLY; then
-	has_go_files=false
-	for pat in '*.go' '**/*.go'; do
-		if ls $pat 2>/dev/null | grep -q .; then has_go_files=true; break; fi
-	done
-	if $has_go_files && command -v go &>/dev/null; then
-		section "Go — Build & Vet"
-		go build ./... 2>/dev/null && pass "go build" || fail "go build"
-		go vet ./... 2>/dev/null && pass "go vet" || fail "go vet"
-		go test ./... -race -count=1 2>&1 | tail -5 && pass "go test -race" || fail "go test -race"
-	fi
-fi
-
-# ── TypeScript checks (if applicable) ─────────────────
-if ! $SPEC_ONLY && ! $PY_ONLY && ! $GO_ONLY && [ -f "package.json" ]; then
-	section "TypeScript — Build"
-	npm run build 2>&1 | tail -3 && pass "npm run build" || fail "npm run build"
-
-	if [ -f "vitest.config.js" ] || [ -f "vitest.config.ts" ]; then
-		section "TypeScript — Tests"
-		npm test -- --run 2>&1 | tail -10 && pass "npm test" || warn "npm test: some tests failed"
-	fi
+# Project checks are implemented separately to keep this gateway navigable.
+section "Project Checks"
+quality_mode=all
+$PY_ONLY && quality_mode=py
+$TS_ONLY && quality_mode=ts
+$GO_ONLY && quality_mode=go
+$SPEC_ONLY && quality_mode=spec
+python3 "$ROOT_DIR/.agents/lib/quality.py" --root "$ROOT_DIR" --mode "$quality_mode"
+if [ $? -ne 0 ]; then
+    fail "Mandatory project checks failed"
 fi
 
 # ── Adapter consistency (regenerated from .agents/agentic.json) ─────
@@ -215,7 +167,7 @@ if [ -f "feature_list.json" ]; then
 		fail "feature_list.json is NOT valid JSON"
 	fi
 
-	python3 /dev/stdin <<'PYEOF' 2>/dev/null || true
+	python3 /dev/stdin <<'PYEOF'
 import json, os, sys
 with open('feature_list.json') as f:
     data = json.load(f)
@@ -228,11 +180,7 @@ for feat in data['features']:
     if feat['status'] not in valid_status:
         errors.append(f"{feat['id']}: invalid status '{feat['status']}'")
 
-in_progress = [f for f in data['features'] if f['status'] == 'in_progress']
-if len(in_progress) > 1:
-    names = ', '.join(f['id'] for f in in_progress)
-    errors.append(f"Multiple features 'in_progress': {names}")
-
+# The concurrency limit, including any team override, is enforced by workflow-check.
 requires_spec = {"spec_ready", "in_progress", "done"}
 for feat in data['features']:
     if feat.get('sdd') and feat['status'] in requires_spec:
@@ -253,7 +201,7 @@ else:
     print(f"[OK]    feature_list.json valid ({len(data['features'])} features)")
     in_prog = [f for f in data['features'] if f['status'] == 'in_progress']
     if in_prog:
-        print(f"        1 feature in progress: {in_prog[0]['id']} — {in_prog[0]['name']}")
+        print(f"        {len(in_prog)} feature(s) in progress: " + ', '.join(f"{f['id']} — {f['name']}" for f in in_prog))
     else:
         print("        No features in progress")
 PYEOF
@@ -264,7 +212,18 @@ PYEOF
 		fail "Errors in feature_list.json"
 	fi
 else
-	warn "feature_list.json not found — skipping"
+	warn "feature_list.json not found — the workflow contract below decides whether that is allowed"
+fi
+
+# Always runs: an active team_policy with missing or malformed state must fail.
+section "SDD Workflow Contract"
+workflow_output=$(python3 "$ROOT_DIR/.agents/lib/workflow_cli.py" --root "$ROOT_DIR" check 2>&1)
+workflow_rc=$?
+echo "  $workflow_output"
+if [ "$workflow_rc" -eq 0 ]; then
+	pass "Workflow state, approvals, and evidence are consistent"
+else
+	fail "Workflow contract violations block this check"
 fi
 
 # ── Progress files check ──────────────────────────
@@ -505,9 +464,11 @@ for s in steering:
                     warnings.append(f"steering '{name}': frontmatter missing 'description'")
 if os.path.isdir('steering'):
     declared = {s['file'] for s in steering}
+    # Shipped scaffolds are examples until /init promotes or removes them.
+    scaffolds = {s.get('file') for s in m.get('_template_steering_examples', []) if isinstance(s, dict)}
     for f in os.listdir('steering'):
         fpath = f"steering/{f}"
-        if fpath not in declared and f.endswith('.md'):
+        if fpath not in declared and fpath not in scaffolds and f.endswith('.md'):
             warnings.append(f"file '{fpath}' in steering/ not declared in agentic.json#steering[]")
 for e in errors:
     print(f"[ERROR] {e}")
@@ -533,7 +494,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters test_token_limit test_m1 test_team_policy test_m3 test_session_brief test_hook_runner; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"
@@ -541,7 +502,11 @@ for t in test_cli_adapter_parity test_agent_template_placeholders test_steering 
 			fail "${t} (see tests/${t}.sh for details)"
 		fi
 	else
-		warn "Missing tests/${t}.sh (skipped)"
+        if [ -d "$ROOT_DIR/tests" ]; then
+            fail "Missing required tests/${t}.sh"
+        else
+            echo "  [SKIP] ${t} (optional): exported consumer has no framework test suites"
+        fi
 	fi
 done
 

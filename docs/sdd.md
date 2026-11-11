@@ -197,6 +197,15 @@ controls the behavior on failure:
 | `error` | Stop immediately, abort the workflow |
 | `ignore` | Continue silently regardless of failure |
 
+The runner fails closed. An unreadable manifest stops with an error. A script
+that is missing, not executable, or outside the repository (absolute path,
+`..`, or a symlink leading out) counts as a failed hook and follows the same
+policy; an unknown policy is treated as `error`. Each hook has a time limit:
+its optional `timeout_seconds`, else `$HOOK_TIMEOUT_SECONDS`, else 300 seconds.
+
+`hooks/run-hooks.sh` is a copy of `.agents/lib/hook-runner.sh`; change the
+canonical file and copy it, never the installed one.
+
 ### 7.4 Managing Hooks
 
 ```bash

@@ -77,7 +77,7 @@ with open('$TMPDIR/.agents/agentic.json') as f:
     m = json.load(f)
 m['hooks'] = [{
     'event': '__test_error_event__',
-    'script': '$TMPDIR/error_hook.sh',
+    'script': 'error_hook.sh',
     'description': 'Test error hook',
     'on_failure': 'error',
 }]
@@ -88,14 +88,17 @@ with open('$TMPDIR/.agents/agentic.json', 'w') as f:
 
 # Ejecutar run-hooks.sh con el manifest temporal
 (
-    export ROOT_DIR="$TMPDIR"
-    export HOOK_EVENT="__test_error_event__"
+    # The runner derives its root from its own location, so install it in the fixture.
+    mkdir -p "$TMPDIR/hooks"
+    cp hooks/run-hooks.sh "$TMPDIR/hooks/run-hooks.sh"
     cd "$TMPDIR"
-    if "$ROOT_DIR/hooks/run-hooks.sh" __test_error_event__ 2>/dev/null; then
-        echo "__TEST_FAIL__"
-    else
-        rc=$?
+    "$TMPDIR/hooks/run-hooks.sh" __test_error_event__ 2>/dev/null
+    rc=$?
+    # Exit 42 proves the fixture hook itself ran and its failure aborted the run.
+    if [ "$rc" -eq 42 ]; then
         echo "__TEST_PASS__ exit_code=$rc"
+    else
+        echo "__TEST_FAIL__ exit_code=$rc"
     fi
 ) > "$TMPDIR/output.txt" 2>/dev/null || true
 

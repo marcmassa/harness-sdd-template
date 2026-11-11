@@ -1,19 +1,28 @@
-# Current Session State — 2026-10-22
+# Current Session State
 
 ## Active Task
-FEAT-009 plugin-packaging — spec written, waiting for human approval.
+FEAT-010 — M3 corrections reviewed a second time; three new defects fixed.
 
 ## Progress
-- [x] Verified Claude plugin/marketplace schemas and OpenCode plugins docs (2026-10-22)
-- [x] Wrote specs/plugin-packaging/{requirements,design,tasks}.md
-- [x] Set feature_list.json status to spec_ready
-- [ ] Human reviews the spec and approves or requests changes
+- [x] Six scenario decisions accepted by user and recorded.
+- [x] T11, T12, T14, T15 implemented, corrected, and independently reviewed.
+- [x] Second review: see progress/claude-M3-second-review.md. ./check.sh passes.
+- [ ] T13 partial: verifier and workflow exist; never run in a real repository.
+- [x] MAINT-002 context budget: brief, check.sh --quiet, AGENTS.md as a map
+  (22.1 KB to 5.9 KB), /init 15.7 KB to 5.1 KB. Tests in tests/test_session_brief.py.
+- [x] Hardening: hook runner (no injection, contained paths, fail closed,
+  timeout), pinned skill sync, CI actions pinned. Tests: tests/test_hook_runner.py.
+- [x] Default-mode spec digest (ADR-1); FEAT-010 bound to its 2026-11-09 approval.
 
 ## Pending
-- Implementation is blocked on approval. No production code was changed.
+Maintainer decides the T11, T12, T14, T15 boxes (review recommends checking
+them). Order per ADR-2: M5 (T20–T24) before M4, then M6. FEAT-009 stays separately spec_ready.
+All FEAT-010 work is uncommitted.
 
 ## Blockers
-- None
+Trusted provider verification needs a real run of trusted-review.yml with
+allowed reviewers. Real pilots, remote CI, and publication remain external
+evidence gates.
 
 ## Next Step
-Human reads specs/plugin-packaging/ and approves. Then set status to in_progress and execute tasks.md from T1.
+Commit, push to observe the CI matrix, then start M5 with T20.

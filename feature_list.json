@@ -122,6 +122,49 @@
       "priority": "P1",
       "agent": "spec-author",
       "sprint": "S7"
+    },
+    {
+      "id": "MAINT-001",
+      "name": "staged-token-limit",
+      "title": "Staged authored-file token limit pre-commit hook",
+      "description": "Installed .githooks/pre-commit: checks indexed blobs against 20,000 bytes, skips generated artifacts and lockfiles, and gives splitting instructions. Seven integration tests pass through check.sh.",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P0",
+      "agent": "implementer",
+      "sprint": "S8"
+    },
+    {
+      "id": "FEAT-010",
+      "name": "hybrid-team-stable-release",
+      "title": "Hybrid human/AI teams — reliable base to stable 1.0",
+      "description": "Six sequential milestones: reliable bootstrap and mandatory quality gates; authority and risk policy; verifiable SDD approvals/evidence; ownership and handoffs; safe versioned distribution; real pilots and stable release readiness. See specs/hybrid-team-stable-release/. FEAT-009 approval remains separate; no production implementation before approval.",
+      "type": "feat",
+      "status": "in_progress",
+      "sdd": true,
+      "priority": "P0",
+      "agent": "spec-author",
+      "sprint": "S8-S13",
+      "spec_approval": {
+        "spec_digest": "c6a824ec3bb1e120753e95e6cbe1d11202574f05abb51e1b659a0ca25ff99508",
+        "task_digest": "62373bfcfc414b723e7c52bb547ff3fe002efc4da4f909d62bc720952aff2a67",
+        "reviewer": "user in this chat",
+        "evidence_ref": "progress/approval_FEAT-010.json",
+        "assurance": "declared-unmanaged-no-roles"
+      }
+    },
+    {
+      "id": "MAINT-002",
+      "name": "session-context-budget",
+      "title": "Session context budget — brief, quiet gateway, navigation-only AGENTS.md",
+      "description": "Session start no longer reads growing state files: bootstrap.sh brief (about 1 KB, constant in closed features), check.sh --quiet, AGENTS.md reduced to a map, compact /init, trimmed adapter templates, context-budget warnings and archive-log. See docs/quality-checks.md. Tests: tests/test_session_brief.py.",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P0",
+      "agent": "implementer",
+      "sprint": "S8"
     }
   ]
 }

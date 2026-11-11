@@ -123,8 +123,8 @@ of the framework itself.
   `bootstrap.sh --list-orphans` to verify.
 - **Permission completeness**: Every sub-agent entry MUST include a `permission.edit`
   mapping with a `specs/**` rule. Sub-agents should NOT edit approved specs.
-- **Harness Compliance**: Always consult `AGENTS.md`, `feature_list.json`, and
-  `progress/current.md` before acting within this repository.
+- **Harness Compliance**: Follow `AGENTS.md` and start from
+  `./.agents/bootstrap.sh brief` before acting within this repository.
 - **Determinism**: The render pipeline (`agentic.json → render.py → adapter`) must be
   deterministic. Same manifest + same root → identical output. The parity tests in
   `tests/` verify this.
@@ -162,7 +162,7 @@ of the framework itself.
 ## Workflow
 
 1. Read this file in full to internalize the templates role.
-2. Read `AGENTS.md`, `feature_list.json`, and `progress/current.md` for session context.
+2. Read `AGENTS.md` and run `./.agents/bootstrap.sh brief` for session context.
 3. Read `.agents/agentic.json` to understand the current manifest state.
 4. Read any relevant adapter READMEs or the `render.py` renderer if the task involves
    the rendering pipeline.
