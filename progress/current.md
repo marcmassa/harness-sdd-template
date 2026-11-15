@@ -1,30 +1,24 @@
 # Current Session State
 
 ## Active Task
-FEAT-010 — M3 corrections reviewed a second time; three new defects fixed.
+FEAT-010 — M5 in progress (ADR-2 order): T20 and T21 implemented, awaiting review.
 
 ## Progress
-- [x] Six scenario decisions accepted by user and recorded.
-- [x] T11, T12, T14, T15 implemented, corrected, and independently reviewed.
-- [x] Second review: see progress/claude-M3-second-review.md. ./check.sh passes.
-- [ ] T13 partial: verifier and workflow exist; never run in a real repository.
-- [x] MAINT-002 context budget: brief, check.sh --quiet, AGENTS.md as a map
-  (22.1 KB to 5.9 KB), /init 15.7 KB to 5.1 KB. Tests in tests/test_session_brief.py.
-- [x] Hardening: hook runner (no injection, contained paths, fail closed,
-  timeout), pinned skill sync, CI actions pinned. Tests: tests/test_hook_runner.py.
-- [x] Default-mode spec digest (ADR-1); FEAT-010 bound to its 2026-11-09 approval.
-- [x] Committed 6cd752c on feat/hybrid-team-stable-release and pushed; T11, T12, T14, T15 checked.
-- [ ] T20 and T21 (versions, inventory, update plan/apply/restore) implemented, awaiting review.
+- [x] M1–M3 committed and pushed; CI green on Ubuntu/macOS with Python 3.10/3.13.
+- [x] T11, T12, T14, T15 checked. T13 open: trusted-review.yml has never run.
+- [x] T20 versions and inventory; T21 update plan/apply/restore/keep/accept/adopt.
+- [x] Role cards compacted; brief warns on role and description budgets.
+- [x] harness-manager migrated to 0.9.0 (local branch, not pushed).
+- [x] SecurIT: check.sh cache, --quiet, timings (local branch, not pushed).
 
 ## Pending
-Maintainer decides the T11, T12, T14, T15 boxes (review recommends checking
-them). Order per ADR-2: M5 (T20–T24) before M4, then M6. FEAT-009 stays separately spec_ready.
-
+- Human review of T20 and T21 before their boxes are checked.
+- T22 capability matrix, T23 split render.py (49 KB) and docs, T24 end-to-end exercise.
+- FEAT-009 stays separately spec_ready.
 
 ## Blockers
-Trusted provider verification needs a real run of trusted-review.yml with
-allowed reviewers. Real pilots, remote CI, and publication remain external
-evidence gates.
+T13 needs a pull request against the default branch to exercise trusted-review.yml.
+Real pilot reports for M6 need human review.
 
 ## Next Step
-Review T20, then T21 (update plan, apply, restore).
+Review and push the two project branches, then T22.

@@ -130,3 +130,16 @@ including the changed-file size gate. `trusted-review.yml` has still never run
 Files: `.agents/lib/update.py`, `bootstrap.sh` (`update-plan/apply/restore/keep/adopt`),
 `docs/maintenance.md`. Export no longer ships machine-local synced skills.
 
+## First real migrations — 2026-11-15 (input for M6, not yet a reviewed pilot report)
+
+| Project | Starting point | Result |
+|---|---|---|
+| harness-manager | Legacy install with bootstrap, 38 features done | `update-adopt` matched 11 files, recognized 22 as untouched earlier releases, 2 uncertain (`AGENTS.md`, `check.sh`). `update-apply` changed 76 paths; its own `check.sh` passes (36 checks). Local commit 3caa189 on `chore/harness-sdd-0.9.0`, not pushed |
+| SecurIT | Hand-adapted install that removed the renderer on purpose; 0 of 24 files match any release | Full update not applied: it would re-add 64 files the project chose to drop. Targeted change to its `check.sh` only (green-run cache, `--quiet`, timings), local commit 329b213f on `chore/harness-context-budget`, not pushed, full check not run with the change |
+
+Defects the migrations exposed, fixed in the framework: legacy files could not
+be told from local edits (now matched against the source's Git history);
+starter and scaffold files were added to initialized projects (now never
+added); no way to accept a conflict explicitly (`update-accept`); the brief
+ignored `.kiro/specs`; releases shipped machine-local skills.
+
