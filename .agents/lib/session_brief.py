@@ -25,6 +25,8 @@ BUDGETS = {'AGENTS.md': 8000, CURRENT: 3000, 'progress/handoff.md': 8000,
            'progress/progress.md': 20000, 'progress/history.md': 20000,
            'progress/decisions.md': 20000}
 SESSION_FILES = ('AGENTS.md', CURRENT, 'progress/handoff.md')
+ROLE_BUDGET = 3000
+DESCRIPTION_BUDGET = 160
 
 
 def _read(path):
@@ -146,6 +148,18 @@ def budget_warnings(root):
         cost = 'loaded every session' if relative in SESSION_FILES else 'read its tail only'
         warnings.append('  {} is {:.1f} KB (budget {:.0f} KB, {}): {}'.format(
             relative, size / 1000.0, budgets[relative] / 1000.0, cost, action))
+    for agent in (manifest.get('subagents') or []) if isinstance(manifest, dict) else []:
+        if not isinstance(agent, dict):
+            continue
+        name, role = agent.get('name'), root / str(agent.get('role_file') or '')
+        if role.is_file() and role.stat().st_size > ROLE_BUDGET:
+            warnings.append('  role {} is {:.1f} KB (budget {:.0f} KB, loaded whenever the role acts): '
+                            'move identity to SOUL.md and conventions to steering/'.format(
+                                name, role.stat().st_size / 1000.0, ROLE_BUDGET / 1000.0))
+        if len(str(agent.get('description') or '')) > DESCRIPTION_BUDGET:
+            warnings.append('  role {} description is {} characters (budget {}, listed in every '
+                            'session): one sentence on what it does and when to use it'.format(
+                                name, len(agent['description']), DESCRIPTION_BUDGET))
     return warnings
 
 
