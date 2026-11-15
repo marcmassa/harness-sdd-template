@@ -17,11 +17,13 @@ ORDER = ('in_progress', 'spec_ready', 'blocked', 'pending', 'done')
 TASK = re.compile(r'^\s*(?:>\s?)*(?:[-*+]|\d+[.)])?\s*\[(.?)\]\s*(?:\*\*|__)?(T\d+(?:\.\d+)*)(?:\*\*|__)?'
                   r'\s*(?:[:—–-]\s*)?(.*)$')
 CURRENT = 'progress/current.md'
+SPEC_BASES = ('specs', '.kiro/specs')
 CURRENT_SHOWN = 2000
 # Bytes. Files an agent loads every session stay small; logs are read by tail only.
 BUDGETS = {'AGENTS.md': 8000, CURRENT: 3000, 'progress/handoff.md': 8000,
-           'progress/progress.md': 40000, 'progress/history.md': 40000,
-           'progress/decisions.md': 40000}
+           # Logs share the staged-file limit of .githooks, so the warning comes before the block.
+           'progress/progress.md': 20000, 'progress/history.md': 20000,
+           'progress/decisions.md': 20000}
 SESSION_FILES = ('AGENTS.md', CURRENT, 'progress/handoff.md')
 
 
@@ -91,6 +93,10 @@ def _active_lines(root, feature):
         _label(feature), feature.get('status'), '' if feature.get('sdd') is False else ', sdd',
         _short(feature.get('title') or feature.get('description'), 90))]
     spec = 'specs/{}'.format(feature.get('name'))
+    for base in SPEC_BASES:  # first layout that holds this feature's tasks
+        if (root / base / str(feature.get('name')) / 'tasks.md').is_file():
+            spec = '{}/{}'.format(base, feature.get('name'))
+            break
     tasks = _read(root / spec / 'tasks.md')
     if tasks is None:
         if feature.get('sdd') is not False:

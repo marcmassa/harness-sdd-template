@@ -91,6 +91,10 @@ it by hand so that it equals the release, or declare the file yours:
 ```
 
 `update-keep` marks the paths project-owned; updates never propose them again.
+`update-accept ../my-project <path>...` does the opposite: it installs the
+release version of the named conflicts, after backing up yours, and
+`update-restore` can undo it. Use it for framework internals of a legacy
+install that you never customized.
 
 For a project installed before inventories existed, run
 `./.agents/bootstrap.sh update-adopt ../my-project` first. It only writes the
