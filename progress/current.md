@@ -14,7 +14,7 @@ FEAT-010 — M3 corrections reviewed a second time; three new defects fixed.
   timeout), pinned skill sync, CI actions pinned. Tests: tests/test_hook_runner.py.
 - [x] Default-mode spec digest (ADR-1); FEAT-010 bound to its 2026-11-09 approval.
 - [x] Committed 6cd752c on feat/hybrid-team-stable-release and pushed; T11, T12, T14, T15 checked.
-- [ ] T20 (versions, inventory, legacy adoption) implemented, uncommitted, awaiting review.
+- [ ] T20 and T21 (versions, inventory, update plan/apply/restore) implemented, awaiting review.
 
 ## Pending
 Maintainer decides the T11, T12, T14, T15 boxes (review recommends checking

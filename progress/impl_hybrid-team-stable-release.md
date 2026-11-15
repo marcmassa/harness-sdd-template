@@ -119,3 +119,14 @@ FEAT-009 spec was git-ignored and missing remotely. Run 43110408983 (commit
 including the changed-file size gate. `trusted-review.yml` has still never run
 (it triggers on pull requests only), so R15/T13 remain without remote evidence.
 
+## T21 implemented 2026-11-15, awaiting review
+
+| Requirement | Task | Evidence (tests/test_update.py) | State |
+|---|---|---|---|
+| R24 | T21 | PlanTests: per-file add/replace/conflict/remove, non-mutating, stable digest | Local PASS |
+| R25 | T21 | ApplyTests and RestoreTests: conflicts preserved, backup, stale plan refused, interruption detected and restored, post-update edits protected | Local PASS |
+| R26 | T21 | Foreign files and tool configuration untouched; symlinks and traversal refused; only inventory paths change | Local PASS |
+
+Files: `.agents/lib/update.py`, `bootstrap.sh` (`update-plan/apply/restore/keep/adopt`),
+`docs/maintenance.md`. Export no longer ships machine-local synced skills.
+
