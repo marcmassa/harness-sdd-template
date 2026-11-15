@@ -63,7 +63,7 @@ The brief also warns when a file exceeds its budget:
 | `AGENTS.md` | 8 KB | Loaded every session |
 | `progress/current.md` | 3 KB | Loaded every session; live state only, replaced not appended |
 | `progress/handoff.md` | 8 KB | Loaded every session where a project uses it |
-| `progress/progress.md`, `history.md`, `decisions.md` | 40 KB | Logs: search or read the tail, never the whole file |
+| `progress/progress.md`, `history.md`, `decisions.md` | 20 KB | Logs: search or read the tail, never the whole file. Same limit as the staged-file hook |
 
 Override or add budgets (bytes) with an optional `context_budget` object in
 `.agents/agentic.json`, for example `{"DESIGN.md": 12000}`.

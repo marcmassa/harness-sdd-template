@@ -24,7 +24,11 @@ SKIPPED_DIRECTORIES = {'.git', '.harness', '__pycache__', 'node_modules'}
 # Created once at install and owned by the project afterwards; an update never replaces them.
 SEED_FILES = {'feature_list.json', 'DESIGN.md', 'README.md', 'LICENSE', 'SECURITY.md',
               '.gitignore', '.agents/agentic.json'}
-SEED_PREFIXES = ('progress/', 'steering/', 'examples/')
+SEED_PREFIXES = ('progress/', 'steering/', 'examples/',
+                 # Scaffolds a project replaces with its own roles and hooks during /init.
+                 '.agents/subagents/harness/', '.agents/subagents/spec-author/',
+                 '.agents/subagents/implementer/', '.agents/subagents/reviewer/',
+                 '.agents/subagents/templates/', 'hooks/on-')
 
 
 def declared():
@@ -189,13 +193,16 @@ def status(root):
     return document, result
 
 
-def adopt(root, release_root):
+def adopt(root, release_root, known=None):
     """Give an install that predates inventories one, judged against a known release tree.
 
-    A file identical to the release is owned with that baseline. A file that
-    differs cannot be told apart from a local edit, so it is recorded as
-    uncertain (no baseline) and every later update treats it as a conflict.
-    Files the release does not ship are not recorded: they stay the project's.
+    A file identical to the release is owned with that baseline. `known` maps a
+    path to the digests of its earlier published versions: a file equal to one
+    of them is an untouched older release, owned with its current digest, and
+    updates may replace it. Any other file cannot be told apart from a local
+    edit, so it is recorded as uncertain (no baseline) and every later update
+    treats it as a conflict. Starter files and files the release does not ship
+    are not recorded: they stay the project's.
     """
     root, release_root = Path(root).resolve(), Path(release_root).resolve()
     if (root / INVENTORY).exists():
@@ -206,22 +213,29 @@ def adopt(root, release_root):
                          './.agents/bootstrap.sh export'.format(INVENTORY))
     if not declared()['update_from'].get('legacy_adoption'):
         raise ValueError('this framework release does not support legacy adoption')
-    files, matched, uncertain = {}, 0, 0
+    files, matched, earlier, uncertain = {}, 0, 0, 0
     for relative, entry in sorted(release['files'].items()):
         path = root / relative
         if path.is_symlink() or not path.is_file():
             continue
-        same = digest(path) == entry['sha256']
-        matched += same
-        uncertain += not same
-        files[relative] = {'sha256': entry['sha256'] if same else None,
-                           'ownership': entry['ownership']}
+        current = digest(path)
+        if entry['ownership'] == 'seed':
+            pass  # the project's own file from the start; its content is not judged
+        elif current == entry['sha256']:
+            matched += 1
+        elif current in (known or {}).get(relative, ()):
+            earlier += 1
+        else:
+            uncertain += 1
+            current = None
+        files[relative] = {'sha256': current, 'ownership': entry['ownership']}
     if not files:
         raise ValueError('no file of this project matches the release; is this a Harness SDD install?')
     _write(root, _document(LEGACY, files, adopted={
-        'compared_with': release['framework_version'], 'matched': matched, 'uncertain': uncertain}))
+        'compared_with': release['framework_version'], 'matched': matched,
+        'earlier_release': earlier, 'uncertain': uncertain}))
     return {'created': INVENTORY, 'framework_version': LEGACY, 'matched': matched,
-            'uncertain': uncertain}
+            'earlier_release': earlier, 'uncertain': uncertain}
 
 
 def describe(root):

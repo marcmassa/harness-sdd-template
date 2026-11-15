@@ -66,6 +66,12 @@ class BriefContentTests(BriefTest):
         self.assertIn('progress/current.md is 6.6 KB (budget 3 KB, loaded every session)', text)
         self.assertLess(len(text), 3500)
 
+    def test_kiro_spec_layout_is_found(self):
+        self.features()
+        (self.root / 'specs/feat-a/tasks.md').unlink()
+        self.write('.kiro/specs/feat-a/tasks.md', TASKS)
+        self.assertIn('spec: .kiro/specs/feat-a/ · tasks 1/3', session_brief.brief(self.root))
+
     def test_fresh_manifest_points_to_init(self):
         self.features()
         self.write('.agents/agentic.json', json.dumps(

@@ -20,7 +20,8 @@ BASE = {'check.sh': '#!/bin/sh\necho v1\n', '.agents/lib/tool.py': 'VERSION = 1\
 NEXT = {'check.sh': '#!/bin/sh\necho v2\n', '.agents/lib/tool.py': 'VERSION = 2\n',
         '.agents/lib/new.py': 'added in v2\n', 'docs/guide.md': 'guide v1\n',
         'feature_list.json': '{"features": ["template"]}\n', 'README.md': 'new starter readme\n',
-        'docs/extra.md': 'a new starter doc\n'}
+        'docs/extra.md': 'a new framework doc\n', 'steering/sample.md': 'starter steering\n',
+        '.agents/subagents/reviewer/SUBAGENT.md': 'scaffold role\n'}
 
 
 class UpdateTest(unittest.TestCase):
@@ -76,7 +77,8 @@ class PlanTests(UpdateTest):
         self.assertEqual(self.actions(), {
             'check.sh': 'replace', '.agents/lib/tool.py': 'replace', '.agents/lib/old.py': 'remove',
             '.agents/lib/new.py': 'add', 'docs/guide.md': 'current', 'docs/extra.md': 'add',
-            'feature_list.json': 'keep', 'README.md': 'keep'})
+            'feature_list.json': 'keep', 'README.md': 'keep', 'steering/sample.md': 'keep',
+            '.agents/subagents/reviewer/SUBAGENT.md': 'keep'})
         self.assertEqual(self.snapshot(), before)
         self.assertFalse((self.project / '.harness/backups').exists())
 
@@ -133,6 +135,8 @@ class ApplyTests(UpdateTest):
         self.assertEqual(self.read('feature_list.json'), BASE['feature_list.json'])
         self.assertEqual(self.read('README.md'), BASE['README.md'])
         self.assertEqual(self.read('docs/extra.md'), NEXT['docs/extra.md'])
+        self.assertFalse((self.project / 'steering/sample.md').exists())
+        self.assertFalse((self.project / '.agents/subagents/reviewer').exists())
         self.assertEqual(self.read('notes/mine.md'), 'mine\n')
         self.assertEqual(self.read('.cursor/rules/user.mdc'), 'foreign tool configuration\n')
         self.assertTrue(all(action in ('current', 'keep') for action in self.actions().values()))
@@ -240,11 +244,43 @@ class LegacyAndCommandTests(UpdateTest):
         actions = self.actions()
         self.assertEqual(actions['check.sh'], 'conflict')
         self.assertEqual(actions['.agents/lib/tool.py'], 'replace')
+        self.assertEqual(actions['steering/sample.md'], 'keep')
         self.apply()
         self.assertEqual(self.read('check.sh'), '#!/bin/sh\necho heavily customized\n')
         self.assertEqual(self.read('.agents/lib/tool.py'), NEXT['.agents/lib/tool.py'])
         self.assertEqual(inventory.load(self.project)['framework_version'],
                          inventory.declared()['framework_version'])
+
+    def test_adoption_recognizes_untouched_earlier_releases(self):
+        (self.project / inventory.INVENTORY).unlink()
+        self.write('check.sh', '#!/bin/sh\necho v0, an earlier published version\n')
+        self.write('.agents/lib/tool.py', 'VERSION = "customized here"\n')
+        known = {'check.sh': {inventory.digest(self.project / 'check.sh')},
+                 '.agents/lib/tool.py': {'0' * 64}}
+        result = inventory.adopt(self.project, self.release, known)
+        self.assertEqual((result['earlier_release'], result['uncertain']), (1, 1))
+        actions = self.actions()
+        self.assertEqual(actions['check.sh'], 'replace')
+        self.assertEqual(actions['.agents/lib/tool.py'], 'conflict')
+        self.assertNotIn('.agents/lib/old.py', actions)
+
+    def test_accept_resolves_named_conflicts_and_can_be_restored(self):
+        self.write('check.sh', '#!/bin/sh\necho stale copy from an old release\n')
+        self.write('.agents/lib/tool.py', 'custom\n')
+        before = self.snapshot()
+        with self.assertRaisesRegex(ValueError, 'not a conflict'):
+            update.accept(self.project, self.release, ['docs/guide.md'])
+        with self.assertRaisesRegex(ValueError, 'plain relative path'):
+            update.accept(self.project, self.release, ['../outside'])
+        result = update.accept(self.project, self.release, ['check.sh'])
+        self.assertEqual(result['accepted'], ['check.sh'])
+        self.assertEqual(self.read('check.sh'), NEXT['check.sh'])
+        self.assertEqual(self.read('.agents/lib/tool.py'), 'custom\n')
+        actions = self.actions()
+        self.assertEqual(actions['check.sh'], 'current')
+        self.assertEqual(actions['.agents/lib/tool.py'], 'conflict')
+        update.restore_update(self.project)
+        self.assertEqual(self.snapshot(), before)
 
     def test_bootstrap_commands_drive_a_real_export(self):
         consumer = self.base / 'consumer'

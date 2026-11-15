@@ -7,6 +7,7 @@ Run from the framework source against a project:
     apply    applies exactly the plan whose digest is given; backs up first
     restore  undoes the last applied or interrupted update
     keep     marks conflicting paths as project-owned (never updated again)
+    accept   resolves named conflicts by taking the release version, with backup
     adopt    gives a legacy project an inventory (see inventory.py)
 
 Three-way rule: a file is replaced only if it still equals its installed
@@ -24,6 +25,7 @@ import subprocess
 import sys
 import tempfile
 
+import git_state
 import inventory
 from inventory import INVENTORY, LEGACY, digest, plain_path, version_key
 
@@ -66,9 +68,8 @@ def _decide(relative, installed, incoming, current):
             return 'remove', 'no longer shipped'
         return 'conflict', 'no longer shipped, but changed locally'
     if incoming['ownership'] == 'seed' or (installed and installed['ownership'] == 'seed'):
-        if installed is None and current is None:
-            return 'add', 'new starter file'
-        return 'keep', 'project-owned'
+        # Starter files belong to a fresh install; an update never adds or replaces them.
+        return 'keep', 'project-owned or starter file'
     if current == incoming['sha256']:
         return 'current', 'already up to date'
     if current is None:
@@ -264,6 +265,49 @@ def keep(root, paths):
     return {'project_owned': sorted(paths)}
 
 
+def accept(root, release, paths):
+    """Resolve named conflicts by installing the release version; restore can undo it."""
+    root, release = Path(root).resolve(), Path(release).resolve()
+    plan = plan_update(root, release)
+    by_path = {item['path']: item for item in plan['actions']}
+    chosen = []
+    for relative in paths:
+        item = by_path.get(plain_path(relative))
+        if item is None or item['action'] != 'conflict' or item['new'] is None:
+            raise ValueError('{} is not a conflict with an incoming version'.format(relative))
+        if _blocked(root, relative):
+            raise ValueError('{} cannot be replaced: {}'.format(relative, _blocked(root, relative)))
+        chosen.append(item)
+    if not chosen:
+        raise ValueError('name at least one conflicting path')
+    names = sorted(item['path'] for item in chosen)
+    identifier = 'accept-' + hashlib.sha256(json.dumps(
+        [plan['plan_digest'], names]).encode('utf-8')).hexdigest()[:12]
+    folder = root / BACKUPS / identifier
+    if _blocked(root, BACKUPS + '/x') or folder.exists():
+        raise ValueError('cannot create the backup for ' + identifier)
+    folder.mkdir(parents=True)
+    shutil.copy2(str(root / INVENTORY), str(folder / 'installed.json'))
+    for item in chosen:
+        if item['current'] is not None:
+            _copy(root / item['path'], folder / 'before' / item['path'])
+    journal = {'id': identifier, 'state': 'started', 'from': plan['from'], 'to': plan['to'],
+               'conflicts': [], 'actions': [{'path': item['path'], 'action': 'replace',
+                                             'before': item['current'], 'after': item['new']}
+                                            for item in chosen]}
+    _write_json(folder / 'journal.json', journal)
+    document, incoming = inventory.load(root), inventory.load(release)
+    for item in chosen:
+        _mutate(root, release, item)
+        document['files'][item['path']] = dict(incoming['files'][item['path']])
+    if 'conflicts' in document:
+        document['conflicts'] = [path for path in document['conflicts'] if path not in names]
+    _write_json(root / INVENTORY, document)
+    journal['state'] = 'complete'
+    _write_json(folder / 'journal.json', journal)
+    return {'accepted': names, 'backup': '{}/{}'.format(BACKUPS, identifier)}
+
+
 def render_plan(plan):
     lines = ['update {} -> {}'.format(plan['from'], plan['to'])]
     counts = {}
@@ -274,6 +318,18 @@ def render_plan(plan):
     lines.append('summary: ' + ', '.join('{} {}'.format(counts[name], name) for name in sorted(counts)))
     lines.append('plan digest: ' + plan['plan_digest'])
     return '\n'.join(lines)
+
+
+def known_versions(source, release):
+    """Digests of every published version of each release path, from the source's Git history."""
+    known = {}
+    try:
+        for relative in inventory.load(release)['files']:
+            known[relative] = {hashlib.sha256(content).hexdigest()
+                               for _commit, content in git_state.historical_versions(source, relative)}
+    except ValueError:
+        return {}
+    return known
 
 
 def build_release(source, folder):
@@ -290,7 +346,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', help='framework source to export as the release')
     parser.add_argument('--release', help='an already exported release directory')
-    parser.add_argument('operation', choices=('plan', 'apply', 'restore', 'keep', 'adopt'))
+    parser.add_argument('operation', choices=('plan', 'apply', 'restore', 'keep', 'accept', 'adopt'))
     parser.add_argument('project')
     parser.add_argument('paths', nargs='*')
     parser.add_argument('--plan', dest='plan_digest')
@@ -310,8 +366,11 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(prefix='harness-release-') as temporary:
             release = Path(args.release) if args.release else build_release(
                 args.source, Path(temporary) / 'release')
-            if args.operation == 'adopt':
-                print(json.dumps(inventory.adopt(project, release), sort_keys=True))
+            if args.operation == 'accept':
+                print(json.dumps(accept(project, release, args.paths), sort_keys=True))
+            elif args.operation == 'adopt':
+                known = known_versions(Path(args.source).resolve(), release) if args.source else {}
+                print(json.dumps(inventory.adopt(project, release, known), sort_keys=True))
             elif args.operation == 'plan':
                 plan = plan_update(project, release)
                 print(json.dumps(plan, sort_keys=True) if args.json else render_plan(plan))
