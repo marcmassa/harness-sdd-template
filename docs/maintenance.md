@@ -51,4 +51,51 @@ Adoption writes only `.harness/installed.json`, with version `legacy`:
 The project needs the current `.agents/lib/inventory.py`,
 `.agents/schemas/versions.json`, and `.agents/bootstrap.sh` to run the command.
 
-Update planning, apply, and restore are not implemented yet (FEAT-010 T21).
+## Updating an installed project
+
+Updates are driven from the framework source against a project directory. The
+release is a fresh export of the source.
+
+```bash
+./.agents/bootstrap.sh update-plan ../my-project                  # changes nothing
+./.agents/bootstrap.sh update-apply ../my-project --plan <digest> # the digest the plan printed
+./.agents/bootstrap.sh update-restore ../my-project               # undo the last update
+```
+
+The plan compares three things per path: the installed baseline, the file as
+it is now, and the new release.
+
+| Plan action | When | What apply does |
+|---|---|---|
+| `replace` | The file still equals its installed baseline | Replaces it |
+| `add` | The release ships a new file and nothing occupies the path | Creates it |
+| `remove` | The release no longer ships it and you did not change it | Deletes it |
+| `current` | It already equals the release | Records the new baseline |
+| `keep` | The path is project-owned (`seed`) | Nothing |
+| `conflict` | Changed or deleted locally, uncertain baseline, a file of yours at a new path, or a symlink on the way | Nothing. The incoming version is saved under `.harness/backups/<id>/incoming/` for a manual merge |
+
+`update-apply` takes the digest of the plan you reviewed. If the project or
+the release changed since then, it stops and writes nothing. Before changing
+any file it copies the current versions and the inventory to
+`.harness/backups/<id>/` and records a journal there.
+
+If an update is interrupted, the next `update-plan` refuses to run until
+`update-restore` has put the project back. Restore refuses to overwrite a file
+you edited after the update unless you pass `--overwrite-edits`.
+
+A conflict stays a conflict on every later update until you resolve it. Merge
+it by hand so that it equals the release, or declare the file yours:
+
+```bash
+./.agents/bootstrap.sh update-keep ../my-project check.sh AGENTS.md
+```
+
+`update-keep` marks the paths project-owned; updates never propose them again.
+
+For a project installed before inventories existed, run
+`./.agents/bootstrap.sh update-adopt ../my-project` first. It only writes the
+inventory, as described above.
+
+Limits: the update does not merge file contents, does not touch Git, hooks
+configuration, or generated adapters, and the backup is local to the machine
+that applied it. Review `git diff` in the project before committing.

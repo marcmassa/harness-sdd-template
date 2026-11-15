@@ -22,6 +22,11 @@
 #   ./.agents/bootstrap.sh workflow-check        # Validate policy and all work records
 #   ./.agents/bootstrap.sh version               # Framework and format versions; installed inventory status
 #   ./.agents/bootstrap.sh inventory-adopt <dir> # Give a legacy install an inventory, judged against an export in <dir>
+#   ./.agents/bootstrap.sh update-plan <project>  # Non-mutating per-file update plan for an installed project
+#   ./.agents/bootstrap.sh update-apply <project> --plan <digest>  # Apply a reviewed plan, with backup
+#   ./.agents/bootstrap.sh update-restore <project>               # Undo the last update
+#   ./.agents/bootstrap.sh update-keep <project> <path>...        # Make conflicting paths project-owned
+#   ./.agents/bootstrap.sh update-adopt <project>                 # Inventory for a legacy install
 #   ./.agents/bootstrap.sh brief                 # Compact session brief (use instead of reading state files)
 #   ./.agents/bootstrap.sh archive-log <file>    # Move an oversized progress log to progress/archive/
 #   ./.agents/bootstrap.sh detect --clis         # Observe CLI evidence (generated adapters, host hints)
@@ -77,6 +82,16 @@ case "${1:-help}" in
         python3 "$BOOTSTRAP_LIB/inventory.py" --root "$ROOT_DIR" --describe
         exit $?
         ;;
+    update-plan|update-apply|update-restore|update-keep|update-adopt)
+        operation="${1#update-}"
+        shift
+        if [ -z "${1:-}" ]; then
+            echo "Usage: ./.agents/bootstrap.sh update-$operation <project-dir> [options]" >&2
+            exit 1
+        fi
+        python3 "$BOOTSTRAP_LIB/update.py" --source "$ROOT_DIR" "$operation" "$@"
+        exit $?
+        ;;
     inventory-adopt)
         shift
         if [ -z "${1:-}" ]; then
@@ -111,6 +126,8 @@ case "${1:-help}" in
             python3 "$BOOTSTRAP_LIB/team_policy.py" --sanitize-scenarios \
                 "$ROOT_DIR/docs/team-policy/scenarios.json" "$1/docs/team-policy/scenarios.json" || exit $?
         fi
+        # Synced skills are machine-local (git-ignored): a release ships only the sync tooling.
+        find "$1/.agents/skills" -mindepth 1 -maxdepth 1 ! -name 'README.md' ! -name 'sync-skills.sh' -exec rm -rf {} + 2>/dev/null || true
         # Record what was installed: version, formats, and a baseline digest per owned path.
         python3 "$BOOTSTRAP_LIB/inventory.py" --root "$1" --create >/dev/null || exit $?
         exit 0
