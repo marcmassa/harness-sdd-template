@@ -85,6 +85,30 @@ class BriefContentTests(BriefTest):
         self.write('AGENTS.md', 'x' * 500)
         self.assertIn('AGENTS.md is 0.5 KB (budget 0 KB', session_brief.brief(self.root))
 
+    def test_oversized_role_cards_and_descriptions_are_flagged(self):
+        self.features()
+        self.write('.agents/subagents/big/SUBAGENT.md', 'x' * 3500)
+        self.write('.agents/subagents/small/SUBAGENT.md', 'x' * 900)
+        self.write('.agents/agentic.json', json.dumps({'subagents': [
+            {'name': 'big', 'role_file': '.agents/subagents/big/SUBAGENT.md', 'description': 'd' * 200},
+            {'name': 'small', 'role_file': '.agents/subagents/small/SUBAGENT.md', 'description': 'ok'}]}))
+        text = session_brief.brief(self.root)
+        self.assertIn('role big is 3.5 KB (budget 3 KB', text)
+        self.assertIn('role big description is 200 characters (budget 160', text)
+        self.assertNotIn('role small', text)
+
+    def test_shipped_role_cards_fit_the_budget_and_stay_portable(self):
+        for card in sorted((ROOT / '.agents/subagents').glob('*/SUBAGENT.md')):
+            text = card.read_text(encoding='utf-8')
+            self.assertLessEqual(len(text.encode()), session_brief.ROLE_BUDGET, card)
+            for section in ('## Mission', '## Does', '## Does not', '## Rules', '## Workflow',
+                            '## Done when'):
+                self.assertIn(section, text, card)
+            description = text.split('description: "', 1)[1].split('"', 1)[0]
+            self.assertLessEqual(len(description), 200, card)
+            for vendor in ('Claude', 'Gemini', 'OpenCode', 'Cursor', 'Codex', 'GPT'):
+                self.assertNotIn(vendor, text, '{} names {}'.format(card, vendor))
+
     def test_missing_or_invalid_state_is_reported_not_crashed(self):
         self.assertIn('feature_list.json not found', session_brief.brief(self.root))
         self.write('feature_list.json', '{not json')

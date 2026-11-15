@@ -73,3 +73,33 @@ A: No. The framework is stack-agnostic. It works for any software project — ba
 ---
 
 > **Based on:** Real-world implementations in multiple production projects.
+
+## Writing a role card
+
+A role card is `.agents/subagents/<name>/SUBAGENT.md`. It is loaded every time
+the role acts, and its `description` is listed in every session, so both stay
+short. Start from `.agents/subagents/agent-template/`.
+
+| Part | Content | Budget |
+|---|---|---|
+| `description` (frontmatter and manifest) | One sentence: what the role does and when to use it | 160 characters |
+| `## Mission` | The problem the role owns, in one or two sentences | |
+| `## Does` / `## Does not` | Responsibilities as actions; what it hands over, and to which role | |
+| `## Rules` | Constraints the role must always follow | |
+| `## Workflow` | Only the steps that differ from other roles | |
+| `## Skills` | Which skill to load, and in which situation | |
+| `## Done when` | Observable results that close the work | |
+| Whole file | | 3 KB |
+
+`./.agents/bootstrap.sh brief` warns when a role card or a description exceeds
+its budget.
+
+Keep the card usable by any agent CLI: plain Markdown, repository-relative
+paths, and no tool or model names of one vendor. Three kinds of content do not
+belong in it:
+
+- Who the role is and how it decides under ambiguity: `SOUL.md`.
+- Conventions that apply to several roles: `steering/`.
+- Long procedures and reference material: a skill or a file under `docs/`,
+  linked from the card.
+
