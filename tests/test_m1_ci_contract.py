@@ -17,6 +17,12 @@ class CIContractTests(unittest.TestCase):
         self.assertNotIn('pull_request_target', workflow)
         self.assertNotIn('write-all', workflow)
 
+    def test_new_branch_push_is_compared_with_the_default_branch(self):
+        workflow = (ROOT / '.github/workflows/ci.yml').read_text()
+        new_branch = workflow.index('--base "origin/$DEFAULT_BRANCH"')
+        self.assertLess(new_branch, workflow.index('--initial'))
+        self.assertIn('DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}', workflow)
+
     def test_every_action_is_pinned_to_a_full_commit(self):
         pinned = re.compile(r'^[\w.-]+/[\w./-]+@[0-9a-f]{40}$')
         for workflow in sorted((ROOT / '.github/workflows').glob('*.yml')):

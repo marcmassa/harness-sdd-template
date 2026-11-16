@@ -31,10 +31,15 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REVISION: ${{ github.event.pull_request.base.sha || github.event.before }}
           CANDIDATE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
             python3 .githooks/pre-commit --base "$BASE_REVISION" --candidate "$CANDIDATE_REVISION"
+          elif [[ "$BASE_REVISION" =~ ^0+$ ]] && git rev-parse -q --verify "origin/$DEFAULT_BRANCH^{commit}" >/dev/null \
+              && [[ "$(git rev-parse "origin/$DEFAULT_BRANCH")" != "$CANDIDATE_REVISION" ]]; then
+            # A new branch is not an initial push: check what it changes relative to the default branch.
+            python3 .githooks/pre-commit --base "origin/$DEFAULT_BRANCH" --candidate "$CANDIDATE_REVISION"
           elif [[ "$BASE_REVISION" =~ ^0+$ ]]; then
             python3 .githooks/pre-commit --initial --candidate "$CANDIDATE_REVISION"
           else
