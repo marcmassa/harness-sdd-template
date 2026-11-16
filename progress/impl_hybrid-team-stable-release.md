@@ -231,3 +231,32 @@ Files: `.agents/lib/ownership.py` (validation), `.agents/lib/handoffs.py`
 Documented limit: tracked records are not a distributed lock; two clones can
 work offline on the same feature and the conflict appears when branches meet.
 
+## T25 implemented 2026-11-16, awaiting review; pilot owners not identified
+
+| Requirement | Task | Evidence (tests/test_release.py) | State |
+|---|---|---|---|
+| R30 | T25 | PilotReportTests: every required field, context rules, consent, six exercises, five metrics, human review. Synthetic reports validate and never count; the shipped example is labeled synthetic; the repository holds no real report | Local PASS |
+| R31 | T25 | ReadinessTests: ready only with checked milestone tasks, green CI on all four combinations for the candidate, current matrix, two distinct real pilots, and no open blocker; each gap is named. A blocking category blocks whatever severity label it carries | Local PASS |
+| R32 | T25 | Readiness writes a report and creates no tag; every report states that publication needs explicit authorization | Local PASS |
+
+Files: `.agents/schemas/release-evidence.json`, `.agents/lib/release.py`,
+`docs/pilots/README.md`, `docs/pilots/example-synthetic.json`,
+`releases/1.0.0/defects.json`, `bootstrap.sh pilot-validate` and
+`release-readiness`.
+
+Deviation from the design: pilot reports are JSON (`docs/pilots/<id>.json`),
+not Markdown, so the validator can check them.
+
+Not done, and not doable by an agent: identifying consenting human pilot
+owners. `docs/pilots/README.md` says none has been identified.
+
+Open defect D-001 (`releases/1.0.0/defects.json`): `trusted-review.yml` ended in
+`startup_failure` on three runs on 2026-11-16 between 17:24 and 17:37 UTC with an
+unchanged workflow file, then ran successfully again at 18:26 UTC. Cause not
+determined. It stays recorded as an open release blocker (incorrect-gating) until
+the maintainer decides its disposition.
+
+`./.agents/bootstrap.sh release-readiness 1.0.0` on this repository reports
+`release-candidate`: milestone tasks unchecked, no CI evidence file, no real
+pilot reports, and D-001 open.
+

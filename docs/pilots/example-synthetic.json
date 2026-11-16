@@ -1,0 +1,33 @@
+{
+  "format_version": 1,
+  "id": "example-synthetic",
+  "kind": "synthetic",
+  "context": "small-team",
+  "date_range": {"from": "2026-11-16", "to": "2026-11-16"},
+  "framework_version": "0.9.0",
+  "work_summary": "SYNTHETIC EXAMPLE. Not a real pilot. It shows the report format and never counts toward release readiness.",
+  "baseline": "Invented: before the framework, a session started by reading about 60 KB of state files.",
+  "participants": [
+    {"role": "maintainer", "kind": "human", "cli": "claude-code", "consent": true},
+    {"role": "implementer", "kind": "agent", "cli": "claude-code"}
+  ],
+  "exercises": {
+    "installation": {"done": true, "notes": "Invented: export, /init, check.sh passed.", "evidence_ref": "none"},
+    "approved_change": {"done": true, "notes": "Invented: one SDD feature from spec to done.", "evidence_ref": "none"},
+    "code_review": {"done": true, "notes": "Invented: closing review by the human.", "evidence_ref": "none"},
+    "handoff": {"done": true, "notes": "Invented: one workflow-handoff, resumed by a second session.", "evidence_ref": "none"},
+    "upgrade": {"done": true, "notes": "Invented: update-plan and update-apply with one conflict.", "evidence_ref": "none"},
+    "recovery": {"done": true, "notes": "Invented: update-restore after the upgrade.", "evidence_ref": "none"}
+  },
+  "metrics": {
+    "onboarding_minutes": 30,
+    "approval_wait_minutes": 10,
+    "rework_count": 1,
+    "post_close_defects": 0,
+    "false_blocks": 0
+  },
+  "unresolved_issues": [
+    {"summary": "Invented example of a minor issue.", "severity": "minor", "disposition": "Accepted for the example."}
+  ],
+  "human_review": {"reviewed": true, "reviewer_role": "maintainer", "evidence_ref": "This file is an example; nobody reviewed a pilot."}
+}

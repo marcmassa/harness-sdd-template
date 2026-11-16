@@ -62,7 +62,9 @@ tags, packages, or publishes.
 1. Set `framework_version` in `.agents/schemas/versions.json`. A change to the
    manifest, work-record, or inventory format adds a format version and keeps
    the previous one in `supported` until a migration exists.
-2. Run `./check.sh` and confirm CI is green on `main`.
+2. Run `./check.sh` and confirm CI is green on `main`. Record that run in
+   `releases/<version>/ci.json`, and run `./.agents/bootstrap.sh release-readiness <version>`:
+   it lists the evidence still missing ([docs/pilots/README.md](docs/pilots/README.md)).
 3. Exercise an update from the previous release with
    `./.agents/bootstrap.sh update-plan` on an exported copy of that release.
 4. Tag and publish. Publication is a separate step that requires the

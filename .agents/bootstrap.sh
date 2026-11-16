@@ -30,6 +30,8 @@
 #   ./.agents/bootstrap.sh update-remove <project> [--plan <digest>]  # Remove unchanged framework files by inventory
 #   ./.agents/bootstrap.sh update-adopt <project>                 # Inventory for a legacy install
 #   ./.agents/bootstrap.sh capabilities [--write|--check]  # Adapter capability matrix (docs/compatibility.md)
+#   ./.agents/bootstrap.sh pilot-validate <file>     # Validate a pilot report (docs/pilots/)
+#   ./.agents/bootstrap.sh release-readiness <version> [--write]  # Offline readiness report; never publishes
 #   ./.agents/bootstrap.sh brief                 # Compact session brief (use instead of reading state files)
 #   ./.agents/bootstrap.sh archive-log <file>    # Move an oversized progress log to progress/archive/
 #   ./.agents/bootstrap.sh detect --clis         # Observe CLI evidence (generated adapters, host hints)
@@ -93,6 +95,24 @@ case "${1:-help}" in
             exit 1
         fi
         python3 "$BOOTSTRAP_LIB/update.py" --source "$ROOT_DIR" "$operation" "$@"
+        exit $?
+        ;;
+    pilot-validate)
+        shift
+        if [ -z "${1:-}" ]; then
+            echo "Usage: ./.agents/bootstrap.sh pilot-validate docs/pilots/<pilot-id>.json" >&2
+            exit 1
+        fi
+        python3 "$BOOTSTRAP_LIB/release.py" --root "$ROOT_DIR" pilot "$1"
+        exit $?
+        ;;
+    release-readiness)
+        shift
+        if [ -z "${1:-}" ]; then
+            echo "Usage: ./.agents/bootstrap.sh release-readiness <version> [--write]" >&2
+            exit 1
+        fi
+        python3 "$BOOTSTRAP_LIB/release.py" --root "$ROOT_DIR" readiness "$@"
         exit $?
         ;;
     capabilities)

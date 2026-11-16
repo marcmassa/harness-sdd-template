@@ -69,16 +69,16 @@ self-declared identity never satisfies required repository authentication.
 
 ## M4 — Shared work and recovery
 
-- [ ] **T16** — Add per-feature ownership, branch/worktree, dependency and
+- [x] **T16** — Add per-feature ownership, branch/worktree, dependency and
   revision records; keep default concurrency 1 with explicit opt-in overrides.
   _(R18–R19, R23)_
-- [ ] **T17** — Implement local claim conflicts, merge-time conflict detection,
+- [x] **T17** — Implement local claim conflicts, merge-time conflict detection,
   dependency-cycle checks, and authorized reassignment preserving history.
   Explicitly document cross-clone locking limits. _(R19, R21)_
-- [ ] **T18** — Add immutable handoffs and old-session migration; exercise two
+- [x] **T18** — Add immutable handoffs and old-session migration; exercise two
   independent worktrees and a third participant resuming from recorded state.
   _(R18, R20–R21)_
-- [ ] **T19** — Validate an external-data instruction scenario, conflicting
+- [x] **T19** — Validate an external-data instruction scenario, conflicting
   claims, stale handoff revision, abandoned work, and ./check.sh. _(R18–R22)_
 
 **M4 exit:** independent work records do not overwrite one another; conflicts
@@ -86,19 +86,19 @@ and reassignment are visible and recoverable.
 
 ## M5 — Distribution and maintenance
 
-- [ ] **T20** — Define framework/format versions, compatibility ranges, inventory
+- [x] **T20** — Define framework/format versions, compatibility ranges, inventory
   adoption for legacy consumers, and unknown-version rejection. _(R23, R26)_
-- [ ] **T21** — Implement non-mutating update plans and safe apply/restore with
+- [x] **T21** — Implement non-mutating update plans and safe apply/restore with
   three-way comparisons, backups, journal, digest rechecks, and narrow ownership.
   Test traversal, symlinks, interruption, changed files, and foreign configuration.
   _(R24–R26)_
-- [ ] **T22** — Publish the adapter capability matrix with evidence links;
+- [x] **T22** — Publish the adapter capability matrix with evidence links;
   document native plugin packaging as optional pending FEAT-009 approval.
   _(R26–R27)_
-- [ ] **T23** — Split touched oversized authored files; shorten AGENTS.md to
+- [x] **T23** — Split touched oversized authored files; shorten AGENTS.md to
   navigation; document contribution, hook install, team policy, migration,
   update/rollback, and release ownership. Validate links and claims. _(R28–R29)_
-- [ ] **T24** — Exercise legacy upgrade, clean install, rollback, removal, all
+- [x] **T24** — Exercise legacy upgrade, clean install, rollback, removal, all
   five adapter entry points, and ./check.sh. Record supported versus skipped
   native-tool checks without claiming skips are validation. _(R23–R29)_
 
@@ -107,7 +107,7 @@ files; documentation states actual capabilities and compatibility.
 
 ## M6 — Real pilot and stable evidence
 
-- [ ] **T25** — Prepare pilot/report and readiness formats, test missing/invalid
+- [x] **T25** — Prepare pilot/report and readiness formats, test missing/invalid
   reports, and identify consenting human pilot owners. Synthetic test fixtures
   must be labeled and cannot count toward the two real pilots. _(R30–R31)_
 - [ ] **T26** — Execute the small-team pilot: baseline metrics, installation,
