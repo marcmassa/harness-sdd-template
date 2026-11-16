@@ -100,6 +100,24 @@ For a project installed before inventories existed, run
 `./.agents/bootstrap.sh update-adopt ../my-project` first. It only writes the
 inventory, as described above.
 
+## Removing the framework from a project
+
+```bash
+./.agents/bootstrap.sh clean --all                                # in the project: generated adapters
+./.agents/bootstrap.sh update-remove ../my-project                # from the source: the plan, changes nothing
+./.agents/bootstrap.sh update-remove ../my-project --plan <digest>
+```
+
+Removal works from the inventory. It deletes framework-owned files that still
+equal their installed baseline, the interpreter caches beside them, and the
+directories that leaves empty. It keeps, and lists, every file you changed.
+Project-owned files (`feature_list.json`, `.agents/agentic.json`, `DESIGN.md`,
+`progress/`, your role cards) and anything the inventory does not list stay.
+Removed files are backed up, and `update-restore` puts them back.
+
+It does not unset `core.hooksPath`, change Git or branch configuration, or
+delete `.harness/`.
+
 Limits: the update does not merge file contents, does not touch Git, hooks
 configuration, or generated adapters, and the backup is local to the machine
 that applied it. Review `git diff` in the project before committing.
