@@ -9,6 +9,7 @@ Run from the framework source against a project:
     keep     marks conflicting paths as project-owned (never updated again)
     accept   resolves named conflicts by taking the release version, with backup
     adopt    gives a legacy project an inventory (see inventory.py)
+    remove   removes unchanged framework files by inventory (see removal.py)
 
 Three-way rule: a file is replaced only if it still equals its installed
 baseline. A locally changed, deleted, or uncertain file is a conflict and is
@@ -346,7 +347,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', help='framework source to export as the release')
     parser.add_argument('--release', help='an already exported release directory')
-    parser.add_argument('operation', choices=('plan', 'apply', 'restore', 'keep', 'accept', 'adopt'))
+    parser.add_argument('operation', choices=('plan', 'apply', 'restore', 'keep', 'accept', 'adopt', 'remove'))
     parser.add_argument('project')
     parser.add_argument('paths', nargs='*')
     parser.add_argument('--plan', dest='plan_digest')
@@ -362,6 +363,13 @@ def main(argv=None):
             return 0
         if args.operation == 'keep':
             print(json.dumps(keep(project, args.paths), sort_keys=True))
+            return 0
+        if args.operation == 'remove':
+            import removal  # removal imports this module's helpers
+            if args.plan_digest:
+                print(json.dumps(removal.apply_removal(project, args.plan_digest), sort_keys=True))
+            else:
+                print(removal.render_plan(removal.plan_removal(project)))
             return 0
         with tempfile.TemporaryDirectory(prefix='harness-release-') as temporary:
             release = Path(args.release) if args.release else build_release(
