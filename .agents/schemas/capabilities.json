@@ -1,0 +1,76 @@
+{
+  "format_version": 1,
+  "levels": {
+    "native-config": "Written into the CLI's own configuration. The CLI is expected to apply it; this framework's tests check that it is rendered, not that the CLI enforces it.",
+    "instruction-only": "Text the model is asked to follow. Nothing stops an agent that ignores it.",
+    "not-rendered": "The manifest value does not reach this CLI's files at all.",
+    "manual-setup": "Works after a one-time step the adapter does not perform.",
+    "none": "The CLI has no equivalent and the adapter generates nothing."
+  },
+  "aspects": ["instructions", "roles", "commands", "edit_permissions", "lifecycle_hooks", "skills"],
+  "adapters": {
+    "opencode": {
+      "generates": ["opencode.json"],
+      "instructions": {"level": "native-config", "detail": "`instructions[]` copied to `opencode.json`; the CLI loads those files."},
+      "roles": {"level": "native-config", "detail": "One `agent.<name>` entry per sub-agent, with a prompt that points at its `SUBAGENT.md`."},
+      "commands": {"level": "native-config", "detail": "One `command.<name>` entry per command, pointing at its body in `.agents/commands/`."},
+      "edit_permissions": {"level": "native-config", "detail": "`permission.edit` is copied per agent into `opencode.json`."},
+      "lifecycle_hooks": {"level": "instruction-only", "detail": "Command bodies call `workflow-transition` and `workflow-run-hook`; no native hook is registered."},
+      "skills": {"level": "native-config", "detail": "`skills.paths` copied; the CLI discovers `SKILL.md` files there."},
+      "unsupported": ["Per-agent permissions other than `edit`", "Stack-aware permission overrides for roles other than `implementer`"],
+      "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_opencode_writes_permissions_into_native_config", "tests/test_cli_adapter_parity.sh"]
+    },
+    "claude-code": {
+      "generates": ["CLAUDE.md", ".claude/agents/<name>.md", ".claude/commands/<name>.md", ".claude/settings.json"],
+      "instructions": {"level": "native-config", "detail": "`CLAUDE.md` is loaded by the CLI; it points at `AGENTS.md`."},
+      "roles": {"level": "native-config", "detail": "One `.claude/agents/<name>.md` stub per sub-agent."},
+      "commands": {"level": "native-config", "detail": "One `.claude/commands/<name>.md` stub per command."},
+      "edit_permissions": {"level": "instruction-only", "detail": "The permission map is printed in each agent stub. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty."},
+      "lifecycle_hooks": {"level": "instruction-only", "detail": "Command bodies call `workflow-transition` and `workflow-run-hook`; no native hook is registered."},
+      "skills": {"level": "manual-setup", "detail": "The CLI discovers skills under `.claude/skills/`; link `.agents/skills` there once."},
+      "unsupported": ["Blocking edits to `specs/**` or generated adapters", "Per-sub-agent file permissions"],
+      "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_claude_code_permissions_are_instruction_only", "tests/test_cli_adapter_parity.sh"]
+    },
+    "gemini-cli": {
+      "generates": ["GEMINI.md", ".gemini/commands/<name>.toml"],
+      "instructions": {"level": "native-config", "detail": "`GEMINI.md` is loaded by the CLI."},
+      "roles": {"level": "instruction-only", "detail": "Roles are sections of `GEMINI.md`; the CLI has no separate sub-agent concept."},
+      "commands": {"level": "native-config", "detail": "One `.gemini/commands/<name>.toml` per command."},
+      "edit_permissions": {"level": "instruction-only", "detail": "Printed in `GEMINI.md` as a soft permission contract."},
+      "lifecycle_hooks": {"level": "instruction-only", "detail": "Command bodies call `workflow-transition` and `workflow-run-hook`."},
+      "skills": {"level": "instruction-only", "detail": "`GEMINI.md` tells the model to read `SKILL.md` files under `.agents/skills/`."},
+      "unsupported": ["Hard file permissions", "Role isolation within a session"],
+      "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_gemini_declares_its_permissions_soft", "tests/test_cli_adapter_parity.sh"]
+    },
+    "cursor": {
+      "generates": [".cursor/rules/harness-sdd.mdc", ".cursor/commands/harness-<name>.md"],
+      "instructions": {"level": "native-config", "detail": "An always-applied project rule; the CLI also reads `AGENTS.md`."},
+      "roles": {"level": "instruction-only", "detail": "Role pointers in the rule body."},
+      "commands": {"level": "native-config", "detail": "One `.cursor/commands/harness-<name>.md` per command; the prefix keeps user commands untouched."},
+      "edit_permissions": {"level": "not-rendered", "detail": "The manifest's permission map does not appear in the rule; only the general rule not to edit approved specs does."},
+      "lifecycle_hooks": {"level": "instruction-only", "detail": "No `.cursor/hooks.json`: no Cursor event corresponds to an SDD transition. Command bodies call the workflow commands."},
+      "skills": {"level": "instruction-only", "detail": "The rule tells the model to read skills under `.agents/skills/`."},
+      "unsupported": ["File permissions", "Native lifecycle hooks for SDD transitions"],
+      "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_cursor_does_not_render_the_permission_map", "tests/test_plugin_adapters.sh"]
+    },
+    "codex": {
+      "generates": [],
+      "instructions": {"level": "native-config", "detail": "The CLI reads `AGENTS.md`, which is versioned source and never generated."},
+      "roles": {"level": "instruction-only", "detail": "Described in `AGENTS.md` and the role cards."},
+      "commands": {"level": "none", "detail": "No project-level slash commands; a workflow is run by asking the agent to follow `.agents/commands/<name>.md`."},
+      "edit_permissions": {"level": "none", "detail": "The CLI has no project file-permission concept."},
+      "lifecycle_hooks": {"level": "instruction-only", "detail": "Workflow bodies call the workflow commands."},
+      "skills": {"level": "native-config", "detail": "The CLI scans `.agents/skills` from the working directory up to the repository root."},
+      "unsupported": ["Slash commands", "File permissions", "Any generated file"],
+      "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_codex_generates_nothing", "tests/test_plugin_adapters.sh"]
+    }
+  },
+  "cli_independent_controls": [
+    {"control": "`./check.sh` gateway", "enforced_by": "Whoever runs it, and CI on every push and pull request", "evidence": "tests/test_m1_quality.py"},
+    {"control": "Validated status transitions (`workflow-transition`)", "enforced_by": "The command itself; a hand edit of `feature_list.json` bypasses it", "evidence": "tests/test_workflow_state.py"},
+    {"control": "Approved spec bound by digest", "enforced_by": "`./check.sh` while the feature is in progress, and the `done` transition", "evidence": "tests/test_workflow_commands.py"},
+    {"control": "Staged-file size limit", "enforced_by": "Git pre-commit hook once `core.hooksPath` is set, and CI on changed files", "evidence": "tests/test_token_limit.py"},
+    {"control": "Trusted repository review", "enforced_by": "`trusted-review.yml` as a required check on the protected default branch", "evidence": "tests/test_trusted_verify.py"}
+  ],
+  "native_plugin_packaging": "Optional and not shipped. Distributing the framework as a Claude Code marketplace plugin and an OpenCode plugin, which would add real blocking of edits to approved specs and generated adapters in OpenCode, is specified in FEAT-009 (`specs/plugin-packaging/`) and awaits human approval."
+}

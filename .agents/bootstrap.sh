@@ -28,6 +28,7 @@
 #   ./.agents/bootstrap.sh update-keep <project> <path>...        # Make conflicting paths project-owned
 #   ./.agents/bootstrap.sh update-accept <project> <path>...      # Resolve conflicts with the release version (backed up)
 #   ./.agents/bootstrap.sh update-adopt <project>                 # Inventory for a legacy install
+#   ./.agents/bootstrap.sh capabilities [--write|--check]  # Adapter capability matrix (docs/compatibility.md)
 #   ./.agents/bootstrap.sh brief                 # Compact session brief (use instead of reading state files)
 #   ./.agents/bootstrap.sh archive-log <file>    # Move an oversized progress log to progress/archive/
 #   ./.agents/bootstrap.sh detect --clis         # Observe CLI evidence (generated adapters, host hints)
@@ -93,6 +94,11 @@ case "${1:-help}" in
         python3 "$BOOTSTRAP_LIB/update.py" --source "$ROOT_DIR" "$operation" "$@"
         exit $?
         ;;
+    capabilities)
+        shift
+        python3 "$BOOTSTRAP_LIB/capabilities.py" --root "$ROOT_DIR" "$@"
+        exit $?
+        ;;
     inventory-adopt)
         shift
         if [ -z "${1:-}" ]; then
@@ -110,7 +116,7 @@ case "${1:-help}" in
         fi
         python3 "$RENDERER" --export "$1" --root "$ROOT_DIR" || exit $?
         # Small consumer guides and the shared hook policy accompany the gateway.
-        for rel in docs/team-policy.md docs/workflow-contract.md docs/trusted-review.md docs/team-policy/example.json docs/framework-overview.md docs/framework-workflow.md docs/framework-customization.md docs/quality-checks.md .githooks/pre-commit .githooks/token_limit.py .githooks/README.md; do
+        for rel in docs/compatibility.md docs/maintenance.md docs/team-policy.md docs/workflow-contract.md docs/trusted-review.md docs/team-policy/example.json docs/framework-overview.md docs/framework-workflow.md docs/framework-customization.md docs/quality-checks.md .githooks/pre-commit .githooks/token_limit.py .githooks/README.md; do
             if [ -f "$ROOT_DIR/$rel" ]; then
                 mkdir -p "$1/$(dirname "$rel")" || exit $?
                 cp -p "$ROOT_DIR/$rel" "$1/$rel" || exit $?

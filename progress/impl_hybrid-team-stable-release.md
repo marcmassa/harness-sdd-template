@@ -162,3 +162,17 @@ tests exist. R15 state: Local PASS plus remote boundary evidence. Still not
 observed: `provider-verified` with a real second reviewer, and the ruleset
 binding; both need a repository that opts in to repository mode.
 
+## T22 implemented 2026-11-16, awaiting review
+
+| Requirement | Task | Evidence (tests/test_capability_matrix.py) | State |
+|---|---|---|---|
+| R27 | T22 | AdapterClaimTests: each adapter rendered from one fixture; generated files equal the declared outputs; permission level checked per adapter. MatrixDocumentTests: document generated from the data file, drift detected, every evidence reference exists | Local PASS |
+| R26 (part) | T22 | Matrix lists the exact paths each adapter generates; no adapter owns a whole tool directory | Local PASS |
+
+Files: `.agents/schemas/capabilities.json`, `.agents/lib/capabilities.py`,
+`docs/compatibility.md` (generated), `bootstrap.sh capabilities`. Native plugin
+packaging is stated as optional and pending FEAT-009 approval. Found while
+verifying: `CLAUDE.md` claimed that `.claude/settings.json` enforces edit
+permissions; its `deny` list is empty. The claim is corrected and a test
+keeps it out.
+
