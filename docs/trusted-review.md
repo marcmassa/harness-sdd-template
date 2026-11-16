@@ -121,3 +121,28 @@ the ruleset against a failed and a successful candidate.
   `validate` matrix in `ci.yml` reruns it in CI.
 - Only GitHub is supported. Other hosts use local mode, which is explicitly
   weaker.
+
+## Evidence so far
+
+Recorded 2026-11-16 against `marcmassa/harness-sdd-template`.
+
+| What | How | Result |
+|---|---|---|
+| Real provider data and real fetch | `trusted_verify.py --trusted-ci` run from a scratch clone with a repository-mode policy, the CI environment set by hand, against pull request #4 | Context accepted; pull request and reviews read from the REST API; `refs/pull/4/head` fetched and equal to the API head; rejected because no allowed reviewer other than the author had approved the head |
+| Stale head, rejected token, missing pull request | Same setup, one input changed each time | `rejected`, `provider-unavailable` (HTTP 401), `provider-unavailable` (HTTP 404); the token never appears in output |
+| No token, not in GitHub Actions | Same setup | `missing-trusted-context`, exit 2 |
+| Workflow source | Draft pull request #5 opened against a non-default base branch that carries the workflow | GitHub did not start the workflow: `pull_request_target` uses the default branch's file only |
+
+Not yet observed:
+
+- A run of `trusted-review.yml` inside GitHub Actions. It needs the workflow
+  on the default branch first.
+- The `provider-verified` result with real data. It needs an approving review
+  from an allowed reviewer who is not the pull request author, so a second
+  account.
+- How a ruleset binds the required check to this workflow.
+
+The setup that produced the first three rows is not the trusted job: the
+environment was set by a person. It shows that the code handles real provider
+responses, not that the privilege boundary holds in Actions.
+
