@@ -1,0 +1,27 @@
+{
+  "format_version": 1,
+  "description": "Contracts for pilot reports (docs/pilots/<id>.json) and release evidence (releases/<version>/), enforced by .agents/lib/release.py.",
+  "pilot": {
+    "kinds": ["real", "synthetic"],
+    "contexts": {
+      "small-team": "At least one human and one agent.",
+      "team": "At least two humans using at least two supported CLIs."
+    },
+    "exercises": ["installation", "approved_change", "code_review", "handoff", "upgrade", "recovery"],
+    "metrics": ["onboarding_minutes", "approval_wait_minutes", "rework_count", "post_close_defects", "false_blocks"],
+    "issue_severities": ["blocker", "major", "minor"],
+    "clis": ["opencode", "gemini-cli", "claude-code", "cursor", "codex"]
+  },
+  "release": {
+    "blocker_categories": {
+      "data-loss": "A framework operation lost or overwrote user data.",
+      "incorrect-gating": "A mandatory gate passed when it should have failed, or could not run.",
+      "authentication-bypass-claim": "Something was reported as authenticated or verified when it was not.",
+      "matrix-test-failure": "A test failed on a supported operating system and Python version.",
+      "broken-install-update-recovery": "A documented installation, update, or recovery path does not work."
+    },
+    "defect_statuses": ["open", "resolved"],
+    "ci_matrix": ["ubuntu-latest/3.10", "ubuntu-latest/3.13", "macos-latest/3.10", "macos-latest/3.13"],
+    "milestone_tasks": "T1-T27"
+  }
+}

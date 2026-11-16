@@ -1,0 +1,9 @@
+[
+  {
+    "id": "D-001",
+    "summary": "trusted-review.yml ends in startup_failure on every pull request since 2026-11-16 17:24 UTC, with an unchanged workflow file",
+    "category": "incorrect-gating",
+    "status": "open",
+    "observed": "Runs 43918035681, 43919940399, 43920222020. No job starts and no check appears on the pull request. It ran successfully on pull requests 6 to 9. Cause unknown: the reason is not exposed through the API."
+  }
+]
