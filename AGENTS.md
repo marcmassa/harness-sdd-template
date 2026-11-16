@@ -88,8 +88,8 @@ body when the command is invoked, not before. `/status` shows the brief.
    is done, blockers, next step. Keep it under 3 KB; replace, do not append.
 3. When a task or feature finishes, append a summary of at most five lines to
    `progress/history.md` and reset `progress/current.md` to its template.
-4. If the brief reports a progress log over budget, run
-   `./.agents/bootstrap.sh archive-log progress/<file>.md`.
+4. If the brief reports a progress log over budget, run `archive-log` on it. Under a
+   team policy, pass work on with `workflow-handoff` (`docs/workflow-contract.md`).
 5. Leave no temporary files, debug output, or TODOs without context.
 
 ## §6 — Repository stack

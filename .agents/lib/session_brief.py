@@ -109,6 +109,14 @@ def _active_lines(root, feature):
     lines.append(detail + (' · next: ' + upcoming if upcoming else ' · all tasks checked'))
     if feature.get('pending_hook'):
         lines.append('  failed lifecycle hook pending: run workflow-recover before continuing')
+    try:
+        record = _json(root / 'progress/work/{}.json'.format(feature.get('name')))
+    except ValueError:
+        record = None
+    if isinstance(record, dict) and record.get('owner'):
+        handoff = record.get('handoff')
+        lines.append('  owner: {} · handoff: {}'.format(_short(record['owner'], 40), handoff.get(
+            'path') if isinstance(handoff, dict) else 'none'))
     return lines
 
 

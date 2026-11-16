@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 import git_state
+import ownership
 from safe_fs import list_directory
 from team_policy import load_active_policy, repository_path, verify_scenario_acceptance
 from workflow import (effective_max_concurrent, find_feature, spec_directory,
@@ -138,6 +139,7 @@ def check_repository(root):
         seen[feature['id']] = record
         if result and result.get('approval', {}).get('assurance') == 'pending-trusted-verification':
             pending_trust += 1
+    ownership.validate_repository(root_path, data, seen)
     historical = historical_exemptions(root_path, data, policy, seen)
     committed = git_state.paths_in_history(root_path, WORK + '/')
     for feature in data['features']:
