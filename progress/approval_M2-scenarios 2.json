@@ -1,0 +1,16 @@
+{
+  "feature_id": "FEAT-010",
+  "task": "T10",
+  "decision": "Accepted all six decisions",
+  "source": "Human user message in this chat: Acepto las seis decisiones. Continúa con M2 y los siguientes hitos de la spec. Delega a Opencode y supervisa el resultado",
+  "assurance": "Declared human chat approval, not provider-authenticated identity",
+  "scenario_ids": [
+    "small-fix",
+    "incompatible-change",
+    "approved-spec-change",
+    "failed-check",
+    "external-instruction",
+    "abandoned-work"
+  ],
+  "accepted_decisions_sha256": "a9b512173258f6fbba802546e9fb596d084e15e7f330d1affd27adc45405440f"
+}

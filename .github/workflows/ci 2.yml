@@ -1,0 +1,42 @@
+name: Framework validation
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Validate framework
+        run: ./check.sh
+      - name: Check changed authored files
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REVISION: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CANDIDATE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            python3 .githooks/pre-commit --base "$BASE_REVISION" --candidate "$CANDIDATE_REVISION"
+          elif [[ "$BASE_REVISION" =~ ^0+$ ]]; then
+            python3 .githooks/pre-commit --initial --candidate "$CANDIDATE_REVISION"
+          else
+            python3 .githooks/pre-commit --direct --base "$BASE_REVISION" --candidate "$CANDIDATE_REVISION"
+          fi
