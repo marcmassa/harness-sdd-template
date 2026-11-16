@@ -54,6 +54,8 @@ what the task requires (§2).
 | `docs/workflow-contract.md`, `docs/team-policy.md` | The project declares `team_policy`, or a gate fails |
 | `docs/framework-customization.md`, `docs/quality-checks.md` | Adapting `check.sh` or the manifest |
 | `.agents/agentic.json`, `.agents/adapters/<cli>/` | Changing agents, skills, commands, or adapters |
+| `docs/compatibility.md` | You need to know what your CLI enforces and what is only an instruction |
+| `docs/maintenance.md` | Updating the framework in a project, or checking versions |
 | `progress/history.md`, `progress/decisions.md` | A past decision is needed: search them, do not read them whole |
 | `feature_list.json` | Adding a feature: append an entry, do not rewrite the file |
 

@@ -55,6 +55,7 @@ Steering files direct agent behavior globally or per-agent. Declared in
 {{ stack_labels }}
 
 Skills live in `.agents/skills/`; load one when its frontmatter description
-matches the task. `.claude/settings.json` enforces each sub-agent's edit
-permissions. `AGENTS.md` is the navigation map: read a linked file only when
-the task needs it.
+matches the task. Each sub-agent's edit permissions are a contract stated in
+its `.claude/agents/<name>.md`; `.claude/settings.json` does not block edits
+(see `docs/compatibility.md`). `AGENTS.md` is the navigation map: read a
+linked file only when the task needs it.
