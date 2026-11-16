@@ -104,7 +104,8 @@ def _is_test_path(relative):
 def _python_symbol(content, parts, relative):
     try:
         tree = ast.parse(content)
-    except (SyntaxError, ValueError):
+    except (SyntaxError, ValueError, RecursionError, MemoryError):
+        # The source may come from an unreviewed pull request: a hostile file must not crash the gate.
         raise ValueError('cannot parse test source: ' + relative)
     functions = (ast.FunctionDef, ast.AsyncFunctionDef)
     top = {node.name: node for node in tree.body

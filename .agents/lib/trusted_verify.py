@@ -189,6 +189,14 @@ def verify(root, environ, client_factory=GitHubClient, fetcher=fetch_pull_object
         return 1, {'result': 'provider-unavailable', 'error': str(error)}
     except (ValueError, KeyError, TypeError, OSError) as error:
         return 1, {'result': 'rejected', 'error': str(error)}
+    except Exception as error:  # noqa: BLE001 - anything unforeseen must also fail closed, visibly
+        return 1, {'result': 'rejected', 'error': 'unexpected {}'.format(type(error).__name__)}
+
+
+def _inline(value):
+    """Messages can quote pull-request data: keep them as one line of inert text in the summary."""
+    text = ' '.join(str(value).split())
+    return ''.join(char if char.isalnum() or char in ' .,:;_-/#()=' else '?' for char in text)[:300]
 
 
 def _summary(result, environ, root):
@@ -198,9 +206,10 @@ def _summary(result, environ, root):
     lines = ['## Harness SDD trusted review: {}'.format(result['result']), '']
     for key in ('pull_request', 'candidate', 'assurance', 'error', 'reason'):
         if key in result:
-            lines.append('- {}: `{}`'.format(key, result[key]))
+            lines.append('- {}: `{}`'.format(key, _inline(result[key])))
     for feature in result.get('features', []):
-        lines.append('- {feature}: {status}, {gate}'.format(**feature))
+        lines.append('- {}: {}, {}'.format(*(_inline(feature.get(key)) for key in (
+            'feature', 'status', 'gate'))))
     with open(path, 'a', encoding='utf-8') as stream:
         stream.write('\n'.join(lines) + '\n')
 

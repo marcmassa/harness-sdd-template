@@ -329,6 +329,12 @@ class ClosingGateTests(WorkflowTest):
         self.commit('later refactor')
         self.assertIn('[PASS]', ops.check_repository(self.root))
 
+    def test_hostile_test_source_is_refused_without_crashing(self):
+        import evidence
+        deep = 'x = ' + '(' * 6000 + '1' + ')' * 6000 + '\n'
+        with self.assertRaisesRegex(ValueError, 'cannot parse test source'):
+            evidence._python_symbol(deep, ['test_x'], 'tests/test_deep.py')
+
     def test_closure_evidence_operations_require_in_progress(self):
         self.init_record()
         self.assert_rejected('in_progress', ops.run_checks, self.root, 'FEAT-A')

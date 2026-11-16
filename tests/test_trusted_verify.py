@@ -188,6 +188,27 @@ class MissingTrustedContextTests(TrustedVerifierTest):
         self.assertEqual(json.loads(output.getvalue())['result'], 'missing-trusted-context')
 
 
+class FailClosedTests(TrustedVerifierTest):
+    def test_unforeseen_error_is_a_rejection_not_a_traceback(self):
+        def explode(*_args):
+            raise RuntimeError('internal detail that must not be printed')
+        self.back_to_base()
+        code, result = trusted_verify.verify(self.root, self.environ(), explode, self.fetcher)
+        self.assertEqual((code, result['result']), (1, 'rejected'))
+        self.assertEqual(result['error'], 'unexpected RuntimeError')
+
+    def test_summary_renders_pull_request_text_as_inert_single_line(self):
+        summary = self.root.parent / 'summary.md'
+        hostile = 'x` has no approval\n## Approved\n[click](https://evil.example) <img src=x>'
+        trusted_verify._summary({'result': 'rejected', 'error': hostile},
+                                {'GITHUB_STEP_SUMMARY': str(summary)}, self.root)
+        lines = summary.read_text().splitlines()
+        self.assertEqual(len(lines), 3)
+        for forbidden in ('`x`', '[click]', '<img', '## Approved\n'):
+            self.assertNotIn(forbidden, lines[2][len('- error: `'):-1])
+        self.assertNotIn('`', lines[2][len('- error: `'):-1])
+
+
 class PullRequestBindingTests(TrustedVerifierTest):
     def test_closed_or_merged_pull_request(self):
         self.assert_rejected_result('not open', pulls={5: self.pull(state='closed')})
