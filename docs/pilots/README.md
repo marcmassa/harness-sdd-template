@@ -5,12 +5,17 @@ framework used on real work by real people, not a test.
 
 | Context | Who | Report |
 |---|---|---|
-| `small-team` | At least one human and one agent | Not started |
+| `small-team` | At least one human and one agent | Draft, 1 of 6 exercises: [drafts/small-team-harness-manager.json](drafts/small-team-harness-manager.json) |
 | `team` | At least two humans using at least two supported CLIs | Not started |
 
 One person may take part in both, but the two reports must describe different
-work. No pilot owner has been identified yet; a pilot starts when its human
-participants agree to take part.
+work. A pilot starts when its human participants agree to take part; no `team`
+pilot owner has been identified.
+
+A file under `drafts/` is a record in progress. The validator and the
+readiness command do not read that folder, so a draft never counts. It
+becomes a report when its exercises are done, a participant has reviewed it,
+and it is moved up to this folder.
 
 ## What a pilot covers
 

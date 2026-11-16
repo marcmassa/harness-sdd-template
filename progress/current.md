@@ -1,7 +1,7 @@
 # Current Session State
 
 ## Active Task
-FEAT-010 — M4, M5, and T25 implemented, awaiting review. M6 now needs real pilots.
+FEAT-010 — T1–T25 checked. M6 now needs real pilots (T26, T27).
 
 ## Progress
 - [x] M1–M3 committed and pushed; CI green on Ubuntu/macOS with Python 3.10/3.13.
@@ -25,4 +25,4 @@ reviewer account.
 Real pilot reports for M6 need human review.
 
 ## Next Step
-Maintainer: read the D-001 run annotation, decide the T16–T25 boxes, name pilot owners.
+Maintainer: decide D-001, complete the small-team pilot draft, name team pilot owners.
