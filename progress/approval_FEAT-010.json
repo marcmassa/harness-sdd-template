@@ -1,0 +1,14 @@
+{
+  "feature_id": "FEAT-010",
+  "approved_on": "2026-11-09",
+  "authority": "user in this chat",
+  "decision": "aprobada",
+  "base_revision": "e286f4b800165d0cc29b43907ac3ce428273e417",
+  "spec_sha256": {
+    "requirements.md": "818303e5074bfe04865b7166856a5ebd429123b76558b11339bbc8ea0f8ffb70",
+    "design.md": "253b49c9cd1d1063dd9276b2662c096accaf55c3f9b8f927361b1b5e729ef80c",
+    "tasks.md": "30f1f94e8863d5e4cad9d4a0c293181e379c45e661c27f8390d126bff4ef09a1"
+  },
+  "scope": "FEAT-010 six sequential milestones; FEAT-009 remains independently spec_ready",
+  "assurance": "Declared human chat approval; not provider-authenticated review metadata"
+}
