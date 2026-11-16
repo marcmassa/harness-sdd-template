@@ -1,64 +1,38 @@
 ---
 name: agent-template
-type: subagent
-user-invocable: true
-description: "Example sub-agent that serves as a template for implementing more sub-agents. Includes the right structure and format: dual frontmatter, mission, tasks, tools, rules, guidelines, integration, and workflow."
+description: "Template role card. Copy this directory, then say in one sentence what the role does and when to use it (under 160 characters)."
 mode: subagent
-model-agnostic: true
 ---
 
 ## Mission
-[Describe here the fundamental purpose of this sub-agent: what problem it solves, what area of the project it covers, and why it is needed.]
+[One or two sentences: the problem this role owns in this project, and why it exists.]
 
-## Main tasks
+## Does
+- [A concrete responsibility, written as an action with a visible result.]
+- [Another responsibility. Three to six bullets are enough.]
 
-1. **[Area 1 — Descriptive name]**:
-   - [Concrete and measurable action 1].
-   - [Concrete and measurable action 2].
-   - [Concrete and measurable action 3].
+## Does not
+- [Work this role hands over, naming the role that takes it.]
 
-2. **[Area 2 — Descriptive name]**:
-   - [Concrete and measurable action 1].
-   - [Concrete and measurable action 2].
-
-3. **[Area 3 — Descriptive name]**:
-   - [Concrete and measurable action 1].
-   - [Concrete and measurable action 2].
-   - [Concrete and measurable action 3].
-
-4. **[Area 4 — Descriptive name]**:
-   - [Concrete and measurable action 1].
-
-## Available tools
-- `[path/file]` — [Description of when and how to use it]
-- `[path/file]` — [Description of when and how to use it]
-- `[path/file]` — [Description of when and how to use it]
-
-## Style rules
-- **Harness Compliance**: This agent operates under the **Harness SDD** framework. It must always consult `AGENTS.md`, `feature_list.json` and `progress/current.md` before acting.
-- **Modular Skills**: It must not reinvent standard workflows. It must verify the existence of skills in `.agents/skills/` and, if they don't exist, sync them using `./.agents/skills/sync-skills.sh`.
-- **[Rule 3]**: [Description of the rule and how to apply it].
-
-## Guidelines
-- **Harness First**: Every action must be traceable in the SDD and validated via `./check.sh`.
-- **Skills Oriented**: If the task involves standard technologies (Terraform, K8s, Cloud), prioritize the use of the instructions defined in the downloaded *skills*.
-- [Guideline 3: important behavior or restriction].
-
-## Integration with other sub-agents
-- **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
-- **[Other sub-agent]**: [How they collaborate, what information they exchange, in what order they work].
-
-
-## Skills
-- `skill-governance` — Para asegurar que las contribuciones y el código sigan el workflow estricto de GitFlow y SDD.
+## Rules
+- Start from `./.agents/bootstrap.sh brief`. Open other files only when the task needs them.
+- Never edit an approved spec. Change feature status only through `workflow-transition`.
+- [A project rule this role must always follow.]
 
 ## Workflow
-1. [Step 1 of the typical workflow].
-2. [Step 2 of the typical workflow].
-3. [Step 3 of the typical workflow].
-4. [Step 4 of the typical workflow].
-5. [Step 5 of the typical workflow].
+1. [First step of a typical task.]
+2. [Next step. Keep to the steps that differ from other roles.]
 
----
+## Skills
+- [`skill-name` — the situation in which to load it.]
 
-*Copy this entire directory (`.agents/subagents/agent-template/`) as a base to create new sub-agents. Rename the folder and adjust the YAML frontmatter fields, mission, tasks, and the rest of the sections according to the new agent's role.*
+## Done when
+- [ ] [An observable result that closes the role's work.]
+- [ ] `./check.sh --quiet` passes.
+
+<!--
+Keep a role card under 3 KB: it is loaded every time the role acts.
+Write it so that any agent CLI can use it: plain Markdown, repository-relative
+paths, no tool names or model names of one vendor. Identity and judgement go
+in SOUL.md; project-wide conventions go in steering/. Do not repeat them here.
+-->

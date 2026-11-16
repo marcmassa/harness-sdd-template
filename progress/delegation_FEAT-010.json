@@ -1,0 +1,23 @@
+{
+  "feature_id": "FEAT-010",
+  "supervisor": "Codex",
+  "human_authorization": "User requested OpenCode, then explicitly requested Claude implementation and independent Claude review after quota failure.",
+  "attempts": [
+    {
+      "agent": "OpenCode",
+      "session_id": "ses_e42d38b8effeIcONTtjHUuSggP",
+      "provider": "opencode-go",
+      "model": "kimi-k3.1-pro#high",
+      "status": "stopped",
+      "reason": "HTTP 429 monthly quota exhausted",
+      "accepted": false
+    },
+    {
+      "agent": "Claude Code",
+      "scope": "T11 and M3 T12-T15",
+      "status": "implementing",
+      "review": "A separate independent Claude Code execution is required before supervisor acceptance"
+    }
+  ],
+  "external_evidence": "No trusted remote CI, real pilot, or publication evidence has been claimed."
+}
