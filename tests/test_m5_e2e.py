@@ -138,6 +138,9 @@ class LegacyUpgradeTests(ExportedProject):
         present = subprocess.run(['git', '-C', str(ROOT), 'cat-file', '-e', LEGACY_RELEASE + '^{commit}'],
                                  env=clean_env(), capture_output=True)
         if present.returncode:
+            # CI fetches full history: there a missing release is a failure, never a skip.
+            self.assertNotEqual(os.environ.get('GITHUB_ACTIONS'), 'true',
+                                'legacy release missing in CI; fetch-depth must be 0')
             self.skipTest('legacy release {} is not in this clone (shallow history); the legacy '
                           'upgrade was NOT exercised'.format(LEGACY_RELEASE[:7]))
         old = self.base / 'old-source'
