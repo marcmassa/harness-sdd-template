@@ -1,8 +1,7 @@
 # AGENTS.md — Navigation map for agents
 
-> Entry point for any agent in this repository. It is a **map**, not a manual:
-> load a linked file only when the task needs it. Keep this file under 8 KB —
-> it is read every session.
+> Entry point for any agent. It is a **map**, not a manual: load a linked file only
+> when the task needs it. Keep it under 8 KB and 120 lines; it is read every session.
 
 ## §0 — Framework bootstrap (once per clone)
 
@@ -54,8 +53,7 @@ what the task requires (§2).
 | `docs/workflow-contract.md`, `docs/team-policy.md` | The project declares `team_policy`, or a gate fails |
 | `docs/framework-customization.md`, `docs/quality-checks.md` | Adapting `check.sh` or the manifest |
 | `.agents/agentic.json`, `.agents/adapters/<cli>/` | Changing agents, skills, commands, or adapters |
-| `docs/compatibility.md` | You need to know what your CLI enforces and what is only an instruction |
-| `docs/maintenance.md` | Updating the framework in a project, or checking versions |
+| `docs/compatibility.md`, `docs/maintenance.md` | What your CLI enforces; versions and framework updates |
 | `progress/history.md`, `progress/decisions.md` | A past decision is needed: search them, do not read them whole |
 | `feature_list.json` | Adding a feature: append an entry, do not rewrite the file |
 
@@ -96,8 +94,7 @@ body when the command is invoked, not before. `/status` shows the brief.
 
 ## §6 — Repository stack
 
-> Customize for your project. The bootstrap also detects the stack
-> (`.agents/adapters/_common/project-detect.py`).
+> Customize for your project; the bootstrap also detects the stack.
 
 | Layer | Technology |
 |---|---|
@@ -107,11 +104,9 @@ body when the command is invoked, not before. `/status` shows the brief.
 
 ## §7 — Sub-agents
 
-Active roles are listed in `.agents/agentic.json#subagents[]` and in your CLI's
-generated adapter. The canonical scaffolds are `harness` (orchestrator),
-`spec-author`, `implementer`, and `reviewer`; copy
-`.agents/subagents/agent-template/` to create another. Roles named in
-`.agents/harness/ROUTING.md` are illustrative until scaffolded.
+Active roles are in `.agents/agentic.json#subagents[]`. The canonical scaffolds are
+`harness`, `spec-author`, `implementer`, and `reviewer`; copy
+`.agents/subagents/agent-template/` to create another (`docs/framework-customization.md`).
 
 ## §8 — CLI-agnostic integration and skills
 

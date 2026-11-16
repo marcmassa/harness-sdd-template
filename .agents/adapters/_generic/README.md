@@ -43,8 +43,8 @@ To contribute a prebuilt adapter for a new CLI:
 
 6. **Test the adapter** by running:
    ```bash
-   ./.agents/bootstrap.sh your-cli
-   ./.agents/bootstrap.sh your-cli --check   # verify no drift
+   ./.agents/bootstrap.sh <your-cli>
+   ./.agents/bootstrap.sh <your-cli> --check   # verify no drift
    ./check.sh                                  # harness-level validation
    ```
 

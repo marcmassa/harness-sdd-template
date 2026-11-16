@@ -1,7 +1,7 @@
 # Current Session State
 
 ## Active Task
-FEAT-010 — M5 in progress (ADR-2 order): T20, T21, T22 implemented, awaiting review.
+FEAT-010 — M5 in progress (ADR-2 order): T20–T23 implemented, awaiting review.
 
 ## Progress
 - [x] M1–M3 committed and pushed; CI green on Ubuntu/macOS with Python 3.10/3.13.
@@ -14,7 +14,7 @@ FEAT-010 — M5 in progress (ADR-2 order): T20, T21, T22 implemented, awaiting r
 
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.
-- T23 split render.py (49 KB) and docs, T24 end-to-end exercise.
+- T24 end-to-end exercise (legacy upgrade, clean install, rollback, five entry points).
 - FEAT-009 stays separately spec_ready.
 
 ## Blockers
@@ -23,4 +23,4 @@ reviewer account.
 Real pilot reports for M6 need human review.
 
 ## Next Step
-Review T20–T22, then T23.
+Review T20–T23, then T24.
