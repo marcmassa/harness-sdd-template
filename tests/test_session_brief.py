@@ -66,6 +66,14 @@ class BriefContentTests(BriefTest):
         self.assertIn('progress/current.md is 6.6 KB (budget 3 KB, loaded every session)', text)
         self.assertLess(len(text), 3500)
 
+    def test_owner_and_latest_handoff_are_shown_when_a_record_exists(self):
+        self.features()
+        self.assertNotIn('owner:', session_brief.brief(self.root))
+        self.write('progress/work/feat-a.json', json.dumps({
+            'owner': 'session-a', 'handoff': {'path': 'progress/handoffs/feat-a/002.md'}}))
+        self.assertIn('owner: session-a · handoff: progress/handoffs/feat-a/002.md',
+                      session_brief.brief(self.root))
+
     def test_kiro_spec_layout_is_found(self):
         self.features()
         (self.root / 'specs/feat-a/tasks.md').unlink()

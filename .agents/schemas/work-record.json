@@ -10,5 +10,11 @@
     "dependencies": "array",
     "evidence": "array"
   },
-  "present_nullable": ["branch", "worktree", "spec_dir", "approval", "handoff"]
+  "present_nullable": ["branch", "worktree", "spec_dir", "approval", "handoff"],
+  "optional": {
+    "claim": "object: id, owner, revision. Absent in records created before claims existed.",
+    "claim_history": "array of reassigned or handoff-resumed events, each with the previous claim",
+    "handoff": "null, or object: id, path, kind, revision, from, sha256 of the immutable handoff file",
+    "handoff_history": "array of earlier handoff pointers, newest first"
+  }
 }

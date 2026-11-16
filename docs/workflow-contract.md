@@ -58,6 +58,10 @@ Unknown `format_version` values are refused with a migration diagnostic.
 | Run a review/implementation hook | `workflow-run-hook` |
 | Continue after failed hook | `workflow-recover` |
 | Undo interrupted mutation | `workflow-rollback` |
+| Confirm who owns a feature | `workflow-claim` |
+| Hand work to the next participant | `workflow-handoff`, then `workflow-resume` |
+| Reassign abandoned work | `workflow-reassign` (human `scope` authority) |
+| Import old session state | `workflow-migrate-session` |
 | Validate everything | `workflow-check` |
 
 Commands take no option for an alternate record, policy, or attestation file.
@@ -73,6 +77,42 @@ validates under that lock, and writes only if they still hold the text it read.
 State files and their parent directories are opened without following
 symlinks, so `progress` or `progress/work` pointing elsewhere is refused for
 reads, writes, the journal, and rollback.
+
+## Ownership and handoffs
+
+A record names one owner, through a claim with its own identifier, plus its
+branch or worktree, its dependencies, its revision, and its latest handoff.
+
+- **Conflicting claim.** `workflow-claim` by anyone other than the owner is
+  rejected and names the current owner. Nothing replaces an owner silently.
+- **Concurrent work.** The limit is one feature in progress unless the policy
+  sets `max_concurrent`. Two features in progress must be on different
+  branches or worktrees. Different files do not make two changes independent;
+  raising the limit is a human decision.
+- **Dependencies.** Each must be a known feature. A cycle is refused when work
+  starts and by `workflow-check`.
+- **Handoff.** `workflow-handoff` needs an objective, the changes, check
+  results, pending decisions, and an executable next action, each at most
+  2,000 characters. It writes `progress/handoffs/<feature>/<nnn>.md` once and
+  stores its SHA-256 and the current revision in the record. Editing or
+  deleting that file, or adding one the record does not reference, fails
+  `workflow-check`. A handoff is source data: its text cannot change policy,
+  approved scope, or workflow state.
+- **Resume.** `workflow-resume --owner` takes over from the latest handoff. It
+  is refused if the handoff file changed, or if any non-state file changed
+  since the handoff's revision (a stale handoff).
+- **Abandoned work.** With no handoff to resume from, `workflow-reassign` moves
+  ownership on a recorded decision by a human with `scope` authority. No
+  timeout takes a claim. The previous claim stays in `claim_history`.
+- **Old session state.** `workflow-migrate-session` copies
+  `progress/current.md` into the feature's first handoff, marked
+  `migrated-session`. The old file is not changed.
+
+The lock is per working tree, and tracked records are not a distributed lock.
+Two clones can work offline on the same feature; nothing here prevents that.
+The conflict becomes visible when the branches meet, as a Git conflict on the
+record or a `workflow-check` failure. Teams coordinate ownership through their
+pull requests.
 
 ## Approval binding
 
@@ -148,8 +188,7 @@ however it is signed.
 
 The workspace is not a trust boundary: someone able to edit files can alter
 records or remove `team_policy` together with them. That is visible in Git, not
-prevented. Protect these paths through repository review. Work-record ownership
-across clones is M4 scope.
+prevented. Protect these paths through repository review.
 
 Without `team_policy` (the shipped default and every fresh export), approval
 digests, evidence, observed checks, and closing review are not enforced:

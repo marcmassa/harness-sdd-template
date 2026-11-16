@@ -212,3 +212,22 @@ invoked. `docs/compatibility.md` says the same. In a clone without the
 `e286f4b` commit the legacy cases skip with an explicit message; CI fetches
 full history and runs them.
 
+## M4 (T16–T19) implemented 2026-11-16, awaiting review
+
+Suite `tests/test_ownership.py` (launcher `tests/test_m4.sh`).
+
+| Requirement | Task | Evidence (test class) | State |
+|---|---|---|---|
+| R18 | T16, T18 | RecordIdentityTests: feature, owner, claim, branch, dependencies, revision, handoff; brief shows owner and latest handoff | Local PASS |
+| R19 | T16, T17 | ClaimConflictTests: second claim rejected and owner unchanged; two features in progress need separate branches; dependency cycle refused at start and by workflow-check; copied claim id and hand-edited owner detected. Default limit 1, explicit `max_concurrent` | Local PASS |
+| R20 | T18 | HandoffTests: all five fields required, written once, immutable, accumulating; unreferenced or pre-existing files refused; old session state migrated without touching the old file | Local PASS |
+| R21 | T17, T18 | ReassignmentTests: human `scope` authority, reason and evidence required, previous claim kept. ResumeTests: next participant resumes; stale and tampered handoffs refused. WorktreeTests: two worktrees, merge, third participant resumes | Local PASS |
+| R22 | T19 | `test_external_instructions_in_a_handoff_are_data`: instruction-like handoff text changes no state, approval, or gate; trust order unchanged | Local PASS |
+| R23 (part) | T16 | New record fields are optional under format 1; records without a claim remain valid | Local PASS |
+
+Files: `.agents/lib/ownership.py` (validation), `.agents/lib/handoffs.py`
+(claim, reassign, handoff, resume, migrate-session), wired into
+`validate_transition`, `workflow-check`, `workflow-init`, and the CLI.
+Documented limit: tracked records are not a distributed lock; two clones can
+work offline on the same feature and the conflict appears when branches meet.
+
