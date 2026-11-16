@@ -27,6 +27,7 @@
 #   ./.agents/bootstrap.sh update-restore <project>               # Undo the last update
 #   ./.agents/bootstrap.sh update-keep <project> <path>...        # Make conflicting paths project-owned
 #   ./.agents/bootstrap.sh update-accept <project> <path>...      # Resolve conflicts with the release version (backed up)
+#   ./.agents/bootstrap.sh update-remove <project> [--plan <digest>]  # Remove unchanged framework files by inventory
 #   ./.agents/bootstrap.sh update-adopt <project>                 # Inventory for a legacy install
 #   ./.agents/bootstrap.sh capabilities [--write|--check]  # Adapter capability matrix (docs/compatibility.md)
 #   ./.agents/bootstrap.sh brief                 # Compact session brief (use instead of reading state files)
@@ -84,7 +85,7 @@ case "${1:-help}" in
         python3 "$BOOTSTRAP_LIB/inventory.py" --root "$ROOT_DIR" --describe
         exit $?
         ;;
-    update-plan|update-apply|update-restore|update-keep|update-accept|update-adopt)
+    update-plan|update-apply|update-restore|update-keep|update-accept|update-adopt|update-remove)
         operation="${1#update-}"
         shift
         if [ -z "${1:-}" ]; then

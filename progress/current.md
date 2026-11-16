@@ -1,7 +1,7 @@
 # Current Session State
 
 ## Active Task
-FEAT-010 — M5 in progress (ADR-2 order): T20–T23 implemented, awaiting review.
+FEAT-010 — M5 implemented (ADR-2 order): T20–T24, awaiting review. Next milestone: M4.
 
 ## Progress
 - [x] M1–M3 committed and pushed; CI green on Ubuntu/macOS with Python 3.10/3.13.
@@ -14,7 +14,7 @@ FEAT-010 — M5 in progress (ADR-2 order): T20–T23 implemented, awaiting revie
 
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.
-- T24 end-to-end exercise (legacy upgrade, clean install, rollback, five entry points).
+- M4 (T16–T19): ownership, claims, handoffs. Then M6: real pilots and release readiness.
 - FEAT-009 stays separately spec_ready.
 
 ## Blockers
@@ -23,4 +23,4 @@ reviewer account.
 Real pilot reports for M6 need human review.
 
 ## Next Step
-Review T20–T23, then T24.
+Review T20–T24 and decide their boxes; then M4 (T16).

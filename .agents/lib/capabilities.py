@@ -63,6 +63,7 @@ def render(data=None):
               '| Control | Enforced by | Evidence |', '|---|---|---|']
     lines += ['| {} | {} | `{}` |'.format(item['control'], item['enforced_by'], item['evidence'])
               for item in data['cli_independent_controls']]
+    lines += ['', '## Validation with the CLIs themselves', '', data['native_validation']]
     lines += ['', '## Native plugin packaging', '', data['native_plugin_packaging'], '']
     return '\n'.join(lines)
 

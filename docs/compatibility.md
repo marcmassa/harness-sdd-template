@@ -122,6 +122,10 @@ These hold for any agent, because a tool applies them rather than the model.
 | Staged-file size limit | Git pre-commit hook once `core.hooksPath` is set, and CI on changed files | `tests/test_token_limit.py` |
 | Trusted repository review | `trusted-review.yml` as a required check on the protected default branch | `tests/test_trusted_verify.py` |
 
+## Validation with the CLIs themselves
+
+The generated files are not validated with the vendors' own CLIs. The suites check that each adapter renders the declared files deterministically; whether a given version of a CLI loads and applies them is not exercised, and a skipped native check is recorded as skipped, never as passed.
+
 ## Native plugin packaging
 
 Optional and not shipped. Distributing the framework as a Claude Code marketplace plugin and an OpenCode plugin, which would add real blocking of edits to approved specs and generated adapters in OpenCode, is specified in FEAT-009 (`specs/plugin-packaging/`) and awaits human approval.

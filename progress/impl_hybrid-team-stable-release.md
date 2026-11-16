@@ -187,3 +187,28 @@ The snapshot comparison was run once by hand and is not part of the suite; the
 existing parity, plugin-adapter, target-CLI, portable-template, and M1 suites
 cover the renderer on every run.
 
+## T24 implemented 2026-11-16, awaiting review
+
+Suite `tests/test_m5_e2e.py`, run by `check.sh`. Each case uses real exported projects.
+
+| Exercise | What ran | Result |
+|---|---|---|
+| Legacy upgrade | Release `e286f4b` (before inventories) exported with its own tooling; a customized `check.sh` and a project file added; `update-adopt`, `update-plan`, `update-apply` from the current source | More than 10 files recognized as an untouched earlier release; custom `check.sh` kept as a conflict; project file untouched; inventory at 0.9.0; the new `brief` and `version` run in the project |
+| Clean install | `export`, a project role, scaffolds removed, `init --validate`, `./check.sh` and `--quiet` | PASS |
+| Five entry points | Each adapter rendered in both projects; every declared output file present; `--check` reports no drift | PASS |
+| Rollback | `update-restore` after the legacy upgrade | Project byte-identical to its state before the update |
+| Removal | New `update-remove`: plan, then apply by digest, then restore | Unchanged framework files removed, changed and project-owned files kept and listed, restore byte-identical |
+
+| Requirement | State |
+|---|---|
+| R23, R24, R25, R26 | Local PASS (this suite, `test_inventory.py`, `test_update.py`) |
+| R27, R28, R29 | Local PASS (`test_capability_matrix.py`, `test_docs_contract.py`) |
+
+Native-tool checks: **not performed for any adapter.** The suite prints one
+`[SKIP] native check <cli>: not run` line per adapter and states whether the
+binary is on the machine. On the maintainer's machine `claude`, `codex`, and
+`opencode` were present and `gemini` and `cursor-agent` were not; none was
+invoked. `docs/compatibility.md` says the same. In a clone without the
+`e286f4b` commit the legacy cases skip with an explicit message; CI fetches
+full history and runs them.
+
