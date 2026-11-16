@@ -10,6 +10,7 @@ import json
 import os
 import sys
 
+import handoffs
 import workflow_ops as ops
 from team_policy import load_active_policy
 from workflow import find_feature, validate_transition
@@ -104,6 +105,29 @@ def _rollback(args):
     return _emit(ops.rollback_mutation(args.root, args.authorized_by, args.evidence_ref))
 
 
+def _claim(args):
+    return _emit(handoffs.claim(args.root, args.feature_id, args.owner))
+
+
+def _reassign(args):
+    return _emit(handoffs.reassign(args.root, args.feature_id, args.new_owner, args.authorized_by,
+                                   args.evidence_ref, args.reason, args.branch, args.worktree))
+
+
+def _handoff(args):
+    fields = {'objective': args.objective, 'changes': args.changes, 'checks': args.checks,
+              'pending': args.pending, 'next_action': args.next_action}
+    return _emit(handoffs.record_handoff(args.root, args.feature_id, fields))
+
+
+def _resume(args):
+    return _emit(handoffs.resume(args.root, args.feature_id, args.owner, args.branch, args.worktree))
+
+
+def _migrate_session(args):
+    return _emit(handoffs.migrate_session(args.root, args.feature_id))
+
+
 def _check(args):
     print(ops.check_repository(args.root))
     return 0
@@ -181,6 +205,20 @@ def parser():
     recover.add_argument('--event', required=True)
     _human_decision(recover)
     _human_decision(_command(sub, 'rollback', _rollback, feature=False))
+    _command(sub, 'claim', _claim).add_argument('--owner', required=True)
+    reassign = _command(sub, 'reassign', _reassign)
+    reassign.add_argument('--new-owner', required=True)
+    reassign.add_argument('--reason', required=True)
+    _human_decision(reassign)
+    handoff = _command(sub, 'handoff', _handoff)
+    for name in ('objective', 'changes', 'checks', 'pending', 'next-action'):
+        handoff.add_argument('--' + name, required=True)
+    resume = _command(sub, 'resume', _resume)
+    resume.add_argument('--owner', required=True)
+    for command in (reassign, resume):
+        command.add_argument('--branch')
+        command.add_argument('--worktree')
+    _command(sub, 'migrate-session', _migrate_session)
     _command(sub, 'check', _check, feature=False)
     return result
 

@@ -7,6 +7,7 @@ from classification import require_lightweight_history, validate_classification
 from evidence import (requirement_ids, validate_checks, validate_closing_review,
                       validate_evidence, validate_tasks)
 import git_state
+import ownership
 from team_policy import HIGH_RISK, load_active_policy, validate_work
 from workflow_store import load_json, refuse_incomplete
 
@@ -21,7 +22,8 @@ NESTED = {'approval': (dict, type(None)), 'handoff': (dict, str, type(None)),
           'lightweight': (dict,), 'checks': (list,), 'closing_review': (dict, type(None)),
           'pending_hook': (dict,), 'scope_changes': (list,), 'blocked_from': (str,),
           'blocked_reason': (str,), 'spec_dir': (str, type(None)), 'branch': (str, type(None)),
-          'worktree': (str, type(None)), 'superseded_evidence': (list,)}
+          'worktree': (str, type(None)), 'superseded_evidence': (list,),
+          'claim': (dict,), 'claim_history': (list,), 'handoff_history': (list,)}
 LIST_OF_OBJECTS = ('evidence', 'checks', 'scope_changes')
 FULL_EDGES = {('pending', 'spec_ready'), ('spec_ready', 'in_progress'), ('in_progress', 'done'),
               ('pending', 'blocked'), ('spec_ready', 'blocked'), ('in_progress', 'blocked')}
@@ -314,6 +316,7 @@ def validate_transition(feature, target, record, evidence, policy, context):
                 FULL_EDGES if full else LIGHT_EDGES)
     if target == 'in_progress':
         _check_concurrency(feature, context.get('feature_data'), policy)
+        ownership.check_start(root, feature, record, context.get('feature_data'))
     details = (_validate_full(feature, target, record, evidence, policy, context, root) if full
                else _validate_lightweight(feature, target, record, policy, context, root))
     details.update({'legacy': False, 'current': current, 'target': target})

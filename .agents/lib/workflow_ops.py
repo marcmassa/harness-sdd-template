@@ -12,6 +12,7 @@ from approval import digest_from_spec_dir
 from classification import (require_lightweight_history, require_new_record,
                             validate_classification)
 import git_state
+import ownership
 from team_policy import HIGH_RISK, load_active_policy, repository_path
 from workflow import (find_feature, spec_directory, spec_state, validate_record,
                       validate_transition)
@@ -217,9 +218,13 @@ def create_record(root, feature_id, owner, branch, worktree, dependencies=(), li
         if safe_fs.exists(root_path, relative):
             raise ValueError('work record already exists; existing owner was not replaced')
         require_new_record(root_path, relative, feature)
+        ownership.check_dependencies({item.get('id') for item in data['features']}, feature['id'],
+                                     list(dependencies))
+        revision = git_state.head(root_path)
         record = {'format_version': 1, 'feature_id': feature['id'], 'status': status,
-                  'owner': owner, 'branch': branch, 'worktree': worktree,
-                  'dependencies': list(dependencies), 'revision': git_state.head(root_path),
+                  'owner': owner, 'claim': ownership.new_claim(owner, revision),
+                  'branch': branch, 'worktree': worktree,
+                  'dependencies': list(dependencies), 'revision': revision,
                   'risk': 'full' if full else 'lightweight',
                   'spec_dir': 'specs/' + feature['name'] if full else None,
                   'approval': None, 'handoff': None, 'evidence': []}
