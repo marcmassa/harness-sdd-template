@@ -60,16 +60,21 @@ from optional checks and does not require pytest merely because tests/ exists.
 - [Problem, benefits, and current guarantees](docs/framework-overview.md)
 - [Workflow, scaffold lifecycle, structure, and commands](docs/framework-workflow.md)
 - [Customization and troubleshooting](docs/framework-customization.md)
-- [Proposed human/AI team policy](docs/team-policy.md) — awaiting scenario review
+- [Human/AI team policy](docs/team-policy.md) and the [workflow contract](docs/workflow-contract.md)
+- [Versions, updates, and rollback](docs/maintenance.md)
+- [What each CLI adapter enforces](docs/compatibility.md)
+- [Trusted repository review](docs/trusted-review.md)
+- [Contributing and releases](CONTRIBUTING.md)
 - [SDD process](docs/sdd.md)
 - [Global architecture](DESIGN.md)
 - [Agent navigation and mandatory gates](AGENTS.md)
 - [Unknown CLI bootstrap](.agents/BOOTSTRAP.md)
 - [Security policy](SECURITY.md)
 
-FEAT-010 is in progress: trusted approvals, automatic evidence completeness,
-team handoffs, safe upgrades, and stable-release pilot evidence are not yet
-complete. Native plugin packaging (FEAT-009) remains separately unapproved.
+FEAT-010 is in progress. Shipped: verifiable approvals and evidence gates,
+versioned updates with rollback, and the adapter capability matrix. Not yet
+done: team ownership and handoffs, and stable-release pilot evidence. Native
+plugin packaging (FEAT-009) remains separately unapproved.
 
 ## License and authority
 

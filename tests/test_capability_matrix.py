@@ -60,7 +60,8 @@ class RenderedProject(unittest.TestCase):
     @classmethod
     def files(cls):
         return {path.relative_to(cls.root).as_posix() for path in cls.root.rglob('*')
-                if path.is_file() and '.git/' not in path.as_posix()}
+                if path.is_file() and '.git/' not in path.as_posix()
+                and '__pycache__' not in path.parts}
 
     def text(self, relative):
         return (self.root / relative).read_text(encoding='utf-8')
