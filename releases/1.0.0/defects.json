@@ -1,9 +1,9 @@
 [
   {
     "id": "D-001",
-    "summary": "trusted-review.yml ends in startup_failure on every pull request since 2026-11-16 17:24 UTC, with an unchanged workflow file",
+    "summary": "trusted-review.yml ended in startup_failure on three pull request runs on 2026-11-16 between 17:24 and 17:37 UTC, with an unchanged workflow file",
     "category": "incorrect-gating",
     "status": "open",
-    "observed": "Runs 43918035681, 43919940399, 43920222020. No job starts and no check appears on the pull request. It ran successfully on pull requests 6 to 9. Cause unknown: the reason is not exposed through the API."
+    "observed": "Runs 43918035681, 43919940399, 43920222020: no job started and no check appeared on the pull request. It ran successfully on pull requests 6 to 9 before, and again on pull request 12 (run 43928758743, 18:26 UTC), with the same workflow file throughout. During the failures the default branch was at b7f2be6 and macOS runners were queueing for more than 15 minutes; GitHub reported no incident. Cause not determined: the reason is not exposed through the API. Left open for the maintainer to decide, since it stopped reproducing without a known fix."
   }
 ]

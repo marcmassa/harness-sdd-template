@@ -15,7 +15,8 @@ FEAT-010 — M4, M5, and T25 implemented, awaiting review. M6 now needs real pil
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.
 - T26 and T27: two real pilots, by consenting people. No owner identified yet.
-- D-001: trusted-review.yml fails at startup since 2026-11-16 17:24 UTC; cause unknown.
+- D-001: trusted-review.yml failed at startup three times (17:24–17:37 UTC), then worked
+  again. Cause unknown; open until the maintainer decides.
 - FEAT-009 stays separately spec_ready.
 
 ## Blockers

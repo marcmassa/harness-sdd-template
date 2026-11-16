@@ -250,9 +250,11 @@ not Markdown, so the validator can check them.
 Not done, and not doable by an agent: identifying consenting human pilot
 owners. `docs/pilots/README.md` says none has been identified.
 
-Open defect D-001 (`releases/1.0.0/defects.json`): `trusted-review.yml` ends in
-`startup_failure` since 2026-11-16 17:24 UTC with an unchanged workflow file;
-cause unknown. It is recorded as a release blocker (incorrect-gating).
+Open defect D-001 (`releases/1.0.0/defects.json`): `trusted-review.yml` ended in
+`startup_failure` on three runs on 2026-11-16 between 17:24 and 17:37 UTC with an
+unchanged workflow file, then ran successfully again at 18:26 UTC. Cause not
+determined. It stays recorded as an open release blocker (incorrect-gating) until
+the maintainer decides its disposition.
 
 `./.agents/bootstrap.sh release-readiness 1.0.0` on this repository reports
 `release-candidate`: milestone tasks unchecked, no CI evidence file, no real
