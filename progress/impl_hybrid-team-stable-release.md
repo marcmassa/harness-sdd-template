@@ -143,3 +143,13 @@ starter and scaffold files were added to initialized projects (now never
 added); no way to accept a conflict explicitly (`update-accept`); the brief
 ignored `.kiro/specs`; releases shipped machine-local skills.
 
+## T13 — 2026-11-16
+
+Line-by-line review of `trusted_verify`, `github_api`, `trusted_candidate`, and
+`provider_review`; three fixes with tests (any unforeseen error is a rejection,
+inert summary text, hostile test source cannot crash the gate). First runs
+against the real GitHub API and a real pull-request fetch, all failing closed
+as expected; see `docs/trusted-review.md`, "Evidence so far". Pull request #4
+is open against `main`. T13 stays unchecked: no run inside GitHub Actions and
+no positive `provider-verified` result with real data yet.
+
