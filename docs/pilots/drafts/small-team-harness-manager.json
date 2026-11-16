@@ -1,0 +1,86 @@
+{
+  "format_version": 1,
+  "id": "small-team-harness-manager",
+  "kind": "real",
+  "status": "DRAFT \u2014 incomplete. One of six exercises carried out. Not reviewed. Does not count.",
+  "context": "small-team",
+  "date_range": {
+    "from": "2026-11-15",
+    "to": "2026-11-15"
+  },
+  "framework_version": "0.9.0",
+  "work_summary": "Update of the harness-manager repository (a VS Code extension, 38 closed features) from a legacy install of the framework to 0.9.0.",
+  "baseline": "Measured before the update: AGENTS.md 20,679 bytes, feature_list.json 29,020 bytes, progress/progress.md 65,529 bytes, progress/decisions.md 25,503 bytes, all part of what a session was told to read. The project's own check.sh passed in 4.5 seconds.",
+  "participants": [
+    {
+      "role": "maintainer",
+      "kind": "human",
+      "cli": "claude-code",
+      "consent": null
+    },
+    {
+      "role": "implementer",
+      "kind": "agent",
+      "cli": "claude-code"
+    }
+  ],
+  "exercises": {
+    "installation": {
+      "done": false,
+      "notes": "Not carried out. The project already had a legacy install; no fresh export and /init was done."
+    },
+    "approved_change": {
+      "done": false,
+      "notes": "Not carried out. No feature has gone from spec to done with the updated tooling."
+    },
+    "code_review": {
+      "done": false,
+      "notes": "Not carried out. The update branch chore/harness-sdd-0.9.0 (commit 3caa189) has not been reviewed or pushed."
+    },
+    "handoff": {
+      "done": false,
+      "notes": "Not carried out."
+    },
+    "upgrade": {
+      "done": true,
+      "notes": "update-adopt matched 11 files, recognized 22 as an untouched earlier release, and left 2 uncertain (AGENTS.md, check.sh). update-apply changed 76 paths. AGENTS.md was accepted and adapted to the project's .kiro layout; check.sh was kept and given --quiet. The project's check.sh passed afterwards (36 checks). A second, incremental update replaced 2 files with no conflict.",
+      "evidence_ref": "progress/impl_hybrid-team-stable-release.md, section 'First real migrations'; harness-manager commit 3caa189"
+    },
+    "recovery": {
+      "done": false,
+      "notes": "Not carried out in this project. update-restore was exercised only in test fixtures."
+    }
+  },
+  "metrics": {
+    "onboarding_minutes": null,
+    "approval_wait_minutes": null,
+    "rework_count": null,
+    "post_close_defects": null,
+    "false_blocks": null
+  },
+  "measured_after_update": "Session start: brief 394 bytes, AGENTS.md 5,845 bytes, check.sh --quiet output 165 bytes. check.sh time unchanged (about 4 seconds).",
+  "framework_defects_found_and_fixed": [
+    "Legacy files could not be told from local edits; adoption now matches them against the source's Git history.",
+    "Starter and scaffold files were added to an initialized project; an update no longer adds them.",
+    "No way to accept a conflict explicitly; update-accept added.",
+    "The session brief ignored specs under .kiro/specs.",
+    "Releases shipped machine-local synced skills."
+  ],
+  "unresolved_issues": [
+    {
+      "summary": "The update branch is local only: not pushed, not reviewed, not merged.",
+      "severity": "major"
+    }
+  ],
+  "human_review": {
+    "reviewed": false,
+    "reviewer_role": "maintainer",
+    "evidence_ref": ""
+  },
+  "to_complete": [
+    "The maintainer confirms consent to take part and to have these observations recorded.",
+    "Carry out the five missing exercises on real work in this project.",
+    "Record the five measurements as they are observed, not from memory.",
+    "The maintainer reviews the report, fills human_review, and moves the file to docs/pilots/."
+  ]
+}
