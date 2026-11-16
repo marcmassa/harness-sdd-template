@@ -6,7 +6,7 @@ FEAT-010 — M5 in progress (ADR-2 order): T20 and T21 implemented, awaiting rev
 ## Progress
 - [x] M1–M3 committed and pushed; CI green on Ubuntu/macOS with Python 3.10/3.13.
 - [x] T11, T12, T14, T15 checked.
-- [ ] T13: reviewed and exercised against the real API (fails closed); no run in Actions yet.
+- [x] T13: reviewed, exercised against the real API, first run in Actions on PR #6 (not-required).
 - [x] T20 versions and inventory; T21 update plan/apply/restore/keep/accept/adopt.
 - [x] Role cards compacted; brief warns on role and description budgets.
 - [x] harness-manager migrated to 0.9.0 (local branch, not pushed).
@@ -18,9 +18,9 @@ FEAT-010 — M5 in progress (ADR-2 order): T20 and T21 implemented, awaiting rev
 - FEAT-009 stays separately spec_ready.
 
 ## Blockers
-T13 needs PR #4 merged (pull_request_target uses main's workflow file), then a pull
-request approved by a second account to observe provider-verified.
+provider-verified with real data needs a repository in repository mode and a second
+reviewer account.
 Real pilot reports for M6 need human review.
 
 ## Next Step
-Merge PR #4, observe trusted-review.yml on the next pull request, then T22.
+Merge PR #6, then T22.

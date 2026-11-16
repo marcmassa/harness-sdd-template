@@ -52,7 +52,7 @@ validation rejects absent policy fields and unreviewed exceptions.
 - [x] **T12** — Implement versioned work/evidence records, deterministic spec
   digest, shared state transition validation, atomic writes, and explicit
   failed-hook recovery. _(R11–R14, R17, R23)_
-- [ ] **T13** — Implement declared local review and trusted repository review
+- [x] **T13** — Implement declared local review and trusted repository review
   modes; verify actual provider documentation and privilege boundaries before
   enabling CI. Add tests for forged metadata, stale revision, changed specs,
   task-only updates, missing reviewer, and unavailable required provider access.
