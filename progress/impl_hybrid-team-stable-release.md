@@ -176,3 +176,14 @@ verifying: `CLAUDE.md` claimed that `.claude/settings.json` enforces edit
 permissions; its `deny` list is empty. The claim is corrected and a test
 keeps it out.
 
+## T23 implemented 2026-11-16, awaiting review
+
+| Requirement | Task | Evidence | State |
+|---|---|---|---|
+| R29 | T23 | `render.py` (49,030 bytes) split into `render_core`, `render_adapters`, `render_scaffold`, `render_init`, `render_export` plus a 9 KB entry point; largest module 14,130 bytes. A snapshot of renderer behaviour (export tree, 26 commands, every generated file; 2,083 lines) is byte-identical before and after. `tests/test_docs_contract.py`: no tracked authored file above 20,000 bytes; modules do not import the entry point | Local PASS |
+| R28 | T23 | `CONTRIBUTING.md` (contribution, hook install, releases and their owner) links team policy, maintenance, update and rollback; README index updated; `AGENTS.md` is 120 lines. Tests: relative links and anchors resolve, every documented `bootstrap.sh` and `workflow-*` command exists | Local PASS |
+
+The snapshot comparison was run once by hand and is not part of the suite; the
+existing parity, plugin-adapter, target-CLI, portable-template, and M1 suites
+cover the renderer on every run.
+
