@@ -132,11 +132,12 @@ Recorded 2026-11-16 against `marcmassa/harness-sdd-template`.
 | Stale head, rejected token, missing pull request | Same setup, one input changed each time | `rejected`, `provider-unavailable` (HTTP 401), `provider-unavailable` (HTTP 404); the token never appears in output |
 | No token, not in GitHub Actions | Same setup | `missing-trusted-context`, exit 2 |
 | Workflow source | Draft pull request #5 opened against a non-default base branch that carries the workflow | GitHub did not start the workflow: `pull_request_target` uses the default branch's file only |
+| First run in GitHub Actions | Pull request #6 against `main`, run 43827430983 | Triggered by `pull_request_target`; token permissions were `Contents: read`, `Metadata: read`, `PullRequests: read`; the job checked out the `main` commit `295d138`, not the pull request commit `997e14c`; the check `harness-sdd trusted review` is attached to the pull request; result `not-required`, because this repository has no repository-mode policy |
 
 Not yet observed:
 
-- A run of `trusted-review.yml` inside GitHub Actions. It needs the workflow
-  on the default branch first.
+- A rejection or a verification inside GitHub Actions: the one observed run
+  ended at `not-required`, before any provider call.
 - The `provider-verified` result with real data. It needs an approving review
   from an allowed reviewer who is not the pull request author, so a second
   account.
@@ -144,5 +145,6 @@ Not yet observed:
 
 The setup that produced the first three rows is not the trusted job: the
 environment was set by a person. It shows that the code handles real provider
-responses, not that the privilege boundary holds in Actions.
+responses. The privilege boundary in Actions (read-only token, trusted base
+checkout) is shown by the run on pull request #6.
 

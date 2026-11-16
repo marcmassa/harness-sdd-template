@@ -153,3 +153,12 @@ as expected; see `docs/trusted-review.md`, "Evidence so far". Pull request #4
 is open against `main`. T13 stays unchecked: no run inside GitHub Actions and
 no positive `provider-verified` result with real data yet.
 
+PR #4 merged 2026-11-16 (`295d138`). First run of `trusted-review.yml` in
+GitHub Actions on PR #6 (run 43827430983): read-only token, trusted base
+checkout, check attached to the pull request, result `not-required`. T13
+checked: both review modes are implemented, the provider behaviour and the
+privilege boundary were verified with real runs, and the listed negative
+tests exist. R15 state: Local PASS plus remote boundary evidence. Still not
+observed: `provider-verified` with a real second reviewer, and the ruleset
+binding; both need a repository that opts in to repository mode.
+
