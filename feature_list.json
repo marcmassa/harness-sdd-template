@@ -165,6 +165,30 @@
       "priority": "P0",
       "agent": "implementer",
       "sprint": "S8"
+    },
+    {
+      "id": "MAINT-003",
+      "name": "embedded-command-bodies",
+      "title": "Embedded command and role bodies, smaller always-loaded adapter files",
+      "description": "Generated commands (Claude Code, Gemini CLI, Cursor, opencode) and Claude Code agent files embed their canonical body, saving one read per invocation. CLAUDE.md, GEMINI.md and the Cursor rule no longer repeat what the CLI lists itself. /implement and /done call check.sh --quiet. See docs/quality-checks.md. Tests: tests/test_capability_matrix.py (EmbeddedBodyTests).",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P1",
+      "agent": "implementer",
+      "sprint": "S13"
+    },
+    {
+      "id": "MAINT-004",
+      "name": "one-step-init",
+      "title": "One-step init: init --apply builds the sub-agents deterministically",
+      "description": "bootstrap.sh init --apply --clis ... [--implementer <lang>=<glob>] [--add <scaffold>] builds subagents[], role cards and SOUL.md from the scaffolds, drops them, renders and validates. Canonical roles ship a finished SOUL.md; tailoring is optional. /init is one confirmation and one command. The brief no longer reports PARTIAL for remaining steering and hook scaffolds. Tests: tests/test_init_apply.py.",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P1",
+      "agent": "implementer",
+      "sprint": "S13"
     }
   ]
 }

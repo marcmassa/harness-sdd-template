@@ -71,3 +71,9 @@ Override or add budgets (bytes) with an optional `context_budget` object in
 `./.agents/bootstrap.sh archive-log progress/<file>.md` moves an oversized log
 to `progress/archive/<name>-<date>.md` and leaves a stub that points to it.
 Nothing is deleted.
+
+Generated commands and Claude Code agent files embed their canonical body
+(`.agents/commands/<name>.md`, `SUBAGENT.md`) instead of pointing at it, so
+invoking a command or a role costs no extra read. The canonical files stay the
+source: edit them and re-render; `./check.sh` fails on drift. `/implement` and
+`/done` call `./check.sh --quiet`.

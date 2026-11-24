@@ -502,7 +502,7 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters test_token_limit test_m1 test_team_policy test_m3 test_session_brief test_hook_runner test_inventory test_update test_capability_matrix test_docs_contract test_m5_e2e test_m4 test_release; do
+for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters test_token_limit test_m1 test_team_policy test_m3 test_session_brief test_hook_runner test_inventory test_update test_capability_matrix test_docs_contract test_m5_e2e test_m4 test_release test_init_apply; do
 	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
 		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
 			pass "${t}"

@@ -157,6 +157,29 @@ def load_soul_content(root: Path, sa: dict[str, Any]) -> str:
     return ""
 
 
+def _strip_frontmatter(text: str) -> str:
+    """Drop a leading `---` YAML block; the adapter writes its own."""
+    if text.startswith("---\n"):
+        end = text.find("\n---\n", 4)
+        if end != -1:
+            return text[end + 5:]
+    return text
+
+
+def _inline_file(root: Path, relative: str, pointer: str) -> str:
+    """Content of a canonical file for embedding in an adapter, or `pointer`.
+
+    Embedding saves the agent one read (a full model turn) every time a
+    command or role is invoked. The pointer is the fallback when the file is
+    missing, so a render never fails on it.
+    """
+    path = root / relative if relative else None
+    if path is None or not path.is_file():
+        return pointer
+    body = _strip_frontmatter(path.read_text(encoding="utf-8")).strip()
+    return body or pointer
+
+
 def build_context(
     root: Path, manifest: dict[str, Any], stack_matches: list[dict[str, Any]]
 ) -> dict[str, Any]:
@@ -199,7 +222,24 @@ def build_context(
         soul_section = (
             f"\n## Agent Soul\n\n{soul_content}" if soul_content else ""
         )
-        enriched_subagents.append({**sa, "soul_content": soul_content, "soul_section": soul_section})
+        role_file = sa.get("role_file", "")
+        role_inline = _inline_file(
+            root, role_file,
+            f"**Full role:** read `{role_file}` in full and follow it strictly.",
+        )
+        enriched_subagents.append({
+            **sa, "soul_content": soul_content, "soul_section": soul_section,
+            "role_inline": role_inline,
+        })
+
+    enriched_commands: list[dict[str, Any]] = []
+    for cmd in manifest.get("commands", []):
+        body_file = cmd.get("body_file", "")
+        pointer = f"Read `{body_file}` and execute the workflow described there."
+        inline = _inline_file(root, body_file, pointer)
+        # A TOML literal string cannot contain its own delimiter.
+        inline_toml = pointer if "'''" in inline else inline
+        enriched_commands.append({**cmd, "inline": inline, "inline_toml": inline_toml})
 
     return {
         "manifest": manifest,
@@ -208,7 +248,7 @@ def build_context(
         "instructions": manifest.get("instructions", []),
         "skills_paths": _merge_unique_ordered(base_paths, extra_skills),
         "subagents": enriched_subagents,
-        "commands": manifest.get("commands", []),
+        "commands": enriched_commands,
         "implementer_permission": implementer_perm,
         "stack_labels": [m.get("label", "?") for m in stack_matches],
         "extra_skills": extra_skills,

@@ -29,7 +29,7 @@ To verify the rendered files are in sync with the manifest, run
 | `instructions: [...]` | top of `GEMINI.md` (after the framework header) | Listed as references for the model to read |
 | `subagents[*]` | `### \`<name>\`` section in `GEMINI.md` | Roles are expressed as **inline instructions** in the project markdown; Gemini has no separate subagent concept with permissions |
 | `subagents[*].permission` | "Permission contract" subsection | **Soft** — Gemini has no hard file ACLs. The contract is an instruction, not an enforcement |
-| `commands[*]` | one `.gemini/commands/<name>.toml` | `description` and a stub `prompt` that points at `.agents/commands/<name>.md` |
+| `commands[*]` | one `.gemini/commands/<name>.toml` | `description` and a `prompt` that embeds `.agents/commands/<name>.md` as a TOML literal string |
 | `project_detect[*]` | "Detected Stack" section in `GEMINI.md` | Surfaced as a list of stack labels |
 | `project_detect[*].apply.implementer_permission_overrides` | merged into the `implementer` "Permission contract" section in `GEMINI.md` | Documented in prose rather than enforced by Gemini |
 
@@ -39,8 +39,9 @@ To verify the rendered files are in sync with the manifest, run
   opencode can. The "Permission contract" sections are advisory.
 - **No native sub-agent isolation**: a single Gemini session adopts one role at
   a time. Switching roles mid-session is possible but not enforced.
-- **Slash commands are stubs**: each `.toml` points at a canonical body in
-  `.agents/commands/`. Edit the canonical, regenerate the stub.
+- **Slash commands are generated copies**: each `.toml` embeds its canonical
+  body from `.agents/commands/`. Edit the canonical and regenerate. A body
+  containing `'''` cannot be embedded and falls back to a pointer.
 
 ## Activation
 

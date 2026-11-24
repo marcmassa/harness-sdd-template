@@ -18,7 +18,7 @@ Execute `tasks.md` for the feature in `in_progress`.
 7. After each implementation task, write at least one test that verifies the referenced R<n>.
 8. Document the `R<n> ↔ test` map in `progress/impl_<feature>.md`.
 9. When all `T<n>` are done, run `./.agents/bootstrap.sh workflow-run-hook --feature-id "<feature_id>" --event on_implementation_complete`.
-10. Run `./check.sh`. It must pass.
+10. Run `./check.sh --quiet`. It must pass; it prints the full output only when it fails.
 11. Hand off to the reviewer (do not mark `done` yourself).
 
 ## Guardrails

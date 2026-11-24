@@ -14,7 +14,7 @@ Run the reviewer on the feature currently in `in_progress` and mark it `done` if
    - A wrong or renamed entry: `./.agents/bootstrap.sh workflow-evidence-remove --feature-id "<feature_id>" --requirement R<n> --source "<source>" --reason "<why>"`. Entries for older commits are superseded automatically.
    - Observed checks: `./.agents/bootstrap.sh workflow-run-checks --feature-id "<feature_id>"`.
    - Independent review, using only what the reviewer stated: `./.agents/bootstrap.sh workflow-review --feature-id "<feature_id>" --reviewer "<human>" --role "<role>" --decision approved --evidence-ref "<reference>"`.
-7. Run `./check.sh`. It must pass with no errors.
+7. Run `./check.sh --quiet`. It must pass with no errors; it prints the full output only when it fails.
 8. Run `./.agents/bootstrap.sh workflow-run-hook --feature-id "<feature_id>" --event on_review_complete`.
 9. On success, run `./.agents/bootstrap.sh workflow-transition --feature-id "<feature_id>" --target done`. It enforces the closing gate, updates `feature_list.json`, and runs the `on_feature_done` hooks. Then append a summary entry to `progress/progress.md` (format: `{date} | {type} | {title} | {files} | {next}`).
 10. On failure: report the defects and leave the feature in `in_progress`.

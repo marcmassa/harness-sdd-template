@@ -37,7 +37,7 @@ interactively — pass `--yes` to skip prompts.
 | `subagents[*].permission` | `agent.<name>.permission` | Direct copy. The `implementer` permission is merged with any `project_detect[*].apply.implementer_permission_overrides` |
 | `commands[*].name` | `command.<name>` | Object key |
 | `commands[*].description` | `command.<name>.description` | Direct copy |
-| `commands[*].body_file` | `command.<name>.prompt` (stub) | "Read `<body_file>` and execute the workflow described there." |
+| `commands[*].body_file` | `command.<name>.template` | Embedded content of `body_file`; a pointer to it if the file is missing |
 | `project_detect[*]` | merged into `agent.implementer.permission` | Stack-aware overrides |
 
 ## Caveats and limitations
@@ -49,7 +49,7 @@ interactively — pass `--yes` to skip prompts.
 - **opencode's `mode: "primary"` agents are limited**: only one primary agent
   can be `default_agent`. Other `mode: "primary"` entries are still declared
   but the `default_agent` is the entry point.
-- **The `prompt` field is a stub**: opencode invokes the agent, the agent
+- **The agent `prompt` field is a stub**: opencode invokes the agent, the agent
   reads `.agents/subagents/<name>/SUBAGENT.md` as its first action. This is
   by design — it keeps `.agents/` as the single source of truth.
 
