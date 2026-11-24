@@ -29,13 +29,13 @@ This project runs under the Harness SDD framework. These rules apply to every ta
 
 ## SDD workflow commands
 
-Run a workflow by reading its body file and executing the steps there.
-Lifecycle hooks fire through `hooks/run-hooks.sh <event>` as instructed by
-each workflow body (the bridge for SDD lifecycle hooks — Cursor's native
-hook events are tool/session scoped and have no SDD-transition equivalent).
+Each is `/harness-<name>` in `.cursor/commands/`, with its workflow embedded
+(source: `.agents/commands/<name>.md`). Lifecycle hooks fire through
+`hooks/run-hooks.sh <event>` as each workflow instructs; Cursor's native hook
+events have no SDD-transition equivalent.
 
 {{ LOOP:commands }}
-- **{{ item.name }}** — {{ item.description }} → read `{{ item.body_file }}` and execute the workflow there.
+- **{{ item.name }}** — {{ item.description }}
 {{ ENDLOOP }}
 
 ## Skills

@@ -23,9 +23,9 @@
     "claude-code": {
       "generates": ["CLAUDE.md", ".claude/agents/<name>.md", ".claude/commands/<name>.md", ".claude/settings.json"],
       "instructions": {"level": "native-config", "detail": "`CLAUDE.md` is loaded by the CLI; it points at `AGENTS.md`."},
-      "roles": {"level": "native-config", "detail": "One `.claude/agents/<name>.md` stub per sub-agent."},
-      "commands": {"level": "native-config", "detail": "One `.claude/commands/<name>.md` stub per command."},
-      "edit_permissions": {"level": "instruction-only", "detail": "The permission map is printed in each agent stub. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty."},
+      "roles": {"level": "native-config", "detail": "One `.claude/agents/<name>.md` per sub-agent, with the role card embedded."},
+      "commands": {"level": "native-config", "detail": "One `.claude/commands/<name>.md` per command, with the workflow embedded."},
+      "edit_permissions": {"level": "instruction-only", "detail": "The permission map is printed in each agent file. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty."},
       "lifecycle_hooks": {"level": "instruction-only", "detail": "Command bodies call `workflow-transition` and `workflow-run-hook`; no native hook is registered."},
       "skills": {"level": "manual-setup", "detail": "The CLI discovers skills under `.claude/skills/`; link `.agents/skills` there once."},
       "unsupported": ["Blocking edits to `specs/**` or generated adapters", "Per-sub-agent file permissions"],

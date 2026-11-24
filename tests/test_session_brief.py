@@ -86,6 +86,16 @@ class BriefContentTests(BriefTest):
             {'subagents': [], '_template_subagents_examples': [{'name': 'x'}]}))
         self.assertIn('init: FRESH', session_brief.brief(self.root))
 
+    def test_initialized_project_keeps_steering_and_hook_scaffolds_without_a_warning(self):
+        self.features()
+        manifest = {'subagents': [{'name': 'x'}], '_template_steering_examples': [{'file': 's.md'}],
+                    '_template_hooks_examples': [{'event': 'e'}]}
+        self.write('.agents/agentic.json', json.dumps(manifest))
+        self.assertNotIn('init:', session_brief.brief(self.root))
+        manifest['_template_subagents_examples'] = [{'name': 'y'}]
+        self.write('.agents/agentic.json', json.dumps(manifest))
+        self.assertIn('init: PARTIAL', session_brief.brief(self.root))
+
     def test_budget_is_configurable_in_the_manifest(self):
         self.features()
         self.write('.agents/agentic.json', json.dumps(
