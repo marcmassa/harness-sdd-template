@@ -83,6 +83,7 @@ from render_init import (  # noqa: F401
     SCAFFOLD_ONLY_FIELDS,
     validate_init,
 )
+from render_init_apply import InitError, apply_init  # noqa: F401
 from render_scaffold import (  # noqa: F401
     _default_subagent_body,
     add_agent_from_example,
@@ -149,6 +150,14 @@ def main() -> int:
         metavar="DEST",
         help="Copy the portable template payload into DEST. Refuses a non-empty destination.",
     )
+    parser.add_argument("--init-apply", action="store_true",
+                        help="Build subagents[] from the scaffolds in one step (see init --apply).")
+    parser.add_argument("--clis", default="", help="Comma-separated CLIs for --init-apply.")
+    parser.add_argument("--implementer", action="append", default=[],
+                        help="<language>=<glob>[,<glob>...]; repeatable. Default: one generic implementer.")
+    parser.add_argument("--add-example", action="append", default=[],
+                        help="Optional scaffold to activate with --init-apply; repeatable.")
+    parser.add_argument("--dry-run", action="store_true", help="With --init-apply: print the plan only.")
     args = parser.parse_args()
 
     if args.list_renderers:
@@ -211,6 +220,16 @@ def main() -> int:
         actions = remove_all_examples(root, manifest)
         for a in actions:
             print(a)
+        return 0
+
+    if args.init_apply:
+        try:
+            lines = apply_init(root, manifest, [c for c in args.clis.split(",") if c],
+                               list(RENDERERS), args.implementer, args.add_example, args.dry_run)
+        except InitError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print("\n".join(lines))
         return 0
 
     if args.validate_init:

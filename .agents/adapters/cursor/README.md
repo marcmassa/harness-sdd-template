@@ -16,7 +16,7 @@ files below deterministically. No LLM is involved.
 | Path | Content |
 |---|---|
 | `.cursor/rules/harness-sdd.mdc` | Project rule (frontmatter `description` + `alwaysApply: true`): SDD hard rules, role pointers, workflow commands |
-| `.cursor/commands/harness-<name>.md` | One per manifest command; body stub → read `body_file` and execute the workflow |
+| `.cursor/commands/harness-<name>.md` | One per manifest command; embeds the workflow from `body_file` |
 
 Generated files are gitignored (see the repo `.gitignore`); regenerate with
 `./.agents/bootstrap.sh cursor`. Verify drift with
@@ -29,7 +29,7 @@ Generated files are gitignored (see the repo `.gitignore`); regenerate with
 | `subagents[*].name/mode/description/role_file` | rule body, `## Roles` section | Stub: "read that file FIRST and follow it strictly" |
 | `commands[*].name` | `.cursor/commands/harness-<name>.md` | `harness-` prefix — never overwrites user commands |
 | `commands[*].description` | command frontmatter `description` | Direct copy |
-| `commands[*].body_file` | command body | "Read <body_file> and execute the workflow described there" |
+| `commands[*].body_file` | command body | Embedded content of `body_file` |
 | `steering[]` (global) | rule body source conventions | Global steering also lands in the rule; per-agent steering is documented in the rule's role sections |
 
 ## Lifecycle hooks — bridge decision (verified 2026-10-22)

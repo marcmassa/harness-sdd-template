@@ -47,9 +47,7 @@ def render_opencode(
     for cmd in ctx["commands"]:
         cfg["command"][cmd["name"]] = {
             "description": cmd["description"],
-            "template": (
-                f"Read `{cmd['body_file']}` and execute the workflow described there."
-            ),
+            "template": cmd["inline"],
         }
     if ctx.get("default_agent"):
         cfg["default_agent"] = ctx["default_agent"]

@@ -49,9 +49,9 @@ Generates: `CLAUDE.md`, `.claude/agents/<name>.md`, `.claude/commands/<name>.md`
 | Element | Level | How |
 |---|---|---|
 | Instructions | native-config | `CLAUDE.md` is loaded by the CLI; it points at `AGENTS.md`. |
-| Roles | native-config | One `.claude/agents/<name>.md` stub per sub-agent. |
-| Commands | native-config | One `.claude/commands/<name>.md` stub per command. |
-| Edit permissions | instruction-only | The permission map is printed in each agent stub. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty. |
+| Roles | native-config | One `.claude/agents/<name>.md` per sub-agent, with the role card embedded. |
+| Commands | native-config | One `.claude/commands/<name>.md` per command, with the workflow embedded. |
+| Edit permissions | instruction-only | The permission map is printed in each agent file. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty. |
 | Lifecycle hooks | instruction-only | Command bodies call `workflow-transition` and `workflow-run-hook`; no native hook is registered. |
 | Skills | manual-setup | The CLI discovers skills under `.claude/skills/`; link `.agents/skills` there once. |
 

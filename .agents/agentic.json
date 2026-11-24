@@ -57,7 +57,7 @@
       "_intent": "Sample implementer. Copy, customize (especially the file_glob list to match your project's languages), and add to subagents[] when you need a code-writing agent. Drop the scaffold when done.",
       "name": "implementer",
       "mode": "subagent",
-      "description": "Executes tasks.md sequentially on the feature with status=in_progress. Writes code, modules, and configurations per design.md. Does not modify the approved spec.",
+      "description": "Executes tasks.md in order on the in_progress feature. Writes code and configuration per design.md, with a test per requirement. Never edits the approved spec.",
       "role_file": ".agents/subagents/implementer/SUBAGENT.md",
       "category": "canonical",
       "applies_when": {

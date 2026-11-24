@@ -40,6 +40,7 @@
 # Scaffold lifecycle (project shaping):
 #   ./.agents/bootstrap.sh init                  # Show /init workflow + current scaffold-lifecycle state
 #   ./.agents/bootstrap.sh init --validate       # Objective completion gate (exits 0 if /init is complete)
+#   ./.agents/bootstrap.sh init --apply --clis <cli>[,<cli>] [--implementer <lang>=<glob>]... [--add <scaffold>]...  # Shape the manifest in one step
 #   ./.agents/bootstrap.sh profile               # Report: active set + matching template examples
 #   ./.agents/bootstrap.sh add-agent <name>      # Promote a template example to the active manifest
 #   ./.agents/bootstrap.sh add-agent --all-matched  # Promote all examples that match this project
