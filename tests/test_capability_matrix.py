@@ -162,5 +162,54 @@ class MatrixDocumentTests(unittest.TestCase):
         self.assertIn('Optional and not shipped', data['native_plugin_packaging'])
 
 
+class EmbeddedBodyTests(RenderedProject):
+    """Generated commands and roles carry their body, so invoking one costs no extra read."""
+
+    COMMANDS = ('.claude/commands/approve.md', '.gemini/commands/approve.toml',
+                '.cursor/commands/harness-approve.md')
+
+    def test_command_files_embed_the_canonical_body(self):
+        for relative in self.COMMANDS:
+            text = self.text(relative)
+            self.assertIn('Only the human may approve', text, relative)
+            self.assertIn('.agents/commands/approve.md', text, relative)
+            self.assertNotIn('and execute the workflow described there', text, relative)
+        template = json.loads(self.text('opencode.json'))['command']['approve']['template']
+        self.assertIn('Only the human may approve', template)
+
+    def test_gemini_commands_are_valid_toml(self):
+        try:
+            import tomllib
+        except ImportError:
+            self.skipTest('tomllib needs Python 3.11')
+        source = (ROOT / '.agents/commands/approve.md').read_text(encoding='utf-8').strip()
+        parsed = tomllib.loads(self.text('.gemini/commands/approve.toml'))
+        self.assertEqual(parsed['prompt'].strip(), source)
+
+    def test_claude_role_embeds_the_role_card(self):
+        text = self.text('.claude/agents/fixture-engineer.md')
+        self.assertIn('Maintain the fixture.', text)
+        self.assertNotIn('in full', text)
+
+    def test_claude_entry_file_stays_small(self):
+        self.assertLessEqual(len(self.text('CLAUDE.md').encode('utf-8')), 2000)
+
+    def test_missing_body_falls_back_to_a_pointer(self):
+        sys.path.insert(0, str(ROOT / '.agents/adapters/_common'))
+        import render_core
+        self.assertEqual(render_core._inline_file(self.root, 'missing.md', 'POINTER'), 'POINTER')
+        card = self.root / 'card.md'
+        card.write_text('---\nname: x\n---\n\n## Mission\nBody.\n')
+        self.assertEqual(render_core._inline_file(self.root, 'card.md', 'POINTER'), '## Mission\nBody.')
+        triple = self.root / '.agents/commands/quoted.md'
+        triple.write_text("Uses ''' inside.\n")
+        manifest = json.loads(self.text('.agents/agentic.json'))
+        manifest['commands'] = [{'name': 'quoted', 'description': 'd',
+                                 'body_file': '.agents/commands/quoted.md'}]
+        command = render_core.build_context(self.root, manifest, [])['commands'][0]
+        self.assertIn("'''", command['inline'])
+        self.assertNotIn("'''", command['inline_toml'])
+
+
 if __name__ == '__main__':
     unittest.main()

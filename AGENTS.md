@@ -22,8 +22,8 @@ restart the CLI, and stop. For a CLI without a prebuilt adapter, follow
 ## §0.5 — Project profiling (once per project)
 
 If `./.agents/bootstrap.sh brief` reports `init: FRESH` or `init: PARTIAL`, run
-`/init` (body: `.agents/commands/init.md`) before feature work. It is complete
-only when `./.agents/bootstrap.sh init --validate` and `./check.sh` exit 0.
+`/init` (body: `.agents/commands/init.md`; one `init --apply` command). It is
+complete only when `./.agents/bootstrap.sh init --validate` and `./check.sh` exit 0.
 Later additions use `add-agent`, `add-steering`, `add-hook`; details are in
 `docs/framework-workflow.md` ("Template Installation Lifecycle").
 

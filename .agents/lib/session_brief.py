@@ -124,9 +124,9 @@ def _init_state(root):
     manifest = _json(root / '.agents/agentic.json')
     if not isinstance(manifest, dict):
         return 'manifest: .agents/agentic.json is missing'
-    scaffolds = any(manifest.get(key) for key in ('_template_subagents_examples',
-                                                   '_template_steering_examples',
-                                                   '_template_hooks_examples'))
+    # Same rule as `init --validate`: steering and hook scaffolds stay available
+    # for add-steering / add-hook and do not make an initialized project partial.
+    scaffolds = bool(manifest.get('_template_subagents_examples'))
     if not manifest.get('subagents'):
         return 'init: FRESH — run /init before feature work' if scaffolds else None
     return 'init: PARTIAL — scaffolds remain, finish /init' if scaffolds else None

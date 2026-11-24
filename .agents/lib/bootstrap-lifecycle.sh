@@ -7,10 +7,50 @@ list_orphans() {
     python3 "$RENDERER" --list-orphans --root "$ROOT_DIR"
 }
 
+# init --apply: one deterministic step instead of hand-editing the manifest.
+# Usage: init --apply --clis <cli>[,<cli>] [--implementer <lang>=<glob>[,<glob>]]... [--add <scaffold>]... [--dry-run]
+init_apply() {
+    local args=() dry=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --clis) args+=(--clis "${2:-}"); shift ;;
+            --implementer) args+=(--implementer "${2:-}"); shift ;;
+            --add) args+=(--add-example "${2:-}"); shift ;;
+            --dry-run) args+=(--dry-run); dry="1" ;;
+            --yes|-y) ;;
+            *) echo "ERROR: unknown init --apply option: $1" >&2; return 1 ;;
+        esac
+        shift
+    done
+    python3 "$RENDERER" --init-apply --root "$ROOT_DIR" ${args[@]+"${args[@]}"} || return 1
+    [ -n "$dry" ] && return 0
+    local log step
+    for step in "remove-examples --yes" "clean" "--all --yes"; do
+        # shellcheck disable=SC2086
+        if ! log=$(ROOT_DIR="$ROOT_DIR" "$ROOT_DIR/.agents/bootstrap.sh" $step 2>&1); then
+            echo "ERROR: '$step' failed:" >&2
+            echo "$log" >&2
+            return 1
+        fi
+    done
+    if log=$(python3 "$RENDERER" --validate-init --root "$ROOT_DIR" 2>&1); then
+        echo "init: COMPLETE. Restart your CLI, then run ./check.sh --quiet."
+    else
+        echo "init: NOT complete:" >&2
+        echo "$log" >&2
+        return 1
+    fi
+}
+
 init_show() {
     if [ ! -f "$RENDERER" ]; then
         echo "ERROR: Renderer not found at $RENDERER" >&2
         return 1
+    fi
+    if [ "${1:-}" = "--apply" ]; then
+        shift
+        init_apply "$@"
+        return $?
     fi
 
     local manifest="$ROOT_DIR/.agents/agentic.json"
@@ -208,16 +248,12 @@ for a in m.get('_template_hooks_examples', []):
     fi
     echo ""
     echo "  Agent workflow (./.agents/commands/init.md):"
-    echo "    1. Read the project (README, feature_list.json, layout)."
-    echo "    2. Decide which sub-agents the project needs (always the 4 canonicals,"
-    echo "       plus any stack-specific illustratives: python, terraform, frontend, data)."
-    echo "    3. For each: either ./bootstrap.sh add-agent <name> --yes   (borrow as-is)"
-    echo "                or copy the entry to subagents[] and customize (recommended)."
-    echo "    4. Decide which steering files and hooks the project needs."
-    echo "       Use ./bootstrap.sh add-steering <name> and add-hook --event <event> --script <path>."
-    echo "    5. ./bootstrap.sh remove-examples --yes   (drop the scaffolds)."
-    echo "    6. ./bootstrap.sh init --validate         (objective completion gate, must exit 0)."
-    echo "    7. ./check.sh                              (must be green)."
+    echo "    1. ./bootstrap.sh detect --clis; ./bootstrap.sh profile   (learn the project)."
+    echo "    2. Confirm the CLIs and implementers with the human."
+    echo "    3. ./bootstrap.sh init --apply --clis <cli>[,<cli>] [--implementer <lang>=<glob>]... [--add <scaffold>]..."
+    echo "       (builds subagents[], role cards and SOUL.md, drops the scaffolds, renders, validates)."
+    echo "    4. Optional: ./bootstrap.sh add-steering <name>, add-hook --event <event> --script <path>."
+    echo "    5. ./check.sh --quiet                      (must pass)."
     echo ""
     echo "  Tell the agent: \"run /init\"  (or invoke the init slash command directly)."
     echo "  Completion gate: ./bootstrap.sh init --validate   (MUST exit 0 before init is declared done)"

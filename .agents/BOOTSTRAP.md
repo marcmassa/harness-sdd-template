@@ -65,7 +65,8 @@ human did not confirm.
 5. **Translate `commands` to your CLI's command/macro concept.**
    For each command in `agentic.json`:
    - Create the equivalent slash command / macro / quick action.
-   - The command body should be a short stub:
+   - Embed the content of `<body_file>` as the command body, so invoking it
+     costs no extra read. If your CLI cannot hold it, use a short stub:
      > "Read `<body_file>` and execute the workflow described there."
 
 6. **Apply `instructions` and `steering` to your CLI.**

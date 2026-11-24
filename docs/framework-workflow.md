@@ -61,6 +61,20 @@ Once the framework is installed, the day-to-day workflow follows the SDD state m
 
 ## Template Installation Lifecycle
 
+The short path is one command, which performs the three stages below for the
+sub-agents and runs the completion gate:
+
+```bash
+./.agents/bootstrap.sh init --apply --clis claude-code --implementer 'python=**/*.py'
+```
+
+`--implementer <language>=<glob>[,<glob>]` is repeatable and creates
+`<language>-implementer`; without it there is one generic `implementer`.
+`--add <scaffold>` activates an optional role, and `--dry-run` prints the
+plan without writing. It refuses a manifest that already has sub-agents.
+The canonical roles ship with a finished `SOUL.md`; tailoring them to the
+project is optional. The stages remain available by hand:
+
 When you copy this framework into a project, the sub-agents ship as **scaffolds** — patterns to use as a starting point, never installed by default. The lifecycle has 3 stages:
 
 ```

@@ -30,10 +30,10 @@ To verify all generated files are in sync with the manifest, run
 | `agentic.json` | Claude Code output | Notes |
 |---|---|---|
 | `instructions: [...]` | top of `CLAUDE.md` (after the framework header) | Listed as references for the model to read |
-| `subagents[*]` | one `.claude/agents/<name>.md` with frontmatter `description` | Body is a stub pointing at `.agents/subagents/<name>/SUBAGENT.md` |
-| `subagents[*].permission` | (logged in the per-agent stub) | **Note**: Claude Code's per-sub-agent file permissions are configured differently than opencode's inline `permission` block. The current adapter records the contract in prose. If you need hard file-level enforcement at the sub-agent level, configure `permissions.allow`/`deny` in `.claude/settings.json` (currently scoped at the project level, not per sub-agent) |
-| `commands[*]` | one `.claude/commands/<name>.md` with frontmatter `description` | Body is a stub pointing at `.agents/commands/<name>.md` |
-| `project_detect[*]` | "Detected Stack" section in `CLAUDE.md` | Surfaced as a list of stack labels |
+| `subagents[*]` | one `.claude/agents/<name>.md` with frontmatter `description` | Body embeds `.agents/subagents/<name>/SUBAGENT.md` (frontmatter removed), the permission contract, and the SOUL |
+| `subagents[*].permission` | (printed in the per-agent file) | **Note**: Claude Code's per-sub-agent file permissions are configured differently than opencode's inline `permission` block. The current adapter records the contract in prose. If you need hard file-level enforcement at the sub-agent level, configure `permissions.allow`/`deny` in `.claude/settings.json` (currently scoped at the project level, not per sub-agent) |
+| `commands[*]` | one `.claude/commands/<name>.md` with frontmatter `description` | Body embeds `.agents/commands/<name>.md`, so invoking the command costs no extra read |
+| `project_detect[*]` | "Detected stack" line in `CLAUDE.md` | Surfaced as a list of stack labels |
 | `project_detect[*].apply.implementer_permission_overrides` | merged into the `implementer` permission contract | Documented in prose |
 
 ## Caveats and limitations
@@ -48,8 +48,9 @@ To verify all generated files are in sync with the manifest, run
   ```bash
   ln -s ../.agents/skills .claude/skills
   ```
-- **Slash commands are stubs**: each `.claude/commands/<name>.md` is a thin
-  pointer. Edit `.agents/commands/<name>.md` and regenerate.
+- **Slash commands and agents are generated copies**: each embeds its
+  canonical body. Edit `.agents/commands/<name>.md` or the role's
+  `SUBAGENT.md` and regenerate; `./check.sh` fails on drift.
 
 ## Activation
 
