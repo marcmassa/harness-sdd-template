@@ -83,7 +83,7 @@ from render_init import (  # noqa: F401
     SCAFFOLD_ONLY_FIELDS,
     validate_init,
 )
-from render_init_apply import InitError, apply_init  # noqa: F401
+from render_init_apply import InitError, apply_init, plan_lines  # noqa: F401
 from render_scaffold import (  # noqa: F401
     _default_subagent_body,
     add_agent_from_example,
@@ -150,6 +150,8 @@ def main() -> int:
         metavar="DEST",
         help="Copy the portable template payload into DEST. Refuses a non-empty destination.",
     )
+    parser.add_argument("--init-plan", action="store_true",
+                        help="Print a proposed init --apply command for this project; writes nothing.")
     parser.add_argument("--init-apply", action="store_true",
                         help="Build subagents[] from the scaffolds in one step (see init --apply).")
     parser.add_argument("--clis", default="", help="Comma-separated CLIs for --init-apply.")
@@ -220,6 +222,10 @@ def main() -> int:
         actions = remove_all_examples(root, manifest)
         for a in actions:
             print(a)
+        return 0
+
+    if args.init_plan:
+        print("\n".join(plan_lines(root, manifest)))
         return 0
 
     if args.init_apply:

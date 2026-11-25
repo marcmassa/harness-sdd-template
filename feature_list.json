@@ -189,6 +189,18 @@
       "priority": "P1",
       "agent": "implementer",
       "sprint": "S13"
+    },
+    {
+      "id": "MAINT-005",
+      "name": "faster-check-and-pilot-fixes",
+      "title": "Parallel framework suites and fixes from the first agent-driven install",
+      "description": "check.sh runs the framework suites side by side through tests/run-suites.sh (about 30 s instead of 140 s) and prints a failing suite's last lines. check.sh --quiet prints only failing sections on failure. Fixes from a real agent install: check.sh failed in any project with its own tests/ directory; init --plan proposes the init --apply command; AGENTS.md no longer stops a fresh install after rendering. Tests: tests/test_init_apply.py, tests/test_session_brief.py.",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P1",
+      "agent": "implementer",
+      "sprint": "S13"
     }
   ]
 }

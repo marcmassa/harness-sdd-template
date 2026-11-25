@@ -53,7 +53,7 @@ with the project. The session path is therefore two commands:
 
 | Command | Replaces | Output |
 |---|---|---|
-| `./check.sh --quiet` | `./check.sh` | Warnings and one result line; full output only on failure. Same checks and exit code. |
+| `./check.sh --quiet` | `./check.sh` | Warnings and one result line; only the failing sections on failure. Same checks and exit code. |
 | `./.agents/bootstrap.sh brief` | Reading `feature_list.json`, `tasks.md`, and `progress/current.md` | About 1 KB: feature counts, the active feature and its next task, features awaiting approval, the live session state. Its size does not grow with closed features. |
 
 The brief also warns when a file exceeds its budget:
@@ -71,6 +71,14 @@ Override or add budgets (bytes) with an optional `context_budget` object in
 `./.agents/bootstrap.sh archive-log progress/<file>.md` moves an oversized log
 to `progress/archive/<name>-<date>.md` and leaves a stub that points to it.
 Nothing is deleted.
+
+In this repository `check.sh` also runs the framework suites through
+`tests/run-suites.sh`, side by side (about 30 seconds instead of 140). Suites
+that render into the repository root share one lane; `HARNESS_CHECK_SERIAL=1`
+runs everything one at a time. A failing suite prints its last lines, and a
+`tests/test_*.sh` that is not registered there fails the check. An exported
+project does not carry the suites and skips them, whether or not it has its
+own `tests/` directory.
 
 Generated commands and Claude Code agent files embed their canonical body
 (`.agents/commands/<name>.md`, `SUBAGENT.md`) instead of pointing at it, so
