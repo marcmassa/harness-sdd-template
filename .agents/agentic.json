@@ -23,12 +23,29 @@
   "_template_subagents_examples": [
     {
       "_lifecycle": "scaffold",
-      "_intent": "Sample orchestrator for the SDD workflow. Copy this entry, rename it (e.g. `<project>-orchestrator`), and adjust description/permission/role_file for your project. Add the customized version to subagents[]. When the project's sub-agents are in place, run `./.agents/bootstrap.sh remove-examples` to drop this scaffold.",
-      "name": "harness",
+      "_intent": "Default role. Plans and verifies: routes requests, writes the spec, runs the closing review. Never implements. init --apply always installs it with one or more implementers.",
+      "name": "architect-qa",
       "mode": "primary",
+      "description": "Routes work, writes the EARS spec, and runs the closing review against it. Never implements, so the review stays independent.",
+      "role_file": ".agents/subagents/architect-qa/SUBAGENT.md",
+      "category": "canonical",
+      "permission": {
+        "edit": {
+          "specs/**": "allow",
+          "progress/**": "allow",
+          "feature_list.json": "allow",
+          "*": "deny"
+        }
+      }
+    },
+    {
+      "_lifecycle": "scaffold",
+      "_intent": "Optional. A routing-only orchestrator, for projects that want routing separate from architect-qa. Add it with init --apply --add harness.",
+      "name": "harness",
+      "mode": "subagent",
       "description": "Default orchestrator. Reads feature_list.json, routes tasks to specialized sub-agents, monitors progress.",
       "role_file": ".agents/subagents/harness/SUBAGENT.md",
-      "category": "canonical",
+      "category": "optional",
       "permission": {
         "edit": {
           "*": "ask"
@@ -37,12 +54,12 @@
     },
     {
       "_lifecycle": "scaffold",
-      "_intent": "Sample spec author. Copy, customize, and add to subagents[] if your project follows the EARS / spec-driven workflow. Drop the scaffold when done.",
+      "_intent": "Optional. Splits spec writing out of architect-qa, for teams where different people write and review specs. Add it with init --apply --add spec-author.",
       "name": "spec-author",
       "mode": "subagent",
       "description": "Creates specs/<feature>/{requirements,design,tasks}.md in strict EARS. Never writes production code. Stops at status=spec_ready and waits for human approval.",
       "role_file": ".agents/subagents/spec-author/SUBAGENT.md",
-      "category": "canonical",
+      "category": "optional",
       "permission": {
         "edit": {
           "specs/**": "allow",
@@ -95,12 +112,12 @@
     },
     {
       "_lifecycle": "scaffold",
-      "_intent": "Sample reviewer. Copy, customize, and add to subagents[] if your project uses R<n>↔test traceability. Drop the scaffold when done.",
+      "_intent": "Optional. Splits the closing review out of architect-qa, for teams that want a reviewer who did not write the spec. Add it with init --apply --add reviewer.",
       "name": "reviewer",
       "mode": "subagent",
       "description": "Verifies R<n>↔test traceability. Runs ./check.sh. Marks the feature as done only if all checks pass.",
       "role_file": ".agents/subagents/reviewer/SUBAGENT.md",
-      "category": "canonical",
+      "category": "optional",
       "permission": {
         "edit": {
           "progress/**": "allow",
@@ -132,7 +149,7 @@
       "_intent": "Sample frontend owner. Useful as a starting point if your project has React/Vue/etc. components. Drop the scaffold when done.",
       "name": "frontend-specialist",
       "mode": "subagent",
-      "description": "Owns frontend code: components, state, accessibility, performance, build tooling. Reads the package.json and existing components before changing anything.",
+      "description": "Frontend developer and designer: components, styles, accessibility, UX consistency. Reads package.json and existing components before changing anything.",
       "role_file": ".agents/subagents/frontend-specialist/SUBAGENT.md",
       "category": "illustrative",
       "applies_when": {
