@@ -103,8 +103,8 @@ specific knowledge or specialized workflows without creating a new full sub-agen
 
 | Task Type | Keywords | Primary Agent | Secondary Agents |
 |-----------|----------|---------------|------------------|
-| **SDD Spec** | spec, sdd, requirements, design, tasks, ears, feature_list | `spec-author` | — |
-| **SDD Implementation** | implement, code, after approval | `implementer` | `reviewer` |
+| **SDD Spec** | spec, sdd, requirements, design, tasks, ears, feature_list | `architect-qa` (`spec-author` if declared) | — |
+| **SDD Implementation** | implement, code, after approval | `implementer` | `architect-qa` (`reviewer` if declared) |
 | **Infra / IaC** | terraform, helm, k8s, cloud, aws, gcp, azure, vpc, eks, aks, gke | `cloud-architect` + `platform-engineer` (illustrative) | `quality-agent`, `tester-agent` |
 | **Testing** | test, coverage, terratest, pytest, verification | `tester-agent` (illustrative) | `quality-agent` (illustrative) |
 | **Security / Compliance** | security, policy, compliance, soc2, hipaa, network policy | `security-reviewer` (illustrative) | `quality-agent` (illustrative) |

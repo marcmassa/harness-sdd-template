@@ -27,10 +27,9 @@ extend their capabilities through **skills** stored in `.agents/skills/`.
 
 | Agent | SUBAGENT.md | Responsibility |
 |--------|-------------|----------------|
-| `harness` | `.agents/subagents/harness/SUBAGENT.md` | Default orchestrator. Routes work across sub-agents. |
-| `spec-author` | `.agents/subagents/spec-author/SUBAGENT.md` | Produces specs in EARS notation. Never writes production code. |
-| `implementer` | `.agents/subagents/implementer/SUBAGENT.md` | Executes `tasks.md` sequentially on the active feature. |
-| `reviewer` | `.agents/subagents/reviewer/SUBAGENT.md` | Verifies R<n>↔test traceability and runs `./check.sh`. |
+| `architect-qa` | `.agents/subagents/architect-qa/SUBAGENT.md` | Default. Routes work, writes the spec, runs the closing review. Never implements. |
+| `implementer` | `.agents/subagents/implementer/SUBAGENT.md` | Default. Executes `tasks.md` on the active feature. One per language with `--implementer`. |
+| `harness`, `spec-author`, `reviewer` | `.agents/subagents/<name>/SUBAGENT.md` | Optional (`init --apply --add`): split routing, spec writing, or review out of `architect-qa`. |
 | `agent-template` | `.agents/subagents/agent-template/SUBAGENT.md` | **Example template** — copy to create new sub-agents. |
 
 *To add a new sub-agent, copy `.agents/subagents/agent-template/`, rename the folder and edit the SUBAGENT.md.*

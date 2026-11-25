@@ -18,6 +18,7 @@ LOOP_RE = re.compile(
 )
 
 CANONICAL_SUBAGENTS: set[str] = {
+    "architect-qa",
     "harness",
     "spec-author",
     "implementer",

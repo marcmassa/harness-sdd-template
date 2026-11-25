@@ -14,7 +14,9 @@ FEAT-010 — T1–T25 checked. M6 now needs real pilots (T26, T27).
 - [x] MAINT-003/004 merged (PR #13): embedded bodies, `init --apply`.
 - [x] MAINT-005: parallel suites (check.sh about 30 s), fixes from the first agent-driven
   install (PR #14, merged).
-- [x] MAINT-006: no generated CLAUDE.md; Claude Code reads AGENTS.md (branch maint/agents-md-only).
+- [x] MAINT-006: no generated CLAUDE.md (PR #15, merged).
+- [x] MAINT-007: two roles by default, architect-qa + implementers (branch maint/two-role-default).
+- [ ] SecurIT migration: plan ready (adopt, 24 conflicts, 6 roles to 3); waits for its agent to stop.
 
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.

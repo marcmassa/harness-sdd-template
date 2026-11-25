@@ -29,7 +29,7 @@ Once the framework is installed, the day-to-day workflow follows the SDD state m
                                │    pending       │
                                │  (no spec yet)   │
                                └────────┬─────────┘
-                                        │ spec-author
+                                        │ architect-qa
                                         │ creates specs/<feature>/{requirements,design,tasks}.md
                                         ▼
                                ┌─────────────────┐
@@ -74,8 +74,13 @@ hand (detected stack and CLIs) without writing anything.
 `<language>-implementer`; without it there is one generic `implementer`.
 `--add <scaffold>` activates an optional role, and `--dry-run` prints the
 plan without writing. It refuses a manifest that already has sub-agents.
-The canonical roles ship with a finished `SOUL.md`; tailoring them to the
-project is optional. The stages remain available by hand:
+By default it installs two kinds of role: `architect-qa`, which routes work,
+writes the spec and runs the closing review but never implements, and the
+implementers. Add `harness`, `spec-author` or `reviewer` with `--add` only
+when the team wants those duties split out; one role can cover several
+duties (front-end developer and designer, architect and QA) as long as the
+role that reviews is not the one that implements. The default roles ship with
+a finished `SOUL.md`; tailoring them to the project is optional. The stages remain available by hand:
 
 When you copy this framework into a project, the sub-agents ship as **scaffolds** — patterns to use as a starting point, never installed by default. The lifecycle has 3 stages:
 
@@ -92,7 +97,7 @@ When you copy this framework into a project, the sub-agents ship as **scaffolds*
    │                                                                     │
     │  Read the entries in _template_*_examples[] to see the                │
     │  patterns the framework provides.                                     │
-    │  7 sub-agent scaffolds (4 canonicals + 3 illustrative) +              │
+    │  8 sub-agent scaffolds (2 defaults + 6 optional) +                    │
     │  2 steering + 3 hooks. Each carries _lifecycle: "scaffold".          │
    └────────────────────────────────────┬────────────────────────────────┘
                                         │
@@ -164,10 +169,11 @@ harness-sdd-template/
 │   ├── adapters/              #   CLI adapter templates (opencode, gemini-cli, claude-code, cursor, codex, ...)
 │   ├── subagents/             #   Sub-agent role files
 │   │   ├── agent-template/    #     Scaffold source for new sub-agents
-│   │   ├── harness/           #     Orchestrator
-│   │   ├── spec-author/
-│   │   ├── implementer/
-│   │   └── reviewer/
+│   │   ├── architect-qa/      #     Default: routing, spec, closing review
+│   │   ├── implementer/       #     Default: code
+│   │   ├── harness/           #     Optional: routing only
+│   │   ├── spec-author/       #     Optional: spec only
+│   │   └── reviewer/          #     Optional: review only
 │   ├── skills/                #   Specialized skills (sync'd from the registry)
 │   ├── commands/              #   Slash-command bodies (/spec, /implement, ...)
 │   └── harness/               #   Operational docs (CONVENTION, ROUTING, ...)
