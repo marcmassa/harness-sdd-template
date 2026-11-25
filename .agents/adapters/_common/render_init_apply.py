@@ -32,7 +32,7 @@ CURRENT_AFTER_INIT = (
 CLI_SIGNS = {
     "opencode": ("opencode.json", "OPENCODE"),
     "gemini-cli": ("GEMINI.md", "GEMINI_CLI"),
-    "claude-code": ("CLAUDE.md", "CLAUDECODE"),
+    "claude-code": (".claude/settings.json", "CLAUDECODE"),
     "cursor": (".cursor/rules/harness-sdd.mdc", "CURSOR_TRACE_ID"),
 }
 STACK_GLOBS = {"python": "**/*.py", "typescript": "**/*.ts,**/*.tsx", "go": "**/*.go",

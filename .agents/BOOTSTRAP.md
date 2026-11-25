@@ -93,7 +93,7 @@ human did not confirm.
    Examples:
    - opencode → `opencode.json` in repo root
    - gemini-cli → `GEMINI.md` in repo root + `.gemini/commands/<name>.toml`
-   - claude-code → `CLAUDE.md` + `.claude/agents/<name>.md` + `.claude/commands/<name>.md` + `.claude/settings.json`
+   - claude-code → `.claude/agents/<name>.md` + `.claude/commands/<name>.md` + `.claude/settings.json`
    - cursor → `.cursor/rules/harness-sdd.mdc` + `.cursor/commands/harness-<name>.md`
    - codex → `AGENTS.md` native entry (no generated files; see `.agents/adapters/codex/README.md`)
    - other CLIs → consult your CLI's documentation
