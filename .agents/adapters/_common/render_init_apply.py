@@ -17,7 +17,11 @@ from render_core import detect_stack, matches_condition, save_manifest
 from render_init import SCAFFOLD_ONLY_FIELDS
 from render_scaffold import scaffold_subagent_role_file, scaffold_subagent_soul_file
 
-CANONICAL_ORDER = ("harness", "spec-author", "implementer", "reviewer")
+# Installed by default: one role that plans and verifies, and the implementers.
+# harness, spec-author and reviewer remain optional scaffolds (--add) for teams
+# that want those duties split out.
+DEFAULT_ROLES = ("architect-qa", "implementer")
+PRIMARY_ROLE = "architect-qa"
 NAME_RE = re.compile(r"^[a-z][a-z0-9-]{0,39}$")
 DEFAULT_PERMISSION = {"edit": {"specs/**": "deny", "*": "ask"}}
 
@@ -107,7 +111,7 @@ def plan_lines(root: Path, manifest: dict[str, Any]) -> list[str]:
             if (root / path).exists() or os.environ.get(env)]
     stack = [m.get("label", "?") for m in detect_stack(root, manifest)]
     optional = [s["name"] for s in manifest.get("_template_subagents_examples", []) or []
-                if s.get("name") not in CANONICAL_ORDER and s.get("applies_when")
+                if s.get("name") not in DEFAULT_ROLES and s.get("applies_when")
                 and matches_condition(root, s["applies_when"])]
     command = "./.agents/bootstrap.sh init --apply --clis " + (",".join(clis) or "<cli>")
     command += "".join(f" --implementer '{label}={STACK_GLOBS[label]}'" for label in stack
@@ -134,17 +138,17 @@ def apply_init(root: Path, manifest: dict[str, Any], clis: list[str], known_clis
     if unknown:
         raise InitError(f"unknown CLI(s): {', '.join(unknown)}. Known: {', '.join(known_clis)}. "
                         "For another CLI see .agents/BOOTSTRAP.md.")
-    missing = [n for n in CANONICAL_ORDER if n not in scaffolds]
+    missing = [n for n in DEFAULT_ROLES if n not in scaffolds]
     if missing:
         raise InitError(f"canonical scaffold(s) missing from the manifest: {', '.join(missing)}")
     parsed = [parse_implementer(spec) for spec in implementers]
-    bad_extras = [n for n in extras if n not in scaffolds or n in CANONICAL_ORDER]
+    bad_extras = [n for n in extras if n not in scaffolds or n in DEFAULT_ROLES]
     if bad_extras:
-        available = [n for n in scaffolds if n not in CANONICAL_ORDER]
+        available = [n for n in scaffolds if n not in DEFAULT_ROLES]
         raise InitError(f"--add: not an optional scaffold: {', '.join(bad_extras)}. "
                         f"Available: {', '.join(available) or 'none'}")
     names: list[str] = []
-    for name in CANONICAL_ORDER:
+    for name in DEFAULT_ROLES:
         names += [n for n, _ in parsed] if name == "implementer" and parsed else [name]
     names += extras
     duplicates = sorted({n for n in names if names.count(n) > 1})
@@ -156,13 +160,16 @@ def apply_init(root: Path, manifest: dict[str, Any], clis: list[str], known_clis
         return [f"init --apply (dry run, nothing written): {plan}"]
 
     entries: list[dict[str, Any]] = []
-    for name in CANONICAL_ORDER:
+    for name in DEFAULT_ROLES:
         base = _from_scaffold(scaffolds[name])
         if name == "implementer" and parsed:
             entries += [_language_implementer(root, base, n, globs) for n, globs in parsed]
         else:
             entries.append(base)
-    entries += [_from_scaffold(scaffolds[name]) for name in extras]
+    for name in extras:
+        entry = _from_scaffold(scaffolds[name])
+        entry["mode"] = "subagent"  # one primary: architect-qa
+        entries.append(entry)
 
     customize: list[str] = []
     for entry in entries:
@@ -181,6 +188,7 @@ def apply_init(root: Path, manifest: dict[str, Any], clis: list[str], known_clis
             current.write_text(updated, encoding="utf-8")
 
     manifest["subagents"] = entries
+    manifest["default_agent"] = PRIMARY_ROLE
     manifest["target_clis"] = clis
     save_manifest(root, manifest)
     lines = [f"init --apply: {plan}"]

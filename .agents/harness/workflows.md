@@ -47,7 +47,7 @@ Predefined workflows for the most common tasks in a project using Harness Engine
 **Trigger:** "Create [module/service/component] for [description]"
 
 1. **Spec phase:**
-   - If `sdd: true`: `spec-author` creates `requirements/design/tasks`.
+   - If `sdd: true`: `architect-qa` (or `spec-author`, if declared) creates `requirements/design/tasks`.
    - If `sdd: false`: go directly to implementation.
 2. **Implementation:**
    - Create the component following the project's structure conventions.
