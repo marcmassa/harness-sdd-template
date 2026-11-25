@@ -10,6 +10,7 @@ import sys
 import tempfile
 
 MAX_BYTES = 5000 * 4
+ARCHIVE = b"progress/archive/"
 LOCKFILES = {
     "package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml",
     "bun.lock", "bun.lockb", "Cargo.lock", "Gemfile.lock", "Pipfile.lock",
@@ -50,6 +51,8 @@ def check_paths(paths, prefix, attributes_env=None):
         name = PurePosixPath(os.fsdecode(path)).name
         if path in excluded or name in LOCKFILES or name.endswith(".lock"):
             continue
+        if path.startswith(ARCHIVE) and path.endswith(b".md"):
+            continue  # Written by `bootstrap.sh archive-log`: history, never read whole.
         if any(fnmatch.fnmatchcase(name, pattern) for pattern in GENERATED_NAMES):
             continue
         if git("cat-file", "-t", prefix + path).strip() == b"commit":
