@@ -338,7 +338,8 @@ class GatewayIntegrationTests(unittest.TestCase):
     def test_check_script_runs_workflow_gate_and_new_suites(self):
         text = (ROOT / 'check.sh').read_text(encoding='utf-8')
         self.assertIn('workflow_cli.py', text)
-        self.assertIn('test_m3', text)
+        self.assertIn('tests/run-suites.sh', text)
+        self.assertIn('test_m3', (ROOT / 'tests/run-suites.sh').read_text(encoding='utf-8'))
 
     def test_feature_list_failure_is_no_longer_masked(self):
         text = (ROOT / 'check.sh').read_text(encoding='utf-8')
