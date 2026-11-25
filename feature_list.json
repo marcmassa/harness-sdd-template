@@ -121,7 +121,14 @@
       "sdd": true,
       "priority": "P1",
       "agent": "spec-author",
-      "sprint": "S7"
+      "sprint": "S7",
+      "spec_approval": {
+        "spec_digest": "8db64007d01c4466199de1fb4fefea04a336f085c6552bd11f13c8c0830eac47",
+        "task_digest": "e8db8e651c94e3260a73355e8c609eb6e68943073de4ec66a55e26d134d0ae0c",
+        "reviewer": "MarcMassa (maintainer)",
+        "evidence_ref": "Claude Code session 2026-11-25: maintainer approved the pending features",
+        "assurance": "declared-unmanaged-no-roles"
+      }
     },
     {
       "id": "MAINT-001",
