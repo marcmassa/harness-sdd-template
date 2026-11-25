@@ -21,8 +21,8 @@
       "evidence": ["tests/test_capability_matrix.py::AdapterClaimTests::test_opencode_writes_permissions_into_native_config", "tests/test_cli_adapter_parity.sh"]
     },
     "claude-code": {
-      "generates": ["CLAUDE.md", ".claude/agents/<name>.md", ".claude/commands/<name>.md", ".claude/settings.json"],
-      "instructions": {"level": "native-config", "detail": "`CLAUDE.md` is loaded by the CLI; it points at `AGENTS.md`."},
+      "generates": [".claude/agents/<name>.md", ".claude/commands/<name>.md", ".claude/settings.json"],
+      "instructions": {"level": "native-config", "detail": "`AGENTS.md` is loaded by the CLI itself (v2.1.277 or later, and only when no `CLAUDE.md` exists); the adapter generates no `CLAUDE.md` and removes the one older versions generated."},
       "roles": {"level": "native-config", "detail": "One `.claude/agents/<name>.md` per sub-agent, with the role card embedded."},
       "commands": {"level": "native-config", "detail": "One `.claude/commands/<name>.md` per command, with the workflow embedded."},
       "edit_permissions": {"level": "instruction-only", "detail": "The permission map is printed in each agent file. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty."},

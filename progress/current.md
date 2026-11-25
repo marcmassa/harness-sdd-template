@@ -13,7 +13,8 @@ FEAT-010 — T1–T25 checked. M6 now needs real pilots (T26, T27).
 - [x] SecurIT: check.sh cache, --quiet, timings (local branch, not pushed).
 - [x] MAINT-003/004 merged (PR #13): embedded bodies, `init --apply`.
 - [x] MAINT-005: parallel suites (check.sh about 30 s), fixes from the first agent-driven
-  install (branch maint/faster-check).
+  install (PR #14, merged).
+- [x] MAINT-006: no generated CLAUDE.md; Claude Code reads AGENTS.md (branch maint/agents-md-only).
 
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.

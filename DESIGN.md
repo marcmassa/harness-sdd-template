@@ -40,7 +40,7 @@ decision in this project. These are the non-negotiable properties of the system.
 **Harness SDD example:**
 
 - **CLI-agnostic**: the canonical manifest (`agentic.json`) is the single
-  source of truth. CLI-specific files (`opencode.json`, `GEMINI.md`, `CLAUDE.md`)
+  source of truth. CLI-specific files (`opencode.json`, `GEMINI.md`, `.claude/`)
   are generated artifacts — never edited by hand.
 - **Determinism**: the same manifest + same project root always produces
   identical adapter output. The parity tests in `tests/` enforce this.
@@ -78,7 +78,7 @@ drives all adapters; adapters are generated, never primary.
       │
       ├──► [opencode.json]       ← OpenCode adapter
       ├──► [GEMINI.md]           ← Gemini CLI adapter
-      └──► [CLAUDE.md + .claude/] ← Claude Code adapter
+      └──► [.claude/] ← Claude Code adapter (AGENTS.md is its entry file)
 
 [subagents/]     ─── SUBAGENT.md (instructions) + SOUL.md (identity)
 [steering/]      ─── per-role behavior directives
@@ -127,7 +127,7 @@ Edit agentic.json → bootstrap.sh <cli> → render.py reads manifest
 
 **Session-time (agent reads context):**
 ```
-Agent starts → reads AGENTS.md (navigation) → reads CLAUDE.md/GEMINI.md (instructions)
+Agent starts → reads AGENTS.md (navigation) → reads GEMINI.md where the CLI needs one (instructions)
 → reads feature_list.json (active feature) → reads progress/current.md (session state)
 → reads specs/<feat>/tasks.md (what to do) → executes → check.sh validates
 ```
@@ -149,7 +149,7 @@ developer must respect. Things that cannot be negotiated at the feature level.
 
 **Harness SDD example:**
 
-- **No hand-editing generated files**: `opencode.json`, `GEMINI.md`, `CLAUDE.md`,
+- **No hand-editing generated files**: `opencode.json`, `GEMINI.md`,
   `.claude/`, `.gemini/` are generated. Edit `agentic.json` and re-render.
 - **check.sh is the gateway**: no feature is `done` unless `check.sh` exits 0.
 - **One feature `in_progress` at a time**: enforced by `check.sh` and `feature_list.json`.

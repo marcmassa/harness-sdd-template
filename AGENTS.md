@@ -11,7 +11,7 @@ If your CLI's adapter exists, skip to §1.
 |---|---|
 | opencode | `opencode.json` |
 | gemini-cli | `GEMINI.md`, `.gemini/commands/` |
-| claude-code | `CLAUDE.md`, `.claude/` |
+| claude-code | `.claude/` (this file is the entry; no `CLAUDE.md`) |
 | cursor | `.cursor/rules/harness-sdd.mdc`, `.cursor/commands/harness-*.md` |
 | codex | `AGENTS.md` (native entry, nothing generated) |
 
@@ -67,7 +67,7 @@ what the task requires (§2).
 - No feature is `done` unless `./check.sh` exits 0.
 - Change feature status only through `./.agents/bootstrap.sh workflow-transition`.
   Do not edit `status` in `feature_list.json` by hand to pass a gate.
-- Never edit generated adapters (`opencode.json`, `GEMINI.md`, `CLAUDE.md`,
+- Never edit generated adapters (`opencode.json`, `GEMINI.md`,
   `.claude/`, `.gemini/`, `.cursor/`). Edit `.agents/agentic.json` and re-render.
 - `.agents/agentic.json#subagents[]` is the source of truth for active
   sub-agents; removing a canonical one prunes its directory on the next render.

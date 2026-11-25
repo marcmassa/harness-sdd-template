@@ -124,7 +124,7 @@ fi
 if [ -x "./.agents/bootstrap.sh" ] || [ -f "./.agents/bootstrap.sh" ]; then
 	section "Adapter Consistency"
 	adapter_outputs_found=0
-	for f in opencode.json GEMINI.md CLAUDE.md; do
+	for f in opencode.json GEMINI.md .claude/settings.json; do
 		if [ -f "$f" ]; then adapter_outputs_found=$((adapter_outputs_found + 1)); fi
 	done
 	if [ "$adapter_outputs_found" -eq 0 ]; then

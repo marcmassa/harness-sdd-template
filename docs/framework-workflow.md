@@ -191,7 +191,7 @@ harness-sdd-template/
 ```
 
 The canonical source of truth is `.agents/agentic.json`. Every CLI-specific config
-(`opencode.json`, `GEMINI.md`, `CLAUDE.md`, etc.) is generated from it by
+(`opencode.json`, `GEMINI.md`, `.claude/`, etc.) is generated from it by
 `./.agents/bootstrap.sh <cli>` and is **gitignored** — each developer regenerates
 their own after cloning.
 

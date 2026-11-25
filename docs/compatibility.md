@@ -44,11 +44,11 @@ Evidence: `tests/test_capability_matrix.py::AdapterClaimTests::test_opencode_wri
 
 ## `claude-code`
 
-Generates: `CLAUDE.md`, `.claude/agents/<name>.md`, `.claude/commands/<name>.md`, `.claude/settings.json`.
+Generates: `.claude/agents/<name>.md`, `.claude/commands/<name>.md`, `.claude/settings.json`.
 
 | Element | Level | How |
 |---|---|---|
-| Instructions | native-config | `CLAUDE.md` is loaded by the CLI; it points at `AGENTS.md`. |
+| Instructions | native-config | `AGENTS.md` is loaded by the CLI itself (v2.1.277 or later, and only when no `CLAUDE.md` exists); the adapter generates no `CLAUDE.md` and removes the one older versions generated. |
 | Roles | native-config | One `.claude/agents/<name>.md` per sub-agent, with the role card embedded. |
 | Commands | native-config | One `.claude/commands/<name>.md` per command, with the workflow embedded. |
 | Edit permissions | instruction-only | The permission map is printed in each agent file. `.claude/settings.json` only pre-allows reading framework files; its `deny` list is empty. |
