@@ -6,20 +6,20 @@ installing the template, when `./.agents/bootstrap.sh brief` shows
 
 ## Steps
 
-1. Learn the project, in one call:
+1. Get the proposal:
 
    ```bash
-   ./.agents/bootstrap.sh detect --clis; ./.agents/bootstrap.sh profile; ls
+   ./.agents/bootstrap.sh init --plan
    ```
 
-   Read the project's `README.md` only if the stack is still unclear. Do not
-   guess the stack: if the language or framework is unclear, ask.
+   It prints the detected stack, the CLIs seen, and a ready `init --apply`
+   command. Do not guess: if the stack or the CLI is "ask", ask the human
+   (`./.agents/bootstrap.sh detect --clis` shows the raw detection).
 
 2. **ASK**: show the command you intend to run and wait for confirmation.
 
-   - `--clis`: the CLIs the project uses (propose the ones reported `present`;
-     default `opencode`). Never render a CLI the human did not confirm; it is
-     written to `target_clis`. A CLI without an adapter: `.agents/BOOTSTRAP.md`.
+   - `--clis`: only CLIs the human confirmed; the list is written to
+     `target_clis`. A CLI without an adapter: `.agents/BOOTSTRAP.md`.
    - `--implementer <language>=<glob>[,<glob>]`: one per language, never per
      file or feature. It becomes `<language>-implementer` with edit access to
      those globs. Omit it for a single generic `implementer`.
@@ -27,11 +27,10 @@ installing the template, when `./.agents/bootstrap.sh brief` shows
      `frontend-specialist`, `data-engineer`) only if the project has that
      work. Prefer fewer agents; adding one later is easy.
 
-3. Apply it (add `--dry-run` first to preview the plan):
+3. Run the confirmed command (`--dry-run` previews it without writing):
 
    ```bash
-   ./.agents/bootstrap.sh init --apply --clis claude-code \
-       --implementer 'python=**/*.py,tests/**'
+   ./.agents/bootstrap.sh init --apply --clis <cli>[,<cli>] [--implementer '<language>=<glob>']...
    ```
 
    It builds `subagents[]` from the scaffolds (orchestrator, spec author,
@@ -42,7 +41,8 @@ installing the template, when `./.agents/bootstrap.sh brief` shows
 4. Run `./check.sh --quiet`. `/init` is done only when step 3 printed
    `init: COMPLETE` and this passes. Never report success otherwise.
 
-5. If step 3 listed "placeholders to replace", fill those files with real
+5. Only if step 3 printed a "placeholders to replace" line (it prints none
+   when nothing needs filling), fill those files with real
    content now (role card: mission, tasks, rules; `SOUL.md`: Identity,
    Decision Principles, Boundaries, Tone & Style), then run
    `./.agents/bootstrap.sh --all --yes`.

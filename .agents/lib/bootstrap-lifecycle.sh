@@ -34,7 +34,7 @@ init_apply() {
         fi
     done
     if log=$(python3 "$RENDERER" --validate-init --root "$ROOT_DIR" 2>&1); then
-        echo "init: COMPLETE. Restart your CLI, then run ./check.sh --quiet."
+        echo "init: COMPLETE. Run ./check.sh --quiet, then restart your CLI to load the adapter."
     else
         echo "init: NOT complete:" >&2
         echo "$log" >&2
@@ -46,6 +46,10 @@ init_show() {
     if [ ! -f "$RENDERER" ]; then
         echo "ERROR: Renderer not found at $RENDERER" >&2
         return 1
+    fi
+    if [ "${1:-}" = "--plan" ]; then
+        python3 "$RENDERER" --init-plan --root "$ROOT_DIR"
+        return $?
     fi
     if [ "${1:-}" = "--apply" ]; then
         shift

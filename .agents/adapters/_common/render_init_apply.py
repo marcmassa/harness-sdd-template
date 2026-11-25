@@ -9,9 +9,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import datetime
+import os
 import re
 
-from render_core import save_manifest
+from render_core import detect_stack, matches_condition, save_manifest
 from render_init import SCAFFOLD_ONLY_FIELDS
 from render_scaffold import scaffold_subagent_role_file, scaffold_subagent_soul_file
 
@@ -25,6 +27,16 @@ CURRENT_AFTER_INIT = (
     ("- [ ] Shape the manifest with /init", "- [x] Manifest shaped with init --apply"),
     ("Run /init.", "Run /spec."),
 )
+
+# What tells us a CLI is in use: its generated entry file, or the host's environment.
+CLI_SIGNS = {
+    "opencode": ("opencode.json", "OPENCODE"),
+    "gemini-cli": ("GEMINI.md", "GEMINI_CLI"),
+    "claude-code": ("CLAUDE.md", "CLAUDECODE"),
+    "cursor": (".cursor/rules/harness-sdd.mdc", "CURSOR_TRACE_ID"),
+}
+STACK_GLOBS = {"python": "**/*.py", "typescript": "**/*.ts,**/*.tsx", "go": "**/*.go",
+               "terraform": "**/*.tf"}
 
 
 class InitError(Exception):
@@ -89,6 +101,26 @@ def _language_implementer(root: Path, base: dict[str, Any], name: str, globs: li
     return entry
 
 
+def plan_lines(root: Path, manifest: dict[str, Any]) -> list[str]:
+    """A short, ready-to-confirm proposal for `init --apply`; reads only, writes nothing."""
+    clis = [name for name, (path, env) in CLI_SIGNS.items()
+            if (root / path).exists() or os.environ.get(env)]
+    stack = [m.get("label", "?") for m in detect_stack(root, manifest)]
+    optional = [s["name"] for s in manifest.get("_template_subagents_examples", []) or []
+                if s.get("name") not in CANONICAL_ORDER and s.get("applies_when")
+                and matches_condition(root, s["applies_when"])]
+    command = "./.agents/bootstrap.sh init --apply --clis " + (",".join(clis) or "<cli>")
+    command += "".join(f" --implementer '{label}={STACK_GLOBS[label]}'" for label in stack
+                       if label in STACK_GLOBS)
+    command += "".join(f" --add {name}" for name in optional)
+    return [
+        f"init plan | stack: {', '.join(stack) or 'not detected (ask)'} | CLIs seen: "
+        f"{', '.join(clis) or 'none (ask)'} | optional roles matching: {', '.join(optional) or 'none'}",
+        f"proposed: {command}",
+        "Confirm with the human before running; adjust --clis, --implementer, --add to what they say.",
+    ]
+
+
 def apply_init(root: Path, manifest: dict[str, Any], clis: list[str], known_clis: list[str],
                implementers: list[str], extras: list[str], dry_run: bool = False) -> list[str]:
     """Shape a FRESH manifest. Returns the lines to print; raises InitError on a bad plan."""
@@ -144,6 +176,7 @@ def apply_init(root: Path, manifest: dict[str, Any], clis: list[str], known_clis
         updated = text
         for old, new in CURRENT_AFTER_INIT:
             updated = updated.replace(old, new)
+        updated = updated.replace("{YYYY-MM-DD}", datetime.date.today().isoformat(), 1)
         if updated != text:
             current.write_text(updated, encoding="utf-8")
 

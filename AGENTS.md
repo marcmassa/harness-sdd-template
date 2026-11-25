@@ -15,9 +15,9 @@ If your CLI's adapter exists, skip to §1.
 | cursor | `.cursor/rules/harness-sdd.mdc`, `.cursor/commands/harness-*.md` |
 | codex | `AGENTS.md` (native entry, nothing generated) |
 
-If it is missing: run `./.agents/bootstrap.sh <your-cli>`, tell the user to
-restart the CLI, and stop. For a CLI without a prebuilt adapter, follow
-`.agents/BOOTSTRAP.md`.
+If it is missing and `brief` reports `init: FRESH`, go to §0.5: `/init` renders
+it. Otherwise run `./.agents/bootstrap.sh <your-cli>` and tell the user to
+restart the CLI. Without a prebuilt adapter, follow `.agents/BOOTSTRAP.md`.
 
 ## §0.5 — Project profiling (once per project)
 
@@ -29,8 +29,8 @@ Later additions use `add-agent`, `add-steering`, `add-hook`; details are in
 
 ## §1 — Session start (mandatory, two commands)
 
-1. `./check.sh --quiet` — prints only warnings, failures, and the result. If it
-   fails, stop and fix the environment first.
+1. `./check.sh --quiet` — prints warnings and the result; on failure, only the
+   failing sections. If it fails, stop and fix the environment first.
 2. `./.agents/bootstrap.sh brief` — active feature, its next task, features
    awaiting approval, `progress/current.md`, and context-budget warnings.
 
