@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 import json
 
-from render_core import render_template_str, write_file
+from render_core import prune_generated, render_template_str, write_file
 
 
 def render_opencode(
@@ -85,6 +85,8 @@ def render_gemini(
                 body = render_template_str(tf.read_text(), cmd_ctx)
                 out = root / ".gemini" / "commands" / f"{cmd['name']}.{ext}"
                 ok &= write_file(out, body, check, None)
+            ok &= prune_generated(root / ".gemini" / "commands",
+                                  {f"{cmd['name']}.{ext}" for cmd in ctx["commands"]}, check)
     return ok
 
 
@@ -123,6 +125,8 @@ def render_claude(
                 body = render_template_str(tf.read_text(), sa_ctx)
                 out = root / ".claude" / "agents" / f"{sa['name']}.md"
                 ok &= write_file(out, body, check, None)
+            ok &= prune_generated(root / ".claude" / "agents",
+                                  {f"{sa['name']}.md" for sa in ctx["subagents"]}, check)
 
     cmds_tmpl_dir = adapter_dir / "claude-commands"
     if cmds_tmpl_dir.exists():
@@ -133,6 +137,8 @@ def render_claude(
                 body = render_template_str(tf.read_text(), cmd_ctx)
                 out = root / ".claude" / "commands" / f"{cmd['name']}.md"
                 ok &= write_file(out, body, check, None)
+            ok &= prune_generated(root / ".claude" / "commands",
+                                  {f"{cmd['name']}.md" for cmd in ctx["commands"]}, check)
 
     settings_tmpl = adapter_dir / "claude-settings.json.tmpl"
     if settings_tmpl.exists():
@@ -167,6 +173,8 @@ def render_cursor(
                 body = render_template_str(tf.read_text(), cmd_ctx)
                 out = root / ".cursor" / "commands" / f"harness-{cmd['name']}.md"
                 ok &= write_file(out, body, check, None)
+            ok &= prune_generated(root / ".cursor" / "commands",
+                                  {f"harness-{cmd['name']}.md" for cmd in ctx["commands"]}, check)
 
     # R4 evidence gate (verified 2026-10-22 against cursor.com/docs/hooks):
     # no Cursor hook event has a genuine SDD-transition equivalent, so
