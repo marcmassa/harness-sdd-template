@@ -4,7 +4,7 @@ Run `./check.sh` and report the result.
 
 ## Steps
 
-1. Execute `./check.sh --quiet` from the project root. It prints warnings and one result line when it passes, and the full output when it fails.
+1. Execute `./check.sh --quiet` from the project root. It prints warnings and one result line when it passes, and only the failing sections when it fails.
 2. Report the result line, or the failing sections.
 3. If check.sh passes, run `hooks/run-hooks.sh on_check_pass`.
 4. If failures, list the failing sections and their error messages.

@@ -11,9 +11,9 @@ FEAT-010 — T1–T25 checked. M6 now needs real pilots (T26, T27).
 - [x] Role cards compacted; brief warns on role and description budgets.
 - [x] harness-manager migrated to 0.9.0 (local branch, not pushed).
 - [x] SecurIT: check.sh cache, --quiet, timings (local branch, not pushed).
-- [x] MAINT-003: commands and Claude agents embed their body; smaller CLAUDE.md/GEMINI.md
-  (branch maint/command-inlining-adapter-trim, not committed).
-- [x] MAINT-004: `init --apply` one-step init; canonical SOUL.md files (same branch).
+- [x] MAINT-003/004 merged (PR #13): embedded bodies, `init --apply`.
+- [x] MAINT-005: parallel suites (check.sh about 30 s), fixes from the first agent-driven
+  install (branch maint/faster-check).
 
 ## Pending
 - Human review of T20 and T21 before their boxes are checked.

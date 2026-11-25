@@ -198,6 +198,26 @@ class RepositoryContractTests(unittest.TestCase):
             self.assertIn('check.sh: PASS (1 checks passed)', subprocess.run(
                 [str(Path(temp) / 'ok'), '--quiet'], text=True, capture_output=True).stdout)
 
+    def test_quiet_failure_prints_only_failing_sections_and_other_warnings(self):
+        script = (ROOT / 'check.sh').read_text(encoding='utf-8')
+        rule = '━' * 40
+        lines = []
+        for title, body in (('Good', ['  [PASS] fine', '[WARN]  heads up']),
+                            ('Bad', ['detail line', '  [FAIL] broken']),
+                            ('Result', ['  ❌ Some checks failed'])):
+            lines += ['', rule, '  ' + title, rule] + body
+        with tempfile.TemporaryDirectory(prefix='harness-quiet-') as temp:
+            fake = Path(temp) / 'bad'
+            fake.write_text(script.split('ROOT_DIR="$(cd', 1)[0]
+                            + "cat <<'OUT'\n" + '\n'.join(lines) + '\nOUT\nexit 1\n')
+            fake.chmod(0o755)
+            result = subprocess.run([str(fake), '--quiet'], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        for expected in ('detail line', '[FAIL] broken', '[WARN]  heads up', 'check.sh: FAIL'):
+            self.assertIn(expected, result.stdout)
+        self.assertNotIn('[PASS] fine', result.stdout)
+        self.assertNotIn('  Good', result.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()

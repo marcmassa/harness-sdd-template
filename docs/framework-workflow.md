@@ -68,6 +68,8 @@ sub-agents and runs the completion gate:
 ./.agents/bootstrap.sh init --apply --clis claude-code --implementer 'python=**/*.py'
 ```
 
+`./.agents/bootstrap.sh init --plan` prints that command for the project at
+hand (detected stack and CLIs) without writing anything.
 `--implementer <language>=<glob>[,<glob>]` is repeatable and creates
 `<language>-implementer`; without it there is one generic `implementer`.
 `--add <scaffold>` activates an optional role, and `--dry-run` prints the

@@ -7,7 +7,7 @@
 # Usage: ./check.sh [--quiet] [--verbose] [--py-only] [--ts-only] [--go-only] [--spec-only] [--no-color]
 #
 # Flags:
-#   --quiet      Print only warnings, failures, and the result (full output on failure);
+#   --quiet      Print only warnings, failures, and the result (only the failing sections on failure);
 #                the form agents should use, to keep session context small
 #   --verbose    Show full command output instead of tail-only
 #   --py-only    Skip non-Python sections
@@ -61,7 +61,20 @@ if $QUIET; then
 		printf '%s\n' "$output" | grep -E '\[(WARN|FAIL|ERROR)\]' || true
 		echo "check.sh: PASS ($(printf '%s\n' "$output" | grep -c '\[PASS\]') checks passed)"
 	else
-		printf '%s\n' "$output"
+		# Failing sections whole, warnings from the rest; everything if nothing is marked.
+		filtered=$(printf '%s\n' "$output" | awk '
+			function flush() { printf "%s", (bad ? block : warns); block = ""; warns = ""; bad = 0 }
+			/^━+$/ { rule = !rule; if (rule) flush() }
+			{ block = block $0 "\n" }
+			/\[WARN\]/ { warns = warns $0 "\n" }
+			/\[(FAIL|ERROR)\]|❌|DRIFT/ { bad = 1 }
+			END { flush() }')
+		if printf '%s' "$filtered" | grep -q '\[\(FAIL\|ERROR\)\]'; then
+			printf '%s\n' "$filtered"
+			echo "check.sh: FAIL (run ./check.sh for the full output)"
+		else
+			printf '%s\n' "$output"
+		fi
 	fi
 	exit "$code"
 fi
@@ -289,14 +302,14 @@ for sa in manifest.get("subagents", []):
         errors.append(name)
 if errors:
     for name in errors:
-        print(f"  \033[31m❌ Subagent '{name}': missing SOUL.md (.agents/subagents/{name}/SOUL.md)\033[0m")
+        print(f"  [FAIL] Subagent '{name}': missing SOUL.md (.agents/subagents/{name}/SOUL.md)")
     sys.exit(1)
 else:
     for sa in manifest.get("subagents", []):
         name = sa["name"]
         if name == "agent-template":
             continue
-        print(f"  \033[32m✅ Subagent {name} (SOUL.md)\033[0m")
+        print(f"  [PASS] Subagent {name} (SOUL.md)")
 PYEOF
 soul_rc=$?
 if [ $soul_rc -ne 0 ]; then
@@ -502,21 +515,12 @@ fi
 
 # ── CLI Adapter Parity & Placeholders Tests (FEAT-002) ───────
 section "CLI Adapter Tests"
-for t in test_cli_adapter_parity test_agent_template_placeholders test_steering test_hooks test_soul_md test_portable_template test_target_clis test_plugin_adapters test_token_limit test_m1 test_team_policy test_m3 test_session_brief test_hook_runner test_inventory test_update test_capability_matrix test_docs_contract test_m5_e2e test_m4 test_release test_init_apply; do
-	if [ -f "$ROOT_DIR/tests/${t}.sh" ]; then
-		if bash "$ROOT_DIR/tests/${t}.sh" >/dev/null 2>&1; then
-			pass "${t}"
-		else
-			fail "${t} (see tests/${t}.sh for details)"
-		fi
-	else
-        if [ -d "$ROOT_DIR/tests" ]; then
-            fail "Missing required tests/${t}.sh"
-        else
-            echo "  [SKIP] ${t} (optional): exported consumer has no framework test suites"
-        fi
-	fi
-done
+if [ -f "$ROOT_DIR/tests/run-suites.sh" ]; then
+	bash "$ROOT_DIR/tests/run-suites.sh" || EXIT_CODE=1
+else
+	# A consumer project may have its own tests/; the suites run only where shipped.
+	echo "  [SKIP] framework suites (optional): this project does not carry them"
+fi
 
 # ── Summary ─────────────────────────────────────────
 section "Result"

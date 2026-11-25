@@ -60,6 +60,27 @@ class ApplyTests(FreshProject):
         self.assertNotIn('context budget exceeded', brief)
         self.assertNotIn('/init', brief)
 
+    def test_plan_proposes_the_command_from_the_project(self):
+        (self.root / 'pyproject.toml').write_text('[project]\nname = "x"\n')
+        before = (self.root / '.agents/agentic.json').read_text(encoding='utf-8')
+        env = dict(clean_env(), CLAUDECODE='1')
+        result = subprocess.run([str(self.root / '.agents/bootstrap.sh'), 'init', '--plan'],
+                                cwd=str(self.root), env=env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("proposed: ./.agents/bootstrap.sh init --apply --clis claude-code "
+                      "--implementer 'python=**/*.py'", result.stdout)
+        self.assertLess(len(result.stdout), 500)
+        self.assertEqual((self.root / '.agents/agentic.json').read_text(encoding='utf-8'), before)
+
+    def test_check_passes_in_a_project_with_its_own_tests_directory(self):
+        (self.root / 'tests').mkdir()
+        (self.root / 'tests/test_app.py').write_text('def test_ok():\n    assert True\n')
+        self.init('--clis', 'claude-code')
+        result = self.run_tool(self.root / 'check.sh', '--quiet')
+        self.assertNotIn('Missing required', result.stdout)
+        current = (self.root / 'progress/current.md').read_text(encoding='utf-8')
+        self.assertNotIn('{YYYY-MM-DD}', current)
+
     def test_language_implementers_replace_the_generic_one(self):
         self.init('--clis', 'claude-code,opencode', '--implementer', 'python=**/*.py,tests/**',
                   '--implementer', 'ts=**/*.ts')

@@ -24,7 +24,7 @@ responsibility; do not exempt it. Details: [.githooks/README.md](.githooks/READM
    approve it before implementing: [docs/sdd.md](docs/sdd.md). A small
    maintenance change is registered in `feature_list.json` with `"sdd": false`.
 3. Add a regression test under `tests/`. A new suite gets a small `.sh`
-   launcher and is registered in `check.sh`.
+   launcher and is registered in `tests/run-suites.sh`.
 4. Change capabilities in `.agents/agentic.json` or the templates, never in a
    generated adapter. Re-render and confirm `./.agents/bootstrap.sh --check`
    reports no drift.
