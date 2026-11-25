@@ -54,7 +54,6 @@ charts/**/charts/*.tgz
 /opencode.jsonc
 /GEMINI.md
 /.gemini/
-/CLAUDE.md
 /.claude/
 /agy.config*
 

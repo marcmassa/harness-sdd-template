@@ -24,7 +24,7 @@ cd /path/to/your/repo
 ./.agents/bootstrap.sh opencode        # Or render just one CLI explicitly
 ```
 
-The confirmed choice is persisted in `target_clis` inside `.agents/agentic.json`, so `--all` never generates adapters for CLIs the project does not use (a Cursor-only project never gets `CLAUDE.md`/`.claude/` or `GEMINI.md`/`.gemini/`). `./.agents/bootstrap.sh clean` removes stray adapters later.
+The confirmed choice is persisted in `target_clis` inside `.agents/agentic.json`, so `--all` never generates adapters for CLIs the project does not use (a Cursor-only project never gets `.claude/` or `GEMINI.md`/`.gemini/`). `./.agents/bootstrap.sh clean` removes stray adapters later.
 
 ### Step 3 — Tell your agent to set up the project
 

@@ -37,7 +37,7 @@ this order:
 ## Boundaries
 
 - I never edit generated files by hand (`opencode.json`, `GEMINI.md`,
-  `CLAUDE.md`, `.claude/`, `.gemini/`). If a generated file is wrong, I fix
+  `.claude/`, `.gemini/`). If a generated file is wrong, I fix
   the source (`agentic.json` or the template) and re-render.
 
 - I never allow scaffold metadata (`_lifecycle`, `_intent`, `category`) to
