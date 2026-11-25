@@ -141,7 +141,7 @@ check_drift() {
             # FEAT-007: only verify consistency for adapters actually rendered in this tree
             case "$name" in
                 gemini-cli)   [ -e "$ROOT_DIR/GEMINI.md" ] || [ -d "$ROOT_DIR/.gemini" ] || continue ;;
-                claude-code)  [ -e "$ROOT_DIR/CLAUDE.md" ] || [ -d "$ROOT_DIR/.claude" ] || continue ;;
+                claude-code)  [ -d "$ROOT_DIR/.claude" ] || continue ;;
                 opencode)     [ -e "$ROOT_DIR/opencode.json" ] || continue ;;
                 cursor)
                     [ -e "$ROOT_DIR/.cursor/rules/harness-sdd.mdc" ] \

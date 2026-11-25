@@ -86,6 +86,13 @@ class BriefContentTests(BriefTest):
             {'subagents': [], '_template_subagents_examples': [{'name': 'x'}]}))
         self.assertIn('init: FRESH', session_brief.brief(self.root))
 
+    def test_active_steering_files_are_listed(self):
+        self.features()
+        self.write('.agents/agentic.json', json.dumps(
+            {'subagents': [{'name': 'x'}], 'steering': [{'file': 'steering/conventions.md'}]}))
+        self.assertIn('steering (read what applies before changing code): steering/conventions.md',
+                      session_brief.brief(self.root))
+
     def test_initialized_project_keeps_steering_and_hook_scaffolds_without_a_warning(self):
         self.features()
         manifest = {'subagents': [{'name': 'x'}], '_template_steering_examples': [{'file': 's.md'}],
@@ -166,11 +173,11 @@ class RepositoryContractTests(unittest.TestCase):
 
     def test_session_files_fit_their_budgets(self):
         for relative, limit in (('AGENTS.md', 8000), ('.agents/commands/init.md', 8000),
-                                ('.agents/adapters/claude-code/CLAUDE.md.tmpl', 4000)):
+                                ('.agents/adapters/gemini-cli/GEMINI.md.tmpl', 4000)):
             self.assertLessEqual((ROOT / relative).stat().st_size, limit, relative)
 
     def test_entry_points_use_the_brief_instead_of_full_reads(self):
-        for relative in ('AGENTS.md', '.agents/adapters/claude-code/CLAUDE.md.tmpl',
+        for relative in ('AGENTS.md',
                          '.agents/adapters/gemini-cli/GEMINI.md.tmpl', '.agents/commands/status.md'):
             text = (ROOT / relative).read_text(encoding='utf-8')
             self.assertIn('bootstrap.sh brief', text, relative)

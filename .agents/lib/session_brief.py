@@ -120,6 +120,14 @@ def _active_lines(root, feature):
     return lines
 
 
+def _steering_line(root):
+    """Active steering files apply to every task; no CLI entry file lists them any more."""
+    manifest = _json(root / '.agents/agentic.json')
+    files = [str(item.get('file')) for item in (manifest.get('steering') or [])
+             if isinstance(item, dict) and item.get('file')] if isinstance(manifest, dict) else []
+    return 'steering (read what applies before changing code): ' + ', '.join(files) if files else None
+
+
 def _init_state(root):
     manifest = _json(root / '.agents/agentic.json')
     if not isinstance(manifest, dict):
@@ -194,6 +202,9 @@ def brief(root):
     if pending:
         more = ' (+{} more)'.format(len(pending) - 3) if len(pending) > 3 else ''
         lines.append('next pending: ' + ', '.join(_label(f) for f in pending[:3]) + more)
+    steering = _steering_line(root)
+    if steering:
+        lines.append(steering)
     state = _init_state(root)
     if state:
         lines.append(state)
