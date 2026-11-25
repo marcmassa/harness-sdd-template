@@ -26,7 +26,7 @@ SEED_FILES = {'feature_list.json', 'DESIGN.md', 'README.md', 'LICENSE', 'SECURIT
               '.gitignore', '.agents/agentic.json'}
 SEED_PREFIXES = ('progress/', 'steering/', 'examples/',
                  # Scaffolds a project replaces with its own roles and hooks during /init.
-                 '.agents/subagents/harness/', '.agents/subagents/spec-author/',
+                 '.agents/subagents/architect-qa/', '.agents/subagents/harness/', '.agents/subagents/spec-author/',
                  '.agents/subagents/implementer/', '.agents/subagents/reviewer/',
                  '.agents/subagents/templates/', 'hooks/on-')
 

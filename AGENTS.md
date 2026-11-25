@@ -104,8 +104,8 @@ body when the command is invoked, not before. `/status` shows the brief.
 
 ## §7 — Sub-agents
 
-Active roles are in `.agents/agentic.json#subagents[]`. The canonical scaffolds are
-`harness`, `spec-author`, `implementer`, and `reviewer`; copy
+Active roles are in `.agents/agentic.json#subagents[]`. By default `architect-qa`
+(spec and review, never code) and the implementers; others are optional. Copy
 `.agents/subagents/agent-template/` to create another (`docs/framework-customization.md`).
 
 ## §8 — CLI-agnostic integration and skills

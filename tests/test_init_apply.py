@@ -41,8 +41,12 @@ class ApplyTests(FreshProject):
         self.assertIn('init: COMPLETE', result.stdout)
         self.assertLess(len(result.stdout), 400, 'the report is paid for in tokens')
         manifest = self.manifest()
-        self.assertEqual([a['name'] for a in manifest['subagents']],
-                         ['harness', 'spec-author', 'implementer', 'reviewer'])
+        self.assertEqual([a['name'] for a in manifest['subagents']], ['architect-qa', 'implementer'])
+        self.assertEqual(manifest['default_agent'], 'architect-qa')
+        self.assertEqual([a['name'] for a in manifest['subagents'] if a['mode'] == 'primary'],
+                         ['architect-qa'])
+        for pruned in ('harness', 'spec-author', 'reviewer'):
+            self.assertFalse((self.root / '.agents/subagents' / pruned).exists(), pruned)
         self.assertEqual(manifest['target_clis'], ['claude-code'])
         self.assertNotIn('_template_subagents_examples', manifest)
         self.assertNotIn('_template_lifecycle', manifest)
@@ -85,8 +89,7 @@ class ApplyTests(FreshProject):
         self.init('--clis', 'claude-code,opencode', '--implementer', 'python=**/*.py,tests/**',
                   '--implementer', 'ts=**/*.ts')
         agents = {a['name']: a for a in self.manifest()['subagents']}
-        self.assertEqual(list(agents), ['harness', 'spec-author', 'python-implementer',
-                                        'ts-implementer', 'reviewer'])
+        self.assertEqual(list(agents), ['architect-qa', 'python-implementer', 'ts-implementer'])
         python = agents['python-implementer']
         self.assertEqual(python['permission']['edit'], {
             'specs/**': 'deny', 'feature_list.json': 'ask', '**/*.py': 'allow', 'tests/**': 'allow',
@@ -103,10 +106,19 @@ class ApplyTests(FreshProject):
         self.assertIn('.agents/subagents/cloud-architect/SOUL.md', result.stdout)
         self.assertIn('cloud-architect', [a['name'] for a in self.manifest()['subagents']])
 
+    def test_split_duties_are_optional_and_never_a_second_primary(self):
+        self.init('--clis', 'claude-code', '--add', 'reviewer', '--add', 'spec-author',
+                  '--add', 'harness')
+        agents = {a['name']: a for a in self.manifest()['subagents']}
+        self.assertEqual(list(agents), ['architect-qa', 'implementer', 'reviewer', 'spec-author', 'harness'])
+        self.assertEqual([n for n, a in agents.items() if a['mode'] == 'primary'], ['architect-qa'])
+        self.assertEqual(agents['reviewer']['permission']['edit']['specs/**'], 'deny')
+        self.run_tool(self.root / 'check.sh', '--quiet')
+
     def test_dry_run_writes_nothing(self):
         before = (self.root / '.agents/agentic.json').read_text(encoding='utf-8')
         result = self.init('--clis', 'cursor', '--implementer', 'go=**/*.go', '--dry-run')
-        self.assertIn('harness, spec-author, go-implementer, reviewer', result.stdout)
+        self.assertIn('sub-agents: architect-qa, go-implementer |', result.stdout)
         self.assertEqual((self.root / '.agents/agentic.json').read_text(encoding='utf-8'), before)
         self.assertFalse((self.root / '.agents/subagents/go-implementer').exists())
 
@@ -115,7 +127,7 @@ class ApplyTests(FreshProject):
         for args, message in ((('--clis', 'nope'), 'unknown CLI'),
                               ((), '--clis is required'),
                               (('--clis', 'cursor', '--implementer', 'python'), 'is not <language>=<glob>'),
-                              (('--clis', 'cursor', '--add', 'harness'), 'not an optional scaffold'),
+                              (('--clis', 'cursor', '--add', 'architect-qa'), 'not an optional scaffold'),
                               (('--clis', 'cursor', '--implementer', 'go=*.go', '--implementer', 'go=x/**'),
                                'duplicate')):
             result = self.init(*args, ok=False)

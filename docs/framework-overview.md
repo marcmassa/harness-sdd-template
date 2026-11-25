@@ -20,7 +20,7 @@ The root cause is not the agent's capability — it is the absence of structure.
 
 ```
 Human: "Add support for X"
-Agent (spec-author):
+Agent (architect-qa):
   1. Reads feature_list.json → detects feature with sdd:true, status:pending
   2. Creates specs/feature-x/requirements.md (EARS: R1, R2, ...)
   3. Creates specs/feature-x/design.md (files, signatures, alternatives)

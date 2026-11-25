@@ -213,6 +213,18 @@
       "priority": "P1",
       "agent": "implementer",
       "sprint": "S13"
+    },
+    {
+      "id": "MAINT-007",
+      "name": "two-role-default",
+      "title": "Two roles by default: architect-qa and the implementers",
+      "description": "init --apply installs architect-qa (routes, writes the spec, runs the closing review, never implements) plus one implementer per language, and sets default_agent. harness, spec-author and reviewer become optional scaffolds for teams that split those duties. frontend-specialist covers front-end development and design. Evidence: in recorded SecurIT sessions none of its six roles was ever invoked. Tests: tests/test_init_apply.py.",
+      "type": "chore",
+      "status": "done",
+      "sdd": false,
+      "priority": "P1",
+      "agent": "implementer",
+      "sprint": "S13"
     }
   ]
 }

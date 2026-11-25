@@ -23,9 +23,13 @@ installing the template, when `./.agents/bootstrap.sh brief` shows
    - `--implementer <language>=<glob>[,<glob>]`: one per language, never per
      file or feature. It becomes `<language>-implementer` with edit access to
      those globs. Omit it for a single generic `implementer`.
-   - `--add <scaffold>`: an optional role (`cloud-architect`,
-     `frontend-specialist`, `data-engineer`) only if the project has that
-     work. Prefer fewer agents; adding one later is easy.
+   - The default is two kinds of role: `architect-qa` (routes, writes the
+     spec, runs the closing review, never codes) and the implementers.
+   - `--add <scaffold>`: an optional role only if the project has that work:
+     `frontend-specialist` (front-end developer and designer),
+     `cloud-architect`, `data-engineer`, or `harness` / `spec-author` /
+     `reviewer` to split those duties out of `architect-qa`. Prefer fewer
+     roles; adding one later is easy.
 
 3. Run the confirmed command (`--dry-run` previews it without writing):
 
