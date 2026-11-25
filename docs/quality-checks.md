@@ -70,7 +70,8 @@ Override or add budgets (bytes) with an optional `context_budget` object in
 
 `./.agents/bootstrap.sh archive-log progress/<file>.md` moves an oversized log
 to `progress/archive/<name>-<date>.md` and leaves a stub that points to it.
-Nothing is deleted.
+Nothing is deleted. The staged-file size hook skips Markdown under
+`progress/archive/`, so the archive can be committed.
 
 In this repository `check.sh` also runs the framework suites through
 `tests/run-suites.sh`, side by side (about 30 seconds instead of 140). Suites

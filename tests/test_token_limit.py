@@ -67,6 +67,13 @@ class TokenLimitTests(unittest.TestCase):
         self.write(".gitattributes", b"generated/** linguist-generated=true\n")
         self.hook()
 
+    def test_archived_progress_logs_are_skipped_and_only_there(self):
+        large = b"x" * 20001
+        self.write("progress/archive/progress-20260101.md", large)
+        self.hook()
+        self.write("progress/archive/dump.json", large)
+        self.assertIn("progress/archive/dump.json", self.hook(ok=False))
+
     def test_unstaged_attribute_cannot_bypass(self):
         self.write("source.py", b"x" * 20001)
         self.write(".gitattributes", b"source.py linguist-generated=true\n", stage=False)
