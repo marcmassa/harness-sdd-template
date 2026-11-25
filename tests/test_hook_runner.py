@@ -176,6 +176,18 @@ class SkillSyncTests(unittest.TestCase):
         return subprocess.run([str(self.project / '.agents/skills/sync-skills.sh')], text=True,
                               capture_output=True, env=environment, cwd=str(self.base))
 
+
+    def test_without_a_configured_registry_it_refuses_and_changes_nothing(self):
+        result = self.sync(manifest={'skills': {'paths': ['.agents/skills']}})
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('no skills registry configured', result.stderr)
+        self.assertEqual((self.project / '.agents/skills/existing/SKILL.md').read_text(), 'existing skill\n')
+
+    def test_the_shipped_template_names_no_external_registry(self):
+        for relative in ('.agents/skills/sync-skills.sh', '.agents/skills/README.md',
+                         '.agents/harness/CONVENTION.md'):
+            text = (ROOT / relative).read_text(encoding='utf-8')
+            self.assertNotRegex(text, r'https?://(?!example\.)[^\s)]*registry', relative)
     def skill(self, name):
         path = self.project / '.agents/skills' / name / 'SKILL.md'
         return path.read_text() if path.exists() else None
