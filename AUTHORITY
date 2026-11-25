@@ -6,7 +6,7 @@ This document certifies the authority of the author over the
 ## Project
 
 - **Name:** Harness SDD Template
-- **Repository:** https://gitlab.devops.onesait.com/onesait/technology/devops/infrastructure/harness-sdd-template
+- **Repository:** https://github.com/marcmassa/harness-sdd-template
 - **Purpose:** Template for adopting Harness Engineering + Spec Driven
   Development (SDD) in any software project, CLI-agnostic
   (opencode, gemini-cli, claude-code, etc...).
