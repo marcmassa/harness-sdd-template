@@ -142,5 +142,35 @@ class ApplyTests(FreshProject):
         self.assertIn('only runs on a FRESH manifest', result.stderr)
 
 
+
+class ExtensionCommandTests(FreshProject):
+    """add-hook, remove-hook and add-steering accept their documented options."""
+
+    def bootstrap(self, *args, ok=True):
+        return self.run_tool(self.root / '.agents/bootstrap.sh', *args, ok=ok)
+
+    def test_add_and_remove_hook_with_every_option(self):
+        self.init('--clis', 'claude-code')
+        script = self.root / 'hooks/on-implementation-complete_tests.sh'
+        script.write_text('#!/bin/bash\nexit 0\n')
+        script.chmod(0o755)
+        self.bootstrap('add-hook', '--event', 'on_implementation_complete', '--script',
+                       'hooks/on-implementation-complete_tests.sh', '--description', 'Run the tests',
+                       '--on-failure', 'error', '--yes')
+        self.assertEqual(self.manifest()['hooks'], [{
+            'event': 'on_implementation_complete', 'script': 'hooks/on-implementation-complete_tests.sh',
+            'description': 'Run the tests', 'on_failure': 'error'}])
+        self.bootstrap('remove-hook', '--event', 'on_implementation_complete', '--script',
+                       'hooks/on-implementation-complete_tests.sh', '--yes')
+        self.assertEqual(self.manifest()['hooks'], [])
+
+    def test_add_steering_with_options(self):
+        self.init('--clis', 'claude-code')
+        self.bootstrap('add-steering', 'api-rules', '--description', 'API conventions',
+                       '--applies-to', 'implementer', '--yes')
+        entry = [s for s in self.manifest()['steering'] if s['name'] == 'api-rules'][0]
+        self.assertEqual(entry['description'], 'API conventions')
+        self.assertEqual(entry['applies_to'], ['implementer'])
+
 if __name__ == '__main__':
     unittest.main()

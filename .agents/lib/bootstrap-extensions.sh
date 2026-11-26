@@ -22,8 +22,8 @@ add_steering_run() {
 
     while [ "${1:-}" != "" ]; do
         case "$1" in
-            --description) description="$2"; shift 2 ;;
-            --applies-to)  applies_to="$2"; shift 2 ;;
+            --description) description="$2"; shift ;;
+            --applies-to)  applies_to="$2"; shift ;;
             --yes|-y) ;;
             -*)
                 echo "ERROR: unknown add-steering option: $1" >&2
@@ -183,10 +183,10 @@ add_hook_run() {
 
     while [ "${1:-}" != "" ]; do
         case "$1" in
-            --event)        event="$2"; shift 2 ;;
-            --script)       script="$2"; shift 2 ;;
-            --description)  description="$2"; shift 2 ;;
-            --on-failure)   on_failure="$2"; shift 2 ;;
+            --event)        event="$2"; shift ;;
+            --script)       script="$2"; shift ;;
+            --description)  description="$2"; shift ;;
+            --on-failure)   on_failure="$2"; shift ;;
             --yes|-y) ;;
             -*)
                 echo "ERROR: unknown add-hook option: $1" >&2
@@ -268,8 +268,8 @@ remove_hook_run() {
 
     while [ "${1:-}" != "" ]; do
         case "$1" in
-            --event)   event="$2"; shift 2 ;;
-            --script)  script="$2"; shift 2 ;;
+            --event)   event="$2"; shift ;;
+            --script)  script="$2"; shift ;;
             --yes|-y)  ;;
             -*)
                 echo "ERROR: unknown remove-hook option: $1" >&2
